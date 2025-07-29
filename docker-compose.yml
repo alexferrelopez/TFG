@@ -9,5 +9,6 @@ services:
 
   mbtiles-maker:
     image: alex/mbtiles-maker:latest
+    init: true
     volumes:  
       - ./docker_files:/files
