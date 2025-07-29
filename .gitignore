@@ -1,6 +1,8 @@
 # ignore those two demo-dirs (and anything inside them)
 /demo_node/
 /demo_python/
+/datex_to_geojson/
 
 # ignore that zip file
 /demo_node.zip
+/Noto_Sans.zip

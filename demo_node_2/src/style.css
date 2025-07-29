@@ -1,0 +1,15 @@
+/* Global styles */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #fafafa;
+}
+
+a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+h1 {
+  margin-bottom: 1rem;
+}
