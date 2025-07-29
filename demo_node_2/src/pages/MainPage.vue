@@ -1,12 +1,10 @@
 <template>
-  <div class="main-page">
-    <CompassButton
-      :bearing="bearing"
-      :isNorth="isNorth"
-      @reset="resetNorth"
-    />
-    <div id="map" class="map-placeholder"></div>
-  </div>
+  <CompassButton
+    :bearing="bearing"
+    :isNorth="isNorth"
+    @reset="resetNorth"
+  />
+  <div id="map" class="map-placeholder"></div>
 </template>
 
 <script setup>
@@ -91,6 +89,6 @@ onMounted(() => {
 /* ← this class ensures the container isn’t 0px tall */
 .map-placeholder {
   width: 100%;
-  height: 100vh;
+  height: 100%;
 }
 </style>
