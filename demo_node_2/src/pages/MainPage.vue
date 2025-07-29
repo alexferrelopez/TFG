@@ -53,37 +53,36 @@ onMounted(() => {
   map.on('rotate',  updateDirection)
   map.on('moveend', updateDirection)
 
-
   // change cursor on hover
-map.on("mouseenter", "chargers-point", () => {
-  map.getCanvas().style.cursor = "pointer";
-});
-map.on("mouseleave", "chargers-point", () => {
-  map.getCanvas().style.cursor = "";
-});
+  map.on("mouseenter", "chargers-point", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+  map.on("mouseleave", "chargers-point", () => {
+    map.getCanvas().style.cursor = "";
+  });
 
-// show a popup on click
-map.on("click", "chargers-point", (e) => {
-  // e.features is an array; we want the first one
-  const feature = e.features[0];
-  const props = feature.properties;
+  // show a popup on click
+  map.on("click", "chargers-point", (e) => {
+    // e.features is an array; we want the first one
+    const feature = e.features[0];
+    const props = feature.properties;
 
-  // build some HTML from the props
-  const html = `
-    <strong>Charger ID:</strong> ${props.properties}<br/>
-    <strong>Type:</strong> ${props.connectorType || "unknown"}<br/>
-    <strong>Max kW:</strong> ${props.maxPower || "n/a"}<br/>
-    <strong>Status:</strong> ${props.status || "n/a"}<br/>
-    <strong>Percentile:</strong> ${props.percentile || "n/a"}
+    // build some HTML from the props
+    const html = `
+      <strong>Charger ID:</strong> ${props.properties}<br/>
+      <strong>Type:</strong> ${props.connectorType || "unknown"}<br/>
+      <strong>Max kW:</strong> ${props.maxPower || "n/a"}<br/>
+      <strong>Status:</strong> ${props.status || "n/a"}<br/>
+      <strong>Percentile:</strong> ${props.percentile || "n/a"}
 
-  `;
+    `;
 
-  // popup at the click location
-  new maplibregl.Popup({ offset: [0, -8] })
-    .setLngLat(e.lngLat)
-    .setHTML(html)
-    .addTo(map);
-});
+    // popup at the click location
+    new maplibregl.Popup({ offset: [0, -8] })
+      .setLngLat(e.lngLat)
+      .setHTML(html)
+      .addTo(map);
+  });
 })
 </script>
 

@@ -3,8 +3,9 @@
  "sprite": "http://192.168.1.153:3000/sprite/icons",
  "glyphs": "http://192.168.1.153:3000/font/{fontstack}/{range}",
   "sources": {
-    "openmaptiles": {
+    "openmaptiles": { 
       "type": "vector",
+      "url": "http://192.168.1.153:3000/tiles",
       "tiles": [
         "http://192.168.1.153:3000/tiles/{z}/{x}/{y}"
       ],
@@ -13,6 +14,7 @@
     },
     "chargers": {
       "type": "vector",
+      "url": "http://192.168.1.153:3000/chargers",
       "tiles": [
         "http://192.168.1.153:3000/chargers/{z}/{x}/{y}"
       ],

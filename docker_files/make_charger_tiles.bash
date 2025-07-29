@@ -20,6 +20,9 @@ MBTILES_FILE="$MBTILES_DIR/chargers.mbtiles"
 TIPPECANOE_OPTS=(
   --force
   --layer=chargers
+  --attribution="<a href=\"https://creativecommons.org/licenses/by/4.0/deed.es\" target=\"_blank\">&copy; DGT - CC BY 4.0</a>"
+  --name="Electrolineras"
+  --description="Puntos de Recarga para Vehículos Eléctricos en España publicados por la DGT"
   --no-feature-limit
   --drop-rate=0
   -Z3 -z14
