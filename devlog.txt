@@ -1,0 +1,41 @@
+Per tal de tenir un entorn de desenvolupament em cal una solució com Docker, per tenir els diferents serveis de forma ordenada amb una versió consistent que no depengui del meu ordinador,
+Instalo Docker Desktop i començo a seleccionar els diferents serveis que faré servir.
+El primer es diu Martin, el servei de mosaic que enviara la informació al client segons demani la informació del nostre mapa vectoritzat.
+<Donar les raons de la selecció d'aquest servei (Martin)>
+
+Descarrego la imatge de docker proporcionada pels desenvolupadors del servei, preparo el container i el fitxer que conté les dades del mapa (un fitxer amb extensió .mbtiles).
+Per tenir vectoritzades cal descarregar-les d'algun proveidor com openstreetmaps, de moment faré servir: https://data.maptiler.com/downloads/dataset/osm/europe/spain/#4.87/40.07/-2.34
+També es pot fer servir: https://github.com/openmaptiles/openmaptiles/tree/master amb dades provinents de openstreetmaps com per exemple: https://download.geofabrik.de/
+
+Amb:
+
+docker compose up -d martin
+
+un cop iniciat el servei comprovo si funciona usant curl i jq:
+
+curl -I http://localhost:3000/health
+
+Espero un codi 200 per veure que funciona correctament. 
+
+Seguidament comprovo el contingut al servidor amb: 
+
+curl http://localhost:3000/catalog | jq .
+
+Esperant veure el següent:
+
+{
+  "tiles": {
+    "osm-2020-02-10-v3.11_europe_spain": {
+      "content_type": "application/x-protobuf",
+      "content_encoding": "gzip",
+      "name": "OpenMapTiles",
+      "description": "Region Spain extract from https://openmaptiles.com",
+      "attribution": "<a href=\"https://www.maptiler.com/copyright/\" target=\"_blank\">&copy; MapTiler</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a>"
+    }
+  },
+  "sprites": {},
+  "fonts": {},
+  "styles": {}
+}
+
+

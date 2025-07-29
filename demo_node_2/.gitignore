@@ -21,8 +21,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # lock files (if you choose not to track them)
-# package-lock.json
-# yarn.lock
+package-lock.json
 
 # OS / editor junk
 .DS_Store
