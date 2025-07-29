@@ -1,0 +1,6 @@
+# ignore those two demo-dirs (and anything inside them)
+/demo_node/
+/demo_python/
+
+# ignore that zip file
+/demo_node.zip
