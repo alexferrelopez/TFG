@@ -1,24 +1,20 @@
-# martin-config.yml  ── keep it short & sweet
-listen_addresses: 0.0.0.0:3000        # same as the default; explicit for clarity
-base_path: /                          # style + tiles live at the root URL
-cors: true                            # default; safe to omit
+listen_addresses: 0.0.0.0:3000
+base_path: /
+cors: true
 
-# Publish MBTiles files
 mbtiles:
   sources:
     tiles: /files/mbtiles/osm-2020-02-10-v3.11_europe.mbtiles
     chargers: /files/mbtiles/chargers.mbtiles
 
-
 sprites:
   paths:
-    - /files/icons
+    - /files/sprites
+    - /files/sdf_sprites
 
 styles:
-  paths:
-     # publish all *.json files in this directory
-     # The name of the file will be used as the style name
-     - /files
+  sources:
+   style: /files/style.json
 
 fonts:
   - /files/fonts

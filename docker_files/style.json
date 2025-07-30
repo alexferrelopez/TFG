@@ -1,6 +1,15 @@
 {
  "version": 8,
- "sprite": "http://192.168.1.153:3000/sprite/icons",
+ "sprite": [
+    {
+        "id": "sprites",
+        "url": "http://192.168.1.153:3000/sprite/sprites"
+    },
+    {
+        "id": "sdf_sprites",
+        "url": "http://192.168.1.153:3000/sdf_sprite/sdf_sprites"
+    }
+],
  "glyphs": "http://192.168.1.153:3000/font/{fontstack}/{range}",
   "sources": {
     "openmaptiles": { 
@@ -822,6 +831,79 @@
       }
     },
     {
+      "id": "road_one_way_arrow",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 16,
+      "filter": ["==", "oneway", 1],
+      "layout": {"icon-image": "sprites:arrow", "symbol-placement": "line"}
+    },
+    {
+      "id": "road_one_way_arrow_opposite",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 16,
+      "filter": ["==", "oneway", -1],
+      "layout": {
+        "icon-image": "sprites:arrow",
+        "symbol-placement": "line",
+        "icon-rotate": 180
+      }
+    },
+    {
+      "id": "road_shield",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "transportation_name",
+      "minzoom": 7,
+      "filter": [
+        "all",
+        ["<=", "ref_length", 6]
+      ],
+      "layout": {
+        "icon-image": "sprites:default_{ref_length}",
+        "icon-rotation-alignment": "viewport",
+        "symbol-placement": {
+          "base": 1,
+          "stops": [
+            [10, "point"],
+            [11, "line"]
+          ]
+        },
+        "symbol-spacing": 500,
+        "text-field": "{ref}",
+        "text-font": ["Noto Sans Bold"],
+        "text-offset": [0, 0.1],
+        "text-rotation-alignment": "viewport",
+        "text-size": 14,
+        "icon-size": 1.1
+      }
+    },
+    {
+      "id": "chargers-point",
+      "type": "symbol",
+      "source": "chargers",
+      "source-layer": "chargers",
+      "layout": {
+        "icon-image": "sdf_sprites:lightning",
+        "icon-size": 1,
+        "icon-allow-overlap": true
+      },
+      "paint": {
+        "icon-color": [
+          "interpolate",
+          ["linear"],
+          ["get", "percentile"],
+          0,  "#ffdb38",
+          100, "#238b45"
+        ],
+        "icon-halo-color": "rgba(255,255,255,1)",
+        "icon-halo-width": 2
+      }
+    },
+    {
       "id": "country_label",
       "type": "symbol",
       "source": "openmaptiles",
@@ -838,83 +920,14 @@
         "text-font": ["Noto Sans Bold"],
         "text-max-width": 10,
         "text-size": {"stops": [[3, 12], [8, 22]]},
-        "visibility": "visible"
+        "visibility": "visible",
+        "icon-allow-overlap": true
       },
       "paint": {
         "text-color": "hsl(0, 0%, 13%)",
         "text-halo-blur": 0,
         "text-halo-color": "rgba(255,255,255,0.75)",
         "text-halo-width": 2
-      }
-    },
-    {
-      "id": "road_one_way_arrow",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "transportation",
-      "minzoom": 16,
-      "filter": ["==", "oneway", 1],
-      "layout": {"icon-image": "arrow", "symbol-placement": "line"}
-    },
-    {
-      "id": "road_one_way_arrow_opposite",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "transportation",
-      "minzoom": 16,
-      "filter": ["==", "oneway", -1],
-      "layout": {
-        "icon-image": "arrow",
-        "symbol-placement": "line",
-        "icon-rotate": 180
-      }
-    },
-    {
-      "id": "road_shield",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "transportation_name",
-      "minzoom": 7,
-      "filter": [
-        "all",
-        ["<=", "ref_length", 6]
-      ],
-      "layout": {
-        "icon-image": "default_{ref_length}",
-        "icon-rotation-alignment": "viewport",
-        "symbol-placement": {
-          "base": 1,
-          "stops": [
-            [10, "point"],
-            [11, "line"]
-          ]
-        },
-        "symbol-spacing": 500,
-        "text-field": "{ref}",
-        "text-font": ["Noto Sans Bold"],
-        "text-offset": [0, 0.1],
-        "text-rotation-alignment": "viewport",
-        "text-size": 16,
-        "icon-size": 1.2
-      }
-    },
-    {
-      "id": "chargers-point",
-      "type": "circle",
-      "source": "chargers",
-      "source-layer": "chargers",
-      "paint": {
-        "circle-radius": 6,
-        "circle-color": [
-          "interpolate",
-          ["linear"],
-          ["get", "percentile"],
-          0,  "#ffdb38",
-          100, "#238b45"
-        ],
-    "circle-stroke-color": "#000000",   
-    "circle-stroke-width": 1.5,         
-    "circle-stroke-opacity": 0.3
       }
     }
   ],
