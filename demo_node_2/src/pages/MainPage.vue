@@ -4,6 +4,10 @@
     :isNorth="isNorth"
     @reset="resetNorth"
   />
+  <ChargerCard
+    :charger="selectedCharger"
+    @close="selectedCharger = null"
+  />
   <div id="map" class="map-placeholder"></div>
 </template>
 
@@ -12,9 +16,12 @@ import { onMounted, ref } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/CompassButton.vue'
+import ChargerCard from '@/components/ChargerCard.vue'
+
 
 const isNorth = ref(false)
 const bearing = ref(0)
+const selectedCharger = ref(null)
 let map
 
 function updateDirection() {
@@ -39,14 +46,15 @@ onMounted(() => {
     maxZoom: 19,
     minZoom: 4,
     hash: true,
-    antialias: true              // ② enable antialias early (optional)
+    antialias: true
   })
 
   map.on('style.load', () => {
         map.setProjection({
-            type: 'globe', // Set projection to globe
+            type: 'globe',
         });
   });
+
   map.on('load',  updateDirection)
   map.on('rotate',  updateDirection)
   map.on('moveend', updateDirection)
@@ -59,34 +67,22 @@ onMounted(() => {
     map.getCanvas().style.cursor = "";
   });
 
-  // show a popup on click
   map.on("click", "chargers-point", (e) => {
-    // e.features is an array; we want the first one
-    const feature = e.features[0];
-    const props = feature.properties;
+    const feature = e.features[0]
+    const p = feature.properties
 
-    // build some HTML from the props
-    const html = `
-      <strong>Charger ID:</strong> ${props.properties}<br/>
-      <strong>Type:</strong> ${props.connectorType || "unknown"}<br/>
-      <strong>Max kW:</strong> ${props.maxPower || "n/a"}<br/>
-      <strong>Status:</strong> ${props.status || "n/a"}<br/>
-      <strong>Percentile:</strong> ${props.percentile || "n/a"}
-
-    `;
-
-    // popup at the click location
-    new maplibregl.Popup({ offset: [0, -8] })
-      .setLngLat(e.lngLat)
-      .setHTML(html)
-      .addTo(map);
-  });
+    selectedCharger.value = {
+      id:            p.properties,
+      connectorType: p.connectorType,
+      maxPower:      p.maxPower,
+      status:        p.status,
+      percentile:    p.percentile
+    }
+  })
 })
 </script>
 
 <style scoped>
-
-/* ← this class ensures the container isn’t 0px tall */
 .map-placeholder {
   width: 100%;
   height: 100%;
