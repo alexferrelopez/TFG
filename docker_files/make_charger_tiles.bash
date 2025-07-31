@@ -46,10 +46,10 @@ fi
 
 # 2) Download with resume support; disable ERR trap to avoid premature exit
 
-echo "Attempting to download XML from $URL into $XML_FILE (resume supported)..."
+echo "Attempting to download XML from $URL into $XML_FILE..."
 trap - ERR
 set +e
-wget -c "$URL" -O "$XML_FILE"
+wget "$URL" -O "$XML_FILE"
 DL_RET=$?
 set -e
 trap 'echo "Error at line $LINENO" >&2; exit 1' ERR
