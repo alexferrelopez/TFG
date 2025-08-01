@@ -1,18 +1,34 @@
 <template>
-  <CompassButton
-    :bearing="bearing"
-    :isNorth="isNorth"
-    @reset="resetNorth"
-  />
-  <ChargerCard
-    :charger="selectedCharger"
-    @close="selectedCharger = null"
-  />
-  <div id="map" class="map-placeholder"></div>
+  <div class="map-container">
+    <ChargerCard
+      :charger="selectedCharger"
+      @close="selectedCharger = null"
+    />
+    <div id="map" class="map-placeholder"></div>
+    <CompassButton
+      :bearing="bearing"
+      :isNorth="isNorth"
+      @reset="resetNorth"
+    />
+    <div class="filter-controls">
+      <label>
+        <input type="checkbox" v-model="showHigh" />
+        High power
+      </label>
+      <label>
+        <input type="checkbox" v-model="showMid" />
+        Medium power
+      </label>
+      <label>
+        <input type="checkbox" v-model="showLow" />
+        Low power
+      </label>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/CompassButton.vue'
@@ -22,7 +38,51 @@ import ChargerCard from '@/components/ChargerCard.vue'
 const isNorth = ref(false)
 const bearing = ref(0)
 const selectedCharger = ref(null)
+const showLow  = ref(true)
+const showMid  = ref(true)
+const showHigh = ref(true)
 let map
+
+watch([showLow, showMid, showHigh], () => {
+  applyPercentileFilter()
+})
+
+function applyPercentileFilter() {
+  if (!map) return
+  const filters = []
+
+  // NOTE: property may be string — convert to number
+  const getPct = ['to-number', ['get', 'percentile']]
+
+  if (showLow.value) {
+    filters.push([
+      'all',
+      ['>=', getPct,  0],
+      ['<', getPct, 50]
+    ])
+  }
+  if (showMid.value) {
+    filters.push([
+      'all',
+      ['>=', getPct, 50],
+      ['<', getPct, 90]
+    ])
+  }
+  if (showHigh.value) {
+    filters.push([
+      'all',
+      ['>=', getPct, 90],
+      ['<=', getPct, 100]
+    ])
+  }
+
+  // if nothing checked, hide all
+  const expr = filters.length
+    ? ['any', ...filters]
+    : ['==', ['literal', 0], ['literal', 1]]
+
+  map.setFilter('chargers-point', expr)
+}
 
 function updateDirection() {
   // normalize bearing into [0,360)
@@ -33,9 +93,7 @@ function updateDirection() {
 }
 
 function resetNorth() {
-  map.easeTo({ bearing: 0, duration: 800 })
-}
-
+  map.rotateTo(0, { duration: 800 });}
 
 onMounted(() => {
   map = new maplibregl.Map({
@@ -55,7 +113,11 @@ onMounted(() => {
         });
   });
 
-  map.on('load',  updateDirection)
+  map.on('load',  () => {
+    updateDirection()
+    applyPercentileFilter()
+  })
+
   map.on('rotate',  updateDirection)
   map.on('moveend', updateDirection)
 
@@ -83,8 +145,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
 .map-placeholder {
   width: 100%;
   height: 100%;
 }
+.filter-controls {
+  position: absolute;
+  bottom: 40px; right: 10px;
+  background: rgba(255,255,255,0.8);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.filter-controls label { display: block; margin: 2px 0; }
 </style>
