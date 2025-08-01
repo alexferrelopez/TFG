@@ -19,13 +19,13 @@ defineProps({
 
 <style scoped>
 .charger-card {
-  
-  padding-left: 40px;
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 400px;
-  height: 100vh;
+  top: 0; left: 0;
+  padding: 40px;
+  width: 30%;
+  max-width: 400px;
+  height: 100%;
+  box-sizing: border-box;
   background: white;
   box-shadow: 2px 0 4px rgba(0,0,0,0.2);
   overflow-y: auto;
@@ -53,17 +53,38 @@ defineProps({
 }
 
 .auto-fit {
-  /* allow breaks anywhere, hyphenate long words */
   white-space: normal;
   word-break: break-word;
   hyphens: auto;
-
-  /* balance the lines if supported */
   text-wrap: balance;
-
-  /* clamp font-size between 1rem and 1.5rem,
-     scaling relative to the card’s width */
   font-size: clamp(1rem, 4vw, 1.5rem);
-  margin: 1rem 0 0.5rem; /* tighten up spacing */
+  margin: 1rem 0 0.5rem;
+}
+@media (max-width: 768px), (pointer: coarse) {
+  .charger-card {
+    top: auto;   
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    height: 40%;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.2);
+  }
+
+  .auto-fit {
+    font-size: clamp(3rem, 5vw, 3.5rem);
+  }
+
+  .close-btn {
+    top: 8px;
+    right: 8px;
+    font-size: 5rem;
+  }
+
+  /* slide from bottom instead of from left */
+  .slide-enter-from, .slide-leave-to {
+    transform: translateY(100%);
+  }
 }
 </style>
