@@ -789,7 +789,8 @@
         "text-field": "{name:latin}\n{name:nonlatin}",
         "text-font": ["Noto Sans Regular"],
         "text-max-width": 10,
-        "text-size": {"stops": [[3, 12], [8, 16]]}
+        "text-size": {"stops": [[3, 12], [8, 16]]},
+        "text-allow-overlap": true
       },
       "paint": {
         "text-color": "hsl(0, 0%, 0%)",
@@ -891,7 +892,9 @@
           ["linear"],
           ["get", "percentile"],
           0,  "#ffdb38",
-          100, "#238b45"
+          89.9,  "#017026",
+          90, "#a1c1ff",
+          100, "#124cb8"
         ],
         "icon-halo-color": "rgba(255,255,255,1)",
         "icon-halo-width": 2
