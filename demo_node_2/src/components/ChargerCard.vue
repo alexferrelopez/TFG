@@ -30,7 +30,6 @@ defineProps({
   box-shadow: 2px 0 4px rgba(0,0,0,0.2);
   overflow-y: auto;
   z-index: 1;
-  border-radius: 0 14px 14px 0;
 }
 
 /* close button in the top right of the card */
@@ -46,7 +45,7 @@ defineProps({
 
 /* slide-in / slide-out transition */
 .slide-enter-active, .slide-leave-active {
-  transition: transform 0.3s ease;
+  transition: transform 0.1s ease;
 }
 .slide-enter-from, .slide-leave-to {
   transform: translateX(-100%);
