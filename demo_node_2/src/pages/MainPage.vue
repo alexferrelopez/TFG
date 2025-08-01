@@ -10,20 +10,11 @@
       :isNorth="isNorth"
       @reset="resetNorth"
     />
-    <div class="filter-controls">
-      <label>
-        <input type="checkbox" v-model="showHigh" />
-        High power
-      </label>
-      <label>
-        <input type="checkbox" v-model="showMid" />
-        Medium power
-      </label>
-      <label>
-        <input type="checkbox" v-model="showLow" />
-        Low power
-      </label>
-    </div>
+    <ChargerFilters
+      v-model:showHigh="showHigh"
+      v-model:showMid="showMid"
+      v-model:showLow="showLow"
+    />
   </div>
 </template>
 
@@ -33,6 +24,7 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/CompassButton.vue'
 import ChargerCard from '@/components/ChargerCard.vue'
+import ChargerFilters from '../components/ChargerFilters.vue'
 
 
 const isNorth = ref(false)
@@ -43,9 +35,7 @@ const showMid  = ref(true)
 const showHigh = ref(true)
 let map
 
-watch([showLow, showMid, showHigh], () => {
-  applyPercentileFilter()
-})
+watch([showLow, showMid, showHigh], applyPercentileFilter)
 
 function applyPercentileFilter() {
   if (!map) return
@@ -154,13 +144,4 @@ onMounted(() => {
   width: 100%;
   height: 100%;
 }
-.filter-controls {
-  position: absolute;
-  bottom: 40px; right: 10px;
-  background: rgba(255,255,255,0.8);
-  padding: 8px;
-  border-radius: 4px;
-  font-size: 0.9em;
-}
-.filter-controls label { display: block; margin: 2px 0; }
 </style>
