@@ -15,6 +15,7 @@
 </template>
 
 <script setup>
+import compassPath from '@/assets/compass.svg'
 
 const props = defineProps({
   bearing: {
@@ -27,7 +28,7 @@ const props = defineProps({
   },
   iconSrc: {
     type: String,
-    default: '/compass.svg'
+    default: compassPath
   }
 })
 </script>
@@ -49,8 +50,8 @@ const props = defineProps({
   cursor: default;
 }
 .compass-icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
   display: block;
   transform-origin: center center;
 }
