@@ -1,9 +1,11 @@
 <template>
+  <StationCard
+    v-if="selectedStation"
+    :key="selectedStation.id"
+    :charger="selectedStation"
+    @close="selectedStation = null"
+  />
   <div class="map-container">
-    <ChargerCard
-      :charger="selectedCharger"
-      @close="selectedCharger = null"
-    />
     <div id="map" class="map-placeholder"></div>
     <CompassButton
       :bearing="bearing"
@@ -23,13 +25,12 @@ import { onMounted, ref, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/CompassButton.vue'
-import ChargerCard from '@/components/ChargerCard.vue'
+import StationCard from '@/components/StationCard.vue'
 import ChargerFilters from '../components/ChargerFilters.vue'
-
 
 const isNorth = ref(false)
 const bearing = ref(0)
-const selectedCharger = ref(null)
+const selectedStation = ref(null)
 const showLow  = ref(true)
 const showMid  = ref(true)
 const showHigh = ref(true)
@@ -123,8 +124,8 @@ onMounted(() => {
     const feature = e.features[0]
     const p = feature.properties
 
-    selectedCharger.value = {
-      id:            p.properties,
+    selectedStation.value = {
+      id:            p['@id'],
       connectorType: p.connectorType,
       maxPower:      p.maxPower,
       status:        p.status,
