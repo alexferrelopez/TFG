@@ -5,7 +5,7 @@
     @click="handleClick"
     aria-label="Toggle Arrow"
   >
-    <img src="@/assets/arrow_right.svg" alt="Arrow" />
+    <img src="@/assets/arrow_left.svg" alt="Arrow" />
   </button>
 </template>
 
@@ -20,7 +20,7 @@ export default {
   methods: {
     handleClick() {
       this.isFlipped = !this.isFlipped;
-      this.$emit('click', this.isFlipped);
+      this.$emit('toggle', this.isFlipped);
     },
   },
 };
@@ -36,14 +36,14 @@ export default {
   padding: 0;
   border: 0;
   background-color: #fff;
-  border-radius: 6px;
+  border-radius: 0 6px 6px 0;
   box-shadow: 0 1px 2px rgba(60,64,67,0.3),0 2px 6px 2px rgba(60,64,67,0.15);
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 .arrow-btn img {
   display: block;
-  width: 30px;
+  width: 24px;
   height: 24px;
   transition: transform 0.3s ease;
 }
