@@ -25,8 +25,7 @@ const collapsed = ref(false);
 <style scoped>
 .card-container {
   position: absolute;
-  width: 30%;
-  max-width: 400px;
+  width: 400px;
   height: 100%;
   display: grid;
   grid-template-columns: 1fr auto;
@@ -65,8 +64,8 @@ const collapsed = ref(false);
 
 .close-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 12px;
+  right: 12px;
   border: none;
   background: transparent;
   font-size: 2rem;
@@ -85,35 +84,9 @@ const collapsed = ref(false);
   margin: 1rem 0 0.5rem;
 }
 
-/*
 @media (max-width: 768px), (pointer: coarse) {
-  .charger-card {
-    top: auto;
-    left: 0;
-    bottom: 0;
+  .card-container {
     width: 100%;
-    max-width: none;
-    height: 40%;
-    border-radius: 4rem 4rem 0 0;
-    box-shadow: 0 -2px 4px rgba(0,0,0,0.2);
-  }
-
-  .auto-fit {
-    font-size: clamp(3rem, 5vw, 3.5rem);
-  }
-
-  .close-btn {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-    font-size: 5rem;
-    background: transparent;
-  }
-
-  .slide-enter-from,
-  .slide-leave-to {
-    transform: translateY(100%);
   }
 }
-  */
 </style>
