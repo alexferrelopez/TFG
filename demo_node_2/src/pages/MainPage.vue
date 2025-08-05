@@ -1,10 +1,12 @@
 <template>
-  <StationCard
-    v-if="selectedStation"
-    :key="selectedStation.id"
-    :charger="selectedStation"
-    @close="selectedStation = null"
-  />
+  <div class="search-container">
+    <SearchBar />
+  </div>
+  <SideCard @close="selectedStation = null" v-if="selectedStation"
+    :key="selectedStation.id">
+    <StationCard :charger="selectedStation" />
+  </SideCard>
+  
   <div class="map-container">
     <div id="map" class="map-placeholder"></div>
     <CompassButton
@@ -26,7 +28,9 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/CompassButton.vue'
 import StationCard from '@/components/StationCard.vue'
-import ChargerFilters from '../components/ChargerFilters.vue'
+import ChargerFilters from '@/components/ChargerFilters.vue'
+import SideCard from '@/components/SideCard.vue'
+import SearchBar from '@/components/SearchBar.vue'
 
 const isNorth = ref(false)
 const bearing = ref(0)
@@ -136,6 +140,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.search-container {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
 .map-container {
   position: relative;
   width: 100%;
