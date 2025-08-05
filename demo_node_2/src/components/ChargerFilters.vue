@@ -36,7 +36,7 @@ defineEmits([
   background: rgba(255,255,255,0.8);
   padding: 8px;
   border-radius: 4px;
-  font-size: 0.9em;
+  font-size: 1rem;
 }
 .filter-controls label {
   display: block;

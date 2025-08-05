@@ -25,7 +25,7 @@ const collapsed = ref(false);
 <style scoped>
 .card-container {
   position: absolute;
-  width: 400px;
+  width: 450px;
   height: 100%;
   display: grid;
   grid-template-columns: 1fr auto;
@@ -87,6 +87,7 @@ const collapsed = ref(false);
 @media (max-width: 768px), (pointer: coarse) {
   .card-container {
     width: 100%;
+    max-width: 450px;
   }
 }
 </style>
