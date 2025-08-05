@@ -2,15 +2,15 @@
  "version": 8,
  "sprite": [
     {
-        "id": "sprites",
-        "url": "http://192.168.1.153:3000/sprite/sprites"
+      "id": "sprites",
+      "url": "http://192.168.1.153:3000/sprite/sprites"
     },
     {
-        "id": "sdf_sprites",
-        "url": "http://192.168.1.153:3000/sdf_sprite/sdf_sprites"
+      "id": "sdf_sprites",
+      "url": "http://192.168.1.153:3000/sdf_sprite/sdf_sprites"
     }
-],
- "glyphs": "http://192.168.1.153:3000/font/{fontstack}/{range}",
+  ],
+  "glyphs": "http://192.168.1.153:3000/font/{fontstack}/{range}",
   "sources": {
     "openmaptiles": { 
       "type": "vector",
