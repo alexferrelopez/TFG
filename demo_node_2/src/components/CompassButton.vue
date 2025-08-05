@@ -35,6 +35,7 @@ const props = defineProps({
 
 <style scoped>
 .north-button {
+  margin: 10px;
   position: absolute;
   top: 1rem;
   right: 1rem;

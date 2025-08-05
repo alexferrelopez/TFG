@@ -1,6 +1,6 @@
 <template>
   <aside class="card-container" :class="{ collapsed }">
-    <button class="close-btn" @click="$emit('close')">×</button>
+    <Button class="close-btn" @click="$emit('close')"></Button>
     <div class="content-area">
       <slot />
     </div>
@@ -10,7 +10,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import CollapseButton from './CollapseButton.vue';
+import CollapseButton from '@/components/CollapseButton.vue';
+import Button from '@/components/Button.vue';
 
 const collapsed = ref(false);
 </script>
@@ -55,16 +56,8 @@ const collapsed = ref(false);
   display: flex;
   justify-self: end;
   align-self: start;
-  background: transparent;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
   z-index: 4;
   margin: 20px;
-}
-
-.close-btn:hover {
-  color: #ff0000;
 }
 
 @media (max-width: 768px), (pointer: coarse) {

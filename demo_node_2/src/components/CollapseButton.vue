@@ -56,4 +56,7 @@ export default {
 .arrow-btn:hover {
   background-color: #f5f5f5;
 }
+.arrow-btn:active {
+  background-color: #ececec;
+}
 </style>
