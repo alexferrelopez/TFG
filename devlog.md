@@ -52,7 +52,7 @@ Per tal de renderitzar el mapa vectoritzat, faré servir MapLibre, una llibreria
 A partir d'aquest punt podem fer una web simple amb un mapa que demana les dades al servidor Martin a partir de l'endpoint: /{sourceID}/{z}/{x}/{y}, en aquest cas és localhost:3000/ties/{z}/{x}/{y}.
 
 Tot i obtenir dades del servidor, aquestes no es veuen al mapa, per això cal afegir un estil que ens permeti veure les dades. L'estil és un fitxer JSON que conté les diferents capes del mapa i com s'han de renderitzar. Aquest estil es pot crear manualment o bé fer servir un estil predefinit com el d'OpenMapTiles. En aquest cas he modificat l'estil [maptiler-basic-gl-style](https://github.com/openmaptiles/maptiler-basic-gl-style); he afegit els noms de les carreteres, la direcció de les carreteres, els carregadors...
-Essencialment, tot el que es veu al mapa ha d'estar definit en aquest estil, específicament a l'apartat de "layers" del fitxer JSON. Com a exemple, aquest estil simplificat per veure els carregadors:
+Essencialment, tot el que es veu al mapa ha d'estar definit en aquest estil, específicament a l'apartat de "layers" del fitxer JSON. Com a exemple, aquest és l'estil simplificat per veure els carregadors:
 
 ```json
 {
@@ -64,6 +64,15 @@ Essencialment, tot el que es veu al mapa ha d'estar definit en aquest estil, esp
     }
   ],
   "sources": {
+    "chargers": {
+      "type": "vector",
+      "url": "http://192.168.1.153:3000/chargers",
+      "tiles": [
+        "http://192.168.1.153:3000/chargers/{z}/{x}/{y}"
+      ],
+      "minzoom": 0,
+      "maxzoom": 14
+    },
     ...
   },
   "layers": [
@@ -95,4 +104,11 @@ Essencialment, tot el que es veu al mapa ha d'estar definit en aquest estil, esp
   ]
 }
 ```
-Valor per valor, 
+Aquest estil defineix una font de dades anomenada "chargers" que apunta al servidor Martin i especifica com es carregaran les dades dels carregadors. La capa "chargers-point" defineix com es mostraran els carregadors al mapa, sobreposant una icona de llampec (també provinent del servidor Martin) i un color que depèn d'un valor precalculat anomenat "percentile" que explicaré més endevant.
+Tot això permet que el mapa mostri fins a milers de carregadors superposats al mapa seguint els moviments del usuari i carregant-se de manera dinàmica.
+
+En quant a les dades dels carregadors, seguint l'objectiu inicial d'aquest projecte, la unica font de dades és el fitxer de la [DGT: Puntos de recarga eléctrica para vehículos](https://nap.dgt.es/dataset/puntos-de-recarga-electrica-para-vehiculos). Com que el fitxer és massa gran per enviar-lo i fer-lo processar al client he optat per fer un pre-processament de les dades i servirles des del servidor Martin en format vectoritzat, cosa que a més unifica la llogica de càrrega dinamica en format de mosaic. 
+
+Aquest "preprocessat" té l'objectiu de convertir les dades des d'un XML al format acceptat pel nostre servidor Martin. De forma resumida, el script que he implementat llegeix el fitxer XML, filtra les dades i les converteix a format GeoJson, que després a partir d'una eina anomenada Tippecanoe es converteix al format final ".mbtiles".
+
+De forma més detallada el script llegeix el fitxer XML i filtra les dades que ens interessen, com ara la ubicació del carregador, el tipus de connector, la potència, etc.
