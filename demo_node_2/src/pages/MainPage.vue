@@ -2,10 +2,16 @@
   <div class="search-container">
     <SearchBar />
   </div>
-  <SideCard @close="selectedStation = null" v-if="selectedStation"
-    :key="selectedStation.id">
-    <StationCard :charger="selectedStation" />
-  </SideCard>
+
+  <transition name="slide">
+    <SideCard
+      v-if="selectedStation"
+      :key="selectedStation.id"
+      @close="selectedStation = null"
+    >
+      <StationCard :chargingStation="selectedStation" />
+    </SideCard>
+  </transition>
   
   <div class="map-container">
     <div id="map" class="map-placeholder"></div>
@@ -155,5 +161,18 @@ onMounted(() => {
 .map-placeholder {
   width: 100%;
   height: 100%;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
+}
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateX(-100%);
+}
+.slide-enter-to,
+.slide-leave-from {
+  transform: translateX(0);
 }
 </style>

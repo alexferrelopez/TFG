@@ -20,7 +20,6 @@
 .searchBar {
   width: 100%;
   max-width: 31.25rem;
-  margin: 6rem auto;
   display: flex;
   flex-direction: row;
   align-items: center;

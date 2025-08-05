@@ -1,17 +1,17 @@
 /* StationCard.vue */
 <template>
   <div class="station-card">
-    <h3 class="auto-fit">Charger ID: {{ charger.id }}</h3>
-    <p><strong>Type:</strong> {{ charger.connectorType || 'unknown' }}</p>
-    <p><strong>Max kW:</strong> {{ charger.maxPower || 'n/a' }}</p>
-    <p><strong>Status:</strong> {{ charger.status || 'n/a' }}</p>
-    <p><strong>Percentile:</strong> {{ charger.percentile || 'n/a' }}</p>
+    <h3 class="auto-fit">Charger ID: adasdasdasd{{ chargingStation.id }}</h3>
+    <p><strong>Type:</strong> {{ chargingStation.connectorType || 'unknown' }}</p>
+    <p><strong>Max kW:</strong> {{ chargingStation.maxPower || 'n/a' }}</p>
+    <p><strong>Status:</strong> {{ chargingStation.status || 'n/a' }}</p>
+    <p><strong>Percentile:</strong> {{ chargingStation.percentile || 'n/a' }}</p>
   </div>
 </template>
 
 <script setup>
 defineProps({
-  charger: {
+  chargingStation: {
     type: Object,
     required: true,
   },
