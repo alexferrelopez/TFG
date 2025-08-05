@@ -49,7 +49,11 @@ fi
 echo "Attempting to download XML from $URL into $XML_FILE..."
 trap - ERR
 set +e
-wget "$URL" -O "$XML_FILE"
+wget \
+  --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/115.0.0.0 Safari/537.36" \
+  -L  \
+ "$URL" -O "$XML_FILE"
+
 DL_RET=$?
 set -e
 trap 'echo "Error at line $LINENO" >&2; exit 1' ERR
