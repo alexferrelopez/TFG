@@ -2,6 +2,7 @@
 import re, json, bisect, os, argparse
 import xmltodict
 
+
 def strip_ns(obj):
     if isinstance(obj, dict):
         return {
@@ -11,6 +12,7 @@ def strip_ns(obj):
     if isinstance(obj, list):
         return [strip_ns(i) for i in obj]
     return obj
+
 
 def parse_datex2_to_geojson(xml_path, geojson_path):
     # load XML (ignore bad bytes)
@@ -22,48 +24,78 @@ def parse_datex2_to_geojson(xml_path, geojson_path):
         sites = [sites]
 
     features = []
+    scores = []
     for site in sites:
         site = strip_ns(site)
+
+        # Trim energyInfrastructureStation to keep only required fields
+        station = site.get("energyInfrastructureStation", {})
+        new_station = {
+            "authenticationAndIdentificationMethods": station.get("authenticationAndIdentificationMethods", [])
+        }
+
+        # Prepare to process refill points and calculate score
+        raw_rps = station.get("refillPoint", [])
+        if isinstance(raw_rps, dict):
+            raw_rps = [raw_rps]
+        trimmed_rps = []
+        total_power = 0.0
+
+        for rp in raw_rps:
+            # Flatten the nested name text
+            name = ""
+            name_struct = rp.get("name", {}).get("values", {}).get("value", {})
+            if isinstance(name_struct, dict):
+                name = name_struct.get("#text", "")
+
+            # Normalize connectors to list
+            conns = rp.get("connector", [])
+            if isinstance(conns, dict):
+                conns = [conns]
+
+            # Trim connector fields and compute max power inline using max()
+            rp_power = 0.0
+            connectors = []
+            for c in conns:
+                ctype = c.get("connectorType")
+                try:
+                    pwr = float(c.get("maxPowerAtSocket", 0))
+                except (TypeError, ValueError):
+                    pwr = 0.0
+                # use max() to track maximum power
+                rp_power = max(rp_power, pwr)
+                connectors.append({
+                    "connectorType": ctype,
+                    "maxPowerAtSocket": c.get("maxPowerAtSocket")
+                })
+
+            total_power += rp_power
+
+            trimmed_rps.append({
+                "name": name,
+                "connectorCount": len(connectors),
+                "connectors": connectors
+            })
+
+        new_station["refillPoint"] = trimmed_rps
+        site["energyInfrastructureStation"] = new_station
+
+        # Extract geometry and remove coords
         loc = site.get('locationReference', {}).get('coordinatesForDisplay', {})
         try:
             lat, lon = float(loc.get('latitude', 0)), float(loc.get('longitude', 0))
         except ValueError:
             continue
-        # remove coords from props
         site.get('locationReference', {}).pop('coordinatesForDisplay', None)
 
-        features.append({
+        # Build feature with score
+        feature = {
             "type": "Feature",
             "geometry": {"type": "Point", "coordinates": [lon, lat]},
             "properties": site
-        })
-
-    # compute scores properly: one supply per refillPoint
-    scores = []
-    for feat in features:
-        station = feat["properties"].get("energyInfrastructureStation", {})
-        refill = station.get("refillPoint", [])
-        if isinstance(refill, dict):
-            refill = [refill]
-
-        total_power = 0.0
-        for rp in refill:
-            # normalize connector to list
-            conns = rp.get("connector", [])
-            if isinstance(conns, dict):
-                conns = [conns]
-
-            # collect all connector powers, then take the max
-            powers = []
-            for c in conns:
-                try:
-                    powers.append(float(c.get("maxPowerAtSocket", 0)))
-                except (TypeError, ValueError):
-                    pass
-            rp_power = max(powers) if powers else 0.0
-            total_power += rp_power
-
-        feat["properties"]["score"] = total_power
+        }
+        feature["properties"]["score"] = total_power
+        features.append(feature)
         scores.append(total_power)
 
     # compute percentiles
@@ -74,10 +106,11 @@ def parse_datex2_to_geojson(xml_path, geojson_path):
         rank = bisect.bisect_left(sorted_scores, s)
         feat["properties"]["percentile"] = round((rank / n) * 100, 1)
 
-    # write GeoJSON
+    # write GeoJSON output
     out = {"type": "FeatureCollection", "features": features}
     with open(geojson_path, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
+
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(
