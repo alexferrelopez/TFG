@@ -26,8 +26,9 @@ defineEmits(['close'])
   font-size: 2rem;
   cursor: pointer;
   transition: box-shadow .2s ease, color .2s ease;
-  box-shadow:  24px 24px 48px #d7d7d7,
-             -24px -24px 48px #e9e9e9;
+  box-shadow:  5px 5px 20px #ededed,
+              -5px -5px 20px #ffffff;
+
 }
 
 .btn:hover,
