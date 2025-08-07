@@ -1,6 +1,9 @@
 <template>
   <div class="station-card">
-    <h3 class="auto-fit">Charger ID: {{ props.chargingStation.id }}</h3>
+    <h2 >{{ props.chargingStation.name }}</h2>
+    <p>{{ props.chargingStation.address || 'n/a' }}</p>
+    <p>{{ props.chargingStation.town || 'n/a' }}</p>
+    <p><strong>{{ props.chargingStation.operator || 'n/a' }}</strong></p>
     <p><strong>Type of Site: </strong>
       <span class="type-badge" :class="badgeClass">
         {{ badgeLabel }}
@@ -67,7 +70,7 @@ const badgeClass = computed(() => classMap[rawType.value] || classMap.other)
 .type-badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: #fff;

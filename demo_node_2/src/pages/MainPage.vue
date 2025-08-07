@@ -150,13 +150,14 @@ onMounted(() => {
 
     selectedStation.value = {
       id:            p['@id'],
-      connectorType: p.connectorType,
-      maxPower:      p.maxPower,
-      status:        p.status,
+      name:          p.name,
+      operator:      p.operator,
       percentile:    p.percentile,
       score:         p.score,
       energyInfrastructureStation:  eis,
       typeOfSite:    p.typeOfSite,
+      address:       p.address,
+      town:         p.town
     }
   })
 })
