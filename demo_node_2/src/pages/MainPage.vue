@@ -4,13 +4,12 @@
       </div>
   <transition name="slide">
     
-      
       <SideCard
         v-if="selectedStation"
         :key="selectedStation.id"
         @close="selectedStation = null"
       >
-        <StationCard :chargingStation="selectedStation" />
+        <StationCard v-if="selectedStation" :chargingStation="selectedStation" />
       </SideCard>
   
   </transition>
@@ -26,6 +25,7 @@
       v-model:showHigh="showHigh"
       v-model:showMid="showMid"
       v-model:showLow="showLow"
+      v-model:showVeryHigh="showVeryHigh"
     />
   </div>
 </template>
@@ -46,9 +46,10 @@ const selectedStation = ref(null)
 const showLow  = ref(true)
 const showMid  = ref(true)
 const showHigh = ref(true)
+const showVeryHigh = ref(true)
 let map
 
-watch([showLow, showMid, showHigh], applyPercentileFilter)
+watch([showLow, showMid, showHigh, showVeryHigh], applyPercentileFilter)
 
 function applyPercentileFilter() {
   if (!map) return
@@ -61,25 +62,30 @@ function applyPercentileFilter() {
     filters.push([
       'all',
       ['>=', getPct,  0],
-      ['<', getPct, 50]
+      ['<', getPct, 30]
     ])
   }
   if (showMid.value) {
     filters.push([
       'all',
-      ['>=', getPct, 50],
-      ['<', getPct, 90]
+      ['>=', getPct, 30],
+      ['<', getPct, 65]
     ])
   }
   if (showHigh.value) {
     filters.push([
       'all',
-      ['>=', getPct, 90],
-      ['<=', getPct, 100]
+      ['>=', getPct, 65],
+      ['<', getPct, 90]
+    ])
+  }
+  if (showVeryHigh.value) {
+    filters.push([
+      'all',
+      ['>=', getPct, 90]
     ])
   }
 
-  // if nothing checked, hide all
   const expr = filters.length
     ? ['any', ...filters]
     : ['==', ['literal', 0], ['literal', 1]]
@@ -135,13 +141,22 @@ onMounted(() => {
   map.on("click", "chargers-point", (e) => {
     const feature = e.features[0]
     const p = feature.properties
+    let eis = p.energyInfrastructureStation;
+
+    if (typeof eis === "string") {
+      try { eis = JSON.parse(eis); }
+      catch (err) { console.warn("Failed to parse EIS JSON", err); }
+    }
 
     selectedStation.value = {
       id:            p['@id'],
       connectorType: p.connectorType,
       maxPower:      p.maxPower,
       status:        p.status,
-      percentile:    p.percentile
+      percentile:    p.percentile,
+      score:         p.score,
+      energyInfrastructureStation:  eis,
+      typeOfSite:    p.typeOfSite,
     }
   })
 })
@@ -153,7 +168,7 @@ onMounted(() => {
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10;
+  z-index: 2;
 }
 .map-container {
   position: relative;
