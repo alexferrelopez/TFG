@@ -121,11 +121,19 @@ def parse_datex2_to_geojson(xml_path, geojson_path):
             if isinstance(txt, dict):
                 return txt.get('#text', '')
             return ''
+
         address = extract_text(lines[0]) if len(lines) > 0 else ''
         town = extract_text(lines[1]) if len(lines) > 1 else ''
-        # assign simplified fields
-        site['address'] = re.sub(r'^[^:]+:\s*', '', address).lstrip()
-        site['town'] = re.sub(r'^[^:]+:\s*', '', town).lstrip()
+        town = re.sub(r'^[^:]+:\s*', '', town).lstrip()
+        address = re.sub(r'^[^:]+:\s*', '', address).lstrip()
+
+        pat = rf"(?:,\s*|\s+){re.escape(town)}\b.*$"
+
+        if re.search(pat, address, flags=re.IGNORECASE):
+            address = re.sub(pat, "", address, flags=re.IGNORECASE).rstrip(", ").strip()
+
+        site['town'] = town
+        site['address'] = address
         # remove original locationReference
         site.pop('locationReference', None)
         # Build feature with score
