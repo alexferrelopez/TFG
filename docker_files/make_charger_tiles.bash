@@ -47,7 +47,8 @@ TIPPECANOE_OPTS=(
   -Z3 -z14
   -j'{ "chargers": [ "any",
       [ "all", [">=", "percentile", 90], [">=", "$zoom", 3] ],
-      [ "all", [">=", "percentile", 50], [">=", "$zoom", 7] ],
+      [ "all", [">=", "percentile", 65], [">=", "$zoom", 7] ],
+      [ "all", [">=", "percentile", 30], [">=", "$zoom", 9] ],
       [ "all", [">=", "percentile",  0], [">=", "$zoom", 11] ]
     ]
   }'
