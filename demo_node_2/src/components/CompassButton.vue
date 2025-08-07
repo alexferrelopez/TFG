@@ -40,7 +40,7 @@ const props = defineProps({
   align-items: center;
   width: 4rem;
   height: 4rem;
-  margin: 10px;
+  margin: 5px;
   position: absolute;
   top: 1rem;
   right: 1rem;

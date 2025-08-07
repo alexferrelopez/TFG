@@ -1,6 +1,10 @@
 <template>
   <div class="filter-controls">
     <label>
+      <input type="checkbox" :checked="showVeryHigh" @change="$emit('update:showVeryHigh', $event.target.checked)" />
+      Very high power
+    </label>
+    <label>
       <input type="checkbox" :checked="showHigh" @change="$emit('update:showHigh', $event.target.checked)" />
       High power
     </label>
@@ -19,12 +23,14 @@
 defineProps({
   showHigh: Boolean,
   showMid:  Boolean,
-  showLow:  Boolean
+  showLow:  Boolean,
+  showVeryHigh: Boolean
 })
 defineEmits([
   'update:showHigh',
   'update:showMid',
-  'update:showLow'
+  'update:showLow',
+  'update:showVeryHigh'
 ])
 </script>
 
