@@ -1,16 +1,20 @@
 <template>
   <div class="station-card">
     <h2 >{{ props.chargingStation.name }}</h2>
-    <p>{{ props.chargingStation.address || 'n/a' }}</p>
-    <p>{{ props.chargingStation.town || 'n/a' }}</p>
-    <p><strong>{{ props.chargingStation.operator || 'n/a' }}</strong></p>
+    <p>{{ props.chargingStation.address || 'n/a' }}, {{ props.chargingStation.town || 'n/a' }}</p>
     <p><strong>Type of Site: </strong>
       <span class="type-badge" :class="badgeClass">
         {{ badgeLabel }}
       </span>
     </p>
+    <p><strong>{{ props.chargingStation.operator || 'n/a' }}</strong></p>
+    <!-- 
+     
     <p><strong>Percentile:</strong> {{ props.chargingStation.percentile || 'n/a' }}</p>
     <p><strong>Score:</strong> {{ props.chargingStation.score || 'n/a' }}</p>
+    
+    -->
+
 
      <div class="refill-section">
       <h4>Refill Points</h4>
