@@ -2,6 +2,25 @@
 set -euo pipefail
 trap 'echo "Error at line $LINENO" >&2; exit 1' ERR
 
+# Parse flags
+ONLY_TIPPECANOE=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -t|--tippecanoe-only)
+      ONLY_TIPPECANOE=true
+      shift
+      ;;
+    -*)
+      echo "Usage: $0 [--tippecanoe-only]" >&2
+      exit 1
+      ;;
+    *)
+      # you can add more positional args here if needed
+      shift
+      ;;
+  esac
+done
+
 # Determine script directory and cd into datex_to_geojson
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/datex_to_geojson"
@@ -36,42 +55,50 @@ TIPPECANOE_OPTS=(
   -o "$MBTILES_FILE"
 )
 
-# 1) Check for existing XML
-if [[ -s "$XML_FILE" ]]; then
-  echo "Found existing XML file: $XML_FILE"
-  exists_before=true
+if [[ "$ONLY_TIPPECANOE" = true ]]; then
+  echo "Tippecanoe-only mode: skipping download & conversion steps."
+
+  # Verify GeoJSON exists
+  if [[ ! -s "$GEOJSON_FILE" ]]; then
+    echo "Error: GeoJSON file '$GEOJSON_FILE' not found. Cannot build MBTiles." >&2
+    exit 1
+  fi
 else
-  exists_before=false
+  # 1) Check for existing XML
+  if [[ -s "$XML_FILE" ]]; then
+    echo "Found existing XML file: $XML_FILE"
+    exists_before=true
+  else
+    exists_before=false
+  fi
+
+  # 2) Download with resume support; disable ERR trap to avoid premature exit
+  echo "Attempting to download XML from $URL into $XML_FILE..."
+  trap - ERR
+  set +e
+  wget \
+    --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/115.0.0.0 Safari/537.36" \
+    -L  \
+    "$URL" -O "$XML_FILE"
+  DL_RET=$?
+  set -e
+  trap 'echo "Error at line $LINENO" >&2; exit 1' ERR
+
+  if [[ $DL_RET -eq 0 ]]; then
+    echo "Download completed successfully."
+  elif [[ $exists_before == true && -s "$XML_FILE" ]]; then
+    echo "Warning: download failed (status $DL_RET), using existing file."
+  else
+    echo "Error: download failed (status $DL_RET) and no valid existing file." >&2
+    exit 1
+  fi
+
+  echo "Using XML file: $XML_FILE"
+
+  # 3) Convert XML → GeoJSON
+  echo "Converting XML ($XML_FILE) to GeoJSON: $GEOJSON_FILE..."
+  python3 datex_to_geojson.py "$XML_FILE" "$GEOJSON_FILE"
 fi
-
-# 2) Download with resume support; disable ERR trap to avoid premature exit
-
-echo "Attempting to download XML from $URL into $XML_FILE..."
-trap - ERR
-set +e
-wget \
-  --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/115.0.0.0 Safari/537.36" \
-  -L  \
- "$URL" -O "$XML_FILE"
-
-DL_RET=$?
-set -e
-trap 'echo "Error at line $LINENO" >&2; exit 1' ERR
-
-if [[ $DL_RET -eq 0 ]]; then
-  echo "Download completed successfully."
-elif [[ $exists_before == true && -s "$XML_FILE" ]]; then
-  echo "Warning: download failed (status $DL_RET), using existing file."
-else
-  echo "Error: download failed (status $DL_RET) and no valid existing file." >&2
-  exit 1
-fi
-
-echo "Using XML file: $XML_FILE"
-
-# 3) Convert XML → GeoJSON
-echo "Converting XML ($XML_FILE) to GeoJSON: $GEOJSON_FILE..."
-python3 datex_to_geojson.py "$XML_FILE" "$GEOJSON_FILE"
 
 # 4) Build MBTiles
 echo "Building MBTiles with Tippecanoe: $MBTILES_FILE..."
