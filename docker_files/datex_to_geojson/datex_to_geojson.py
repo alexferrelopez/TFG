@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-import re, json, bisect, os, argparse
+import argparse
+import bisect
+import json
+import os
+import re
+
 import xmltodict
 
 
@@ -13,6 +18,13 @@ def strip_ns(obj):
         return [strip_ns(i) for i in obj]
     return obj
 
+def flatten_name(obj):
+    # Flatten the nested name text
+    name = ""
+    name_struct = obj.get("name", {}).get("values", {}).get("value", {})
+    if isinstance(name_struct, dict):
+        name = name_struct.get("#text", "")
+    return name
 
 def parse_datex2_to_geojson(xml_path, geojson_path):
     # load XML (ignore bad bytes)
@@ -28,6 +40,13 @@ def parse_datex2_to_geojson(xml_path, geojson_path):
     for site in sites:
         site = strip_ns(site)
 
+        operator = site.get("operator", {})
+        operator_name = flatten_name(operator)
+        site["operator"] = operator_name
+
+        site_name = flatten_name(site)
+        site["name"] = site_name
+
         # Trim energyInfrastructureStation to keep only required fields
         station = site.get("energyInfrastructureStation", {})
         new_station = {
@@ -42,11 +61,7 @@ def parse_datex2_to_geojson(xml_path, geojson_path):
         total_power = 0.0
 
         for rp in raw_rps:
-            # Flatten the nested name text
-            name = ""
-            name_struct = rp.get("name", {}).get("values", {}).get("value", {})
-            if isinstance(name_struct, dict):
-                name = name_struct.get("#text", "")
+            name = flatten_name(rp)
 
             # Normalize connectors to list
             conns = rp.get("connector", [])
@@ -110,7 +125,6 @@ def parse_datex2_to_geojson(xml_path, geojson_path):
     out = {"type": "FeatureCollection", "features": features}
     with open(geojson_path, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
-
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(
