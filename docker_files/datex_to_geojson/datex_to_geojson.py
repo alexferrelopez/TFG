@@ -95,14 +95,39 @@ def parse_datex2_to_geojson(xml_path, geojson_path):
         new_station["refillPoint"] = trimmed_rps
         site["energyInfrastructureStation"] = new_station
 
-        # Extract geometry and remove coords
-        loc = site.get('locationReference', {}).get('coordinatesForDisplay', {})
+        # Simplify locationReference into address and town
+        loc_ref = site.get('locationReference', {})
+        loc = loc_ref.get('coordinatesForDisplay', {})
         try:
             lat, lon = float(loc.get('latitude', 0)), float(loc.get('longitude', 0))
         except ValueError:
             continue
-        site.get('locationReference', {}).pop('coordinatesForDisplay', None)
 
+        ext = loc_ref.get('_locationReferenceExtension', {})
+        facility = ext.get('facilityLocation', {})
+        addr = facility.get('address', {})
+        # extract address lines
+        lines = addr.get('addressLine', [])
+        if isinstance(lines, dict):
+            lines = [lines]
+        # sort by order
+        try:
+            lines = sorted(lines, key=lambda x: int(x.get('@order', 0)))
+        except (TypeError, ValueError):
+            pass
+        # flatten text values
+        def extract_text(line):
+            txt = line.get('text', {}).get('values', {}).get('value', {})
+            if isinstance(txt, dict):
+                return txt.get('#text', '')
+            return ''
+        address = extract_text(lines[0]) if len(lines) > 0 else ''
+        town = extract_text(lines[1]) if len(lines) > 1 else ''
+        # assign simplified fields
+        site['address'] = re.sub(r'^[^:]+:\s*', '', address).lstrip()
+        site['town'] = re.sub(r'^[^:]+:\s*', '', town).lstrip()
+        # remove original locationReference
+        site.pop('locationReference', None)
         # Build feature with score
         feature = {
             "type": "Feature",
