@@ -130,10 +130,10 @@ def parse_datex2_to_geojson(xml_path, geojson_path):
         pat = rf"(?:,\s*|\s+){re.escape(town)}\b.*$"
 
         if re.search(pat, address, flags=re.IGNORECASE):
-            address = re.sub(pat, "", address, flags=re.IGNORECASE).rstrip(", ").strip()
+            address = re.sub(pat, "", address, flags=re.IGNORECASE)
 
-        site['town'] = town
-        site['address'] = address
+        site['town'] = town.rstrip(", ").strip()
+        site['address'] = address.rstrip(", ").strip()
         # remove original locationReference
         site.pop('locationReference', None)
         # Build feature with score
