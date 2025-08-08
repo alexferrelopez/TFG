@@ -67,48 +67,16 @@ function getChargerDetails(feature) {
 function getPercentileColor(feature) {
   const percentile = parseFloat(feature.properties?.percentile) || 0;
 
-  // Color stops with percentile values
-  const colorStops = [
-    { value: 0, color: "#ffdb38" },
-    { value: 89.9, color: "#017026" },
-    { value: 90, color: "#a1c1ff" },
-    { value: 100, color: "#124cb8" }
-  ];
-
-  // Find the appropriate color range
-  for (let i = 0; i < colorStops.length - 1; i++) {
-    const current = colorStops[i];
-    const next = colorStops[i + 1];
-
-    if (percentile >= current.value && percentile <= next.value) {
-      // Interpolate between current and next color
-      const ratio = (percentile - current.value) / (next.value - current.value);
-      return interpolateColor(current.color, next.color, ratio);
-    }
+  // Simple color mapping based on ranges
+  if (percentile < 90) {
+    // Yellow to green (0-89.9)
+    const ratio = percentile / 89.9;
+    return `hsl(${60 - (ratio * 45)}, 85%, ${45 + (ratio * 10)}%)`;
+  } else {
+    // Light blue to dark blue (90-100)
+    const ratio = (percentile - 90) / 10;
+    return `hsl(${220}, ${60 + (ratio * 40)}%, ${75 - (ratio * 35)}%)`;
   }
-
-  // Fallback to last color if percentile is above 100
-  return colorStops[colorStops.length - 1].color;
-}
-
-// Helper function to interpolate between two hex colors
-function interpolateColor(color1, color2, ratio) {
-  const hex1 = color1.replace('#', '');
-  const hex2 = color2.replace('#', '');
-
-  const r1 = parseInt(hex1.substring(0, 2), 16);
-  const g1 = parseInt(hex1.substring(2, 4), 16);
-  const b1 = parseInt(hex1.substring(4, 6), 16);
-
-  const r2 = parseInt(hex2.substring(0, 2), 16);
-  const g2 = parseInt(hex2.substring(2, 4), 16);
-  const b2 = parseInt(hex2.substring(4, 6), 16);
-
-  const r = Math.round(r1 + (r2 - r1) * ratio);
-  const g = Math.round(g1 + (g2 - g1) * ratio);
-  const b = Math.round(b1 + (b2 - b1) * ratio);
-
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
 function selectCharger(feature) {
@@ -214,13 +182,11 @@ function closePopup() {
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .lightning-svg {
   width: 12px;
   height: 12px;
-  filter: brightness(0) invert(1) drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));
 }
 
 .charger-info {
