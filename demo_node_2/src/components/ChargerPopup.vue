@@ -98,27 +98,21 @@ function closePopup() {
 
 .popup-close-btn {
   position: relative;
-  margin: 0;
-  min-width: 28px !important;
-  height: 28px !important;
+  min-width: 28px;
+  height: 28px;
   font-size: 1.5rem;
-  padding: 0 !important;
-  background: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  border-radius: 50%;
 }
 
 .popup-close-btn:hover {
-
   box-shadow:
     inset 2px 2px 4px rgba(0, 0, 0, 0.1),
-    inset -1px -1px 2px rgba(255, 255, 255, 0.8) !important;
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .popup-close-btn:active {
   box-shadow:
     inset 3px 3px 6px rgba(0, 0, 0, 0.15),
-    inset -2px -2px 4px rgba(255, 255, 255, 0.7) !important;
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7);
 }
 
 .charger-list {
