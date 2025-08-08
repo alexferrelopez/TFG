@@ -2,18 +2,8 @@
   <div class="refill-point-card">
     <h4 class="name">{{ point.name }}</h4>
     <div class="connector-groups">
-      <div
-        v-for="(grp, i) in groupedConnectors"
-        :key="i"
-        class="connector-group"
-      >
-        <img
-          class="icon"
-          :src="getIconUrl(grp.type)"
-          :alt="grp.type"
-          :title="grp.type"
-          @error="onIconError"
-        />
+      <div v-for="(grp, i) in groupedConnectors" :key="i" class="connector-group">
+        <img class="icon" :src="getIconUrl(grp.type)" :alt="grp.type" :title="grp.type" @error="onIconError" />
         <span v-if="grp.count > 1" class="count">x{{ grp.count }}</span>
         <span class="power">{{ formatPower(grp.power) }}</span>
       </div>
@@ -30,8 +20,8 @@ const { point } = toRefs(props)
 const groupedConnectors = computed(() => {
   const map = {}
   for (const { connectorType, maxPowerAtSocket } of point.value.connectors || []) {
-    const kw   = Math.round((Number(maxPowerAtSocket) / 1000) * 10) / 10
-    const key  = `${connectorType}::${kw}`
+    const kw = Math.round((Number(maxPowerAtSocket) / 1000) * 10) / 10
+    const key = `${connectorType}::${kw}`
     map[key] ??= { type: connectorType, power: kw, count: 0 }
     map[key].count++
   }
@@ -49,7 +39,7 @@ function getIconUrl(type) {
 }
 
 function onIconError(event) {
-  const img = event.currentTarget; 
+  const img = event.currentTarget;
   img.onerror = null;
   img.src = unknownIconUrl;
 }
@@ -62,10 +52,12 @@ function onIconError(event) {
   margin-bottom: 1rem;
   border-radius: 0.5rem;
 }
+
 .name {
   margin: 0 0 0.5rem;
   font-size: 1rem;
 }
+
 .connector-groups {
   display: flex;
   flex-wrap: wrap;
@@ -83,10 +75,12 @@ function onIconError(event) {
 .count {
   font-weight: bold;
 }
+
 .icon {
   width: 48px;
   height: 48px;
 }
+
 .power {
   font-size: 0.9rem;
 }

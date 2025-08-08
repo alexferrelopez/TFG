@@ -1,16 +1,6 @@
 <template>
-  <button
-    class="north-button"
-    :disabled="isNorth"
-    @click="$emit('reset')"
-    aria-label="Orient north"
-  >
-    <img
-      :src="iconSrc"
-      alt="Compass"
-      class="compass-icon"
-      :style="{ transform: `rotate(${-45-bearing}deg)` }"
-    />
+  <button class="north-button" :disabled="isNorth" @click="$emit('reset')" aria-label="Orient north">
+    <img :src="iconSrc" alt="Compass" class="compass-icon" :style="{ transform: `rotate(${-45 - bearing}deg)` }" />
   </button>
 </template>
 
@@ -52,10 +42,12 @@ const props = defineProps({
   border-radius: 50%;
   transition: opacity 0.2s;
 }
+
 .north-button:disabled {
   opacity: 0.5;
   cursor: default;
 }
+
 .compass-icon {
   display: block;
   width: 50%;
@@ -67,6 +59,7 @@ const props = defineProps({
     inset 5px 5px 10px #f5f5f5,
     inset -5px -5px 10px #fff;
 }
+
 .north-button:active {
   box-shadow:
     inset 5px 5px 10px #d9d9d9,

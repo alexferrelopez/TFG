@@ -36,7 +36,7 @@ const collapsed = ref(false);
   padding: 40px;
   box-sizing: border-box;
   background: white;
-  box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
   overflow-y: auto;
   z-index: 3;
 }
@@ -44,7 +44,7 @@ const collapsed = ref(false);
 .toggle-btn {
   position: absolute;
   top: 50%;
-  right: -24px;         
+  right: -24px;
   transform: translateY(-50%);
   align-self: center;
   justify-self: end;
@@ -60,7 +60,8 @@ const collapsed = ref(false);
   margin: 20px;
 }
 
-@media (max-width: 768px), (pointer: coarse) {
+@media (max-width: 768px),
+(pointer: coarse) {
   .card-container {
 
     max-width: calc(100% - 24px);

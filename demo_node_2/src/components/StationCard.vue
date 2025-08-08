@@ -1,6 +1,6 @@
 <template>
   <div class="station-card">
-    <h2 >{{ props.chargingStation.name }}</h2>
+    <h2>{{ props.chargingStation.name }}</h2>
     <p>{{ props.chargingStation.address || 'n/a' }}, {{ props.chargingStation.town || 'n/a' }}</p>
     <p><strong>Type of Site: </strong>
       <span class="type-badge" :class="badgeClass">
@@ -17,15 +17,10 @@
     <div class="refill-section">
       <h4>{{ props.chargingStation.energyInfrastructureStation?.refillPoint?.length }} Refill Points</h4>
 
-      <RefillPointCard
-        v-for="p in props.chargingStation.energyInfrastructureStation?.refillPoint || []"
-        :key="p.name"
-        :point="p"
-      />
-      <p
-        v-if="!(props.chargingStation.energyInfrastructureStation?.refillPoint?.length)"
-        class="empty"
-      >No refill points added.</p>
+      <RefillPointCard v-for="p in props.chargingStation.energyInfrastructureStation?.refillPoint || []" :key="p.name"
+        :point="p" />
+      <p v-if="!(props.chargingStation.energyInfrastructureStation?.refillPoint?.length)" class="empty">No refill points
+        added.</p>
     </div>
   </div>
 </template>
@@ -55,6 +50,7 @@ const badgeClass = computed(() => classMap[props.chargingStation.typeOfSite] || 
 .refill-section {
   margin-top: 1rem;
 }
+
 .empty {
   color: #666;
   font-style: italic;
