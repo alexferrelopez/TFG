@@ -3,9 +3,9 @@ services:
     image: ghcr.io/maplibre/martin:latest
     command: ["--config", "/files/config.yaml"]           # this is the argument you pass in your `docker run`
     ports:
-      - "3000:3000"           # host:container
+      - "3000:3000"
     volumes:
-      - ./docker_files:/files      # host > container
+      - ./docker_files:/files
 
   mbtiles-maker:
     image: alex/mbtiles-maker:latest
