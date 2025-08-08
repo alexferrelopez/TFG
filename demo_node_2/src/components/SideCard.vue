@@ -62,8 +62,8 @@ const collapsed = ref(false);
 
 @media (max-width: 768px), (pointer: coarse) {
   .card-container {
-    width: 100%;
-    max-width: 450px;
+
+    max-width: calc(100% - 24px);
   }
 }
 </style>
