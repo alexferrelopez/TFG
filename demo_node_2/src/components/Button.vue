@@ -12,7 +12,6 @@ defineEmits(['close'])
 .btn {
   position: absolute;
   z-index: 4;
-  margin: 2rem;
   padding: 0;
   max-width: fit-content;
   min-width: 2.5rem;
@@ -26,21 +25,23 @@ defineEmits(['close'])
   font-size: 2rem;
   cursor: pointer;
   transition: box-shadow .2s ease, color .2s ease;
-  box-shadow:  5px 5px 20px #ededed,
-              -5px -5px 20px #ffffff;
-
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover,
 .btn:active {
   color: #f00;
 }
+
 .btn:hover {
+  background: #f8f9fa;
   box-shadow:
     inset 5px 5px 10px #f5f5f5,
     inset -5px -5px 10px #fff;
 }
+
 .btn:active {
+  background: #f0f0f0;
   box-shadow:
     inset 5px 5px 10px #d9d9d9,
     inset -5px -5px 10px #fff;
