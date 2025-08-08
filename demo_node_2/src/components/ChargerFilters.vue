@@ -9,11 +9,11 @@
       High power
     </label>
     <label>
-      <input type="checkbox" :checked="showMid"  @change="$emit('update:showMid',  $event.target.checked)" />
+      <input type="checkbox" :checked="showMid" @change="$emit('update:showMid', $event.target.checked)" />
       Medium power
     </label>
     <label>
-      <input type="checkbox" :checked="showLow"  @change="$emit('update:showLow',  $event.target.checked)" />
+      <input type="checkbox" :checked="showLow" @change="$emit('update:showLow', $event.target.checked)" />
       Low power
     </label>
   </div>
@@ -22,8 +22,8 @@
 <script setup>
 defineProps({
   showHigh: Boolean,
-  showMid:  Boolean,
-  showLow:  Boolean,
+  showMid: Boolean,
+  showLow: Boolean,
   showVeryHigh: Boolean
 })
 defineEmits([
@@ -39,11 +39,12 @@ defineEmits([
   position: absolute;
   bottom: 40px;
   right: 10px;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   padding: 8px;
   border-radius: 4px;
   font-size: 1rem;
 }
+
 .filter-controls label {
   display: block;
   margin: 2px 0;
