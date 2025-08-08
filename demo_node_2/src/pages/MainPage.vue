@@ -1,32 +1,20 @@
 <template>
   <div class="search-container">
-        <SearchBar />
-      </div>
+    <SearchBar />
+  </div>
   <transition name="slide">
-    
-      <SideCard
-        v-if="selectedStation"
-        :key="selectedStation.id"
-        @close="selectedStation = null"
-      >
-        <StationCard v-if="selectedStation" :chargingStation="selectedStation" />
-      </SideCard>
-  
+
+    <SideCard v-if="selectedStation" :key="selectedStation.id" @close="selectedStation = null">
+      <StationCard v-if="selectedStation" :chargingStation="selectedStation" />
+    </SideCard>
+
   </transition>
-  
+
   <div class="map-container">
     <div id="map" class="map-placeholder"></div>
-    <CompassButton
-      :bearing="bearing"
-      :isNorth="isNorth"
-      @reset="resetNorth"
-    />
-    <ChargerFilters
-      v-model:showHigh="showHigh"
-      v-model:showMid="showMid"
-      v-model:showLow="showLow"
-      v-model:showVeryHigh="showVeryHigh"
-    />
+    <CompassButton :bearing="bearing" :isNorth="isNorth" @reset="resetNorth" />
+    <ChargerFilters v-model:showHigh="showHigh" v-model:showMid="showMid" v-model:showLow="showLow"
+      v-model:showVeryHigh="showVeryHigh" />
   </div>
 </template>
 
@@ -44,8 +32,8 @@ import ChargerPopup from '@/components/ChargerPopup.vue'
 const isNorth = ref(false)
 const bearing = ref(0)
 const selectedStation = ref(null)
-const showLow  = ref(true)
-const showMid  = ref(true)
+const showLow = ref(true)
+const showMid = ref(true)
 const showHigh = ref(true)
 const showVeryHigh = ref(true)
 let map
@@ -62,7 +50,7 @@ function applyPercentileFilter() {
   if (showLow.value) {
     filters.push([
       'all',
-      ['>=', getPct,  0],
+      ['>=', getPct, 0],
       ['<', getPct, 30]
     ])
   }
@@ -103,7 +91,8 @@ function updateDirection() {
 }
 
 function resetNorth() {
-  map.rotateTo(0, { duration: 800 });}
+  map.rotateTo(0, { duration: 800 });
+}
 
 onMounted(() => {
   map = new maplibregl.Map({
@@ -118,17 +107,17 @@ onMounted(() => {
   })
 
   map.on('style.load', () => {
-        map.setProjection({
-            type: 'globe',
-        });
+    map.setProjection({
+      type: 'globe',
+    });
   });
-  
-  map.on('load',  () => {
+
+  map.on('load', () => {
     updateDirection()
     applyPercentileFilter()
   })
 
-  map.on('rotate',  updateDirection)
+  map.on('rotate', updateDirection)
   map.on('moveend', updateDirection)
 
   // change cursor on hover
@@ -140,71 +129,70 @@ onMounted(() => {
   });
 
   map.on("click", "chargers-point", (e) => {
-  const features = e.features || [];
-  if (!features.length) return;
+    const features = e.features || [];
 
-  const toStation = (f) => {
-    const p = f.properties || {};
-    let eis = p.energyInfrastructureStation;
-    if (typeof eis === "string") {
-      try { eis = JSON.parse(eis); } catch {}
-    }
-    
-    const typeOfSiteMap = {
-      openSpace:   'Open Space',
-      onstreet:    'On Street',
-      inBuilding:  'In Building',
-      other:       'Other'
+    if (!features.length) return;
+
+    const toStation = (f) => {
+      const p = f.properties || {};
+      let eis = p.energyInfrastructureStation;
+      if (typeof eis === "string") {
+        try { eis = JSON.parse(eis); } catch { }
+      }
+
+      const typeOfSiteMap = {
+        openSpace: 'Open Space',
+        onstreet: 'On Street',
+        inBuilding: 'In Building',
+        other: 'Other'
+      };
+
+      const siteType = p.typeOfSite || 'other';
+      const typeOfSite = typeOfSiteMap[siteType] || typeOfSiteMap.other;
+
+      return {
+        id: p['@id'],
+        name: p.name,
+        operator: p.operator,
+        percentile: p.percentile,
+        score: p.score,
+        energyInfrastructureStation: eis,
+        typeOfSite: typeOfSite,
+        address: p.address,
+        town: p.town
+      };
     };
-    
-    const siteType = p.typeOfSite || 'other';
-    const typeOfSite = typeOfSiteMap[siteType] || typeOfSiteMap.other;
-    
-    return {
-      id:            p['@id'],
-      name:          p.name,
-      operator:      p.operator,
-      percentile:    p.percentile,
-      score:         p.score,
-      energyInfrastructureStation: eis,
-      typeOfSite:    typeOfSite,
-      address:       p.address,
-      town:          p.town
-    };
-  };
 
-  if (features.length === 1) {
-    // Single → open side card
-    selectedStation.value = toStation(features[0]);
-    return;
-  }
-
-  // Multiple → show a popup with clickable list using Vue component
-  const container = document.createElement('div');
-  
-  // Create a Vue app instance for the popup
-  const popupApp = createApp(ChargerPopup, {
-    features: features,
-    onSelectCharger: (feature) => {
-      selectedStation.value = toStation(feature);
-      popup.remove();
-      popupApp.unmount();
-    },
-    onClosePopup: () => {
-      popup.remove();
-      popupApp.unmount();
+    if (features.length === 1) {
+      selectedStation.value = toStation(features[0]);
+      return;
     }
+
+    const container = document.createElement('div');
+
+    // Create a Vue app instance for the popup
+    const popupApp = createApp(ChargerPopup, {
+      features: features,
+      onSelectCharger: (feature) => {
+        selectedStation.value = toStation(feature);
+        popup.remove();
+        popupApp.unmount();
+      },
+      onClosePopup: () => {
+        popup.remove();
+        popupApp.unmount();
+      }
+    });
+
+    popupApp.mount(container);
+
+    const popup = new maplibregl.Popup({
+      closeButton: false
+    })
+      .setLngLat(e.lngLat)
+      .setDOMContent(container)
+      .addTo(map);
   });
-  
-  popupApp.mount(container);
-
-  const popup = new maplibregl.Popup({
-    closeButton: false    
-  })
-    .setLngLat(e.lngLat)
-    .setDOMContent(container)
-    .addTo(map);
-});
 
 })
 </script>
@@ -217,11 +205,13 @@ onMounted(() => {
   transform: translateX(-50%);
   z-index: 2;
 }
+
 .map-container {
   position: relative;
   width: 100%;
   height: 100%;
 }
+
 .map-placeholder {
   width: 100%;
   height: 100%;
@@ -231,10 +221,12 @@ onMounted(() => {
 .slide-leave-active {
   transition: transform 0.2s ease;
 }
+
 .slide-enter-from,
 .slide-leave-to {
   transform: translateX(-100%);
 }
+
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0);
