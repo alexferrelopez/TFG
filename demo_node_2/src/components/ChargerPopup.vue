@@ -1,0 +1,268 @@
+<template>
+  <div class="charger-popup" :style="{ maxWidth: '320px' }">
+    <div class="popup-header-container">
+      <div class="popup-header">
+        {{ features.length }} stations here
+      </div>
+      <Button class="popup-close-btn" @click="closePopup"></Button>
+    </div>
+    <ul class="charger-list">
+      <li v-for="(feature, index) in features" :key="index" class="charger-item">
+        <button @click="selectCharger(feature)" class="charger-button">
+          <div class="charger-button-content">
+            <div class="lightning-icon" :style="{ background: getPercentileColor(feature) }">
+              <img src="@/assets/lightning.svg" alt="Lightning" class="lightning-svg" />
+            </div>
+            <div class="charger-info">
+              <div class="charger-name">
+                {{ getChargerName(feature) }}
+              </div>
+              <div class="charger-details">
+                {{ getChargerDetails(feature) }}
+              </div>
+            </div>
+          </div>
+        </button>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script setup>
+import { defineProps, defineEmits } from 'vue'
+import Button from '@/components/Button.vue'
+
+const props = defineProps({
+  features: {
+    type: Array,
+    required: true
+  }
+})
+
+const emit = defineEmits(['select-charger', 'close-popup'])
+
+function getChargerName(feature) {
+  const p = feature.properties || {}
+  return p.name || 'Unnamed'
+}
+
+function getChargerDetails(feature) {
+  const p = feature.properties || {}
+
+  // Transform typeOfSite to readable label (same as in MainPage)
+  const typeOfSiteMap = {
+    openSpace: 'Open Space',
+    onstreet: 'On Street',
+    inBuilding: 'In Building',
+    other: 'Other'
+  };
+
+  const rawType = p.typeOfSite || 'other';
+  const typeLabel = typeOfSiteMap[rawType] || typeOfSiteMap.other;
+
+  return typeLabel
+}
+
+// Color interpolation function based on percentile
+function getPercentileColor(feature) {
+  const percentile = parseFloat(feature.properties?.percentile) || 0;
+
+  // Color stops with percentile values
+  const colorStops = [
+    { value: 0, color: "#ffdb38" },
+    { value: 89.9, color: "#017026" },
+    { value: 90, color: "#a1c1ff" },
+    { value: 100, color: "#124cb8" }
+  ];
+
+  // Find the appropriate color range
+  for (let i = 0; i < colorStops.length - 1; i++) {
+    const current = colorStops[i];
+    const next = colorStops[i + 1];
+
+    if (percentile >= current.value && percentile <= next.value) {
+      // Interpolate between current and next color
+      const ratio = (percentile - current.value) / (next.value - current.value);
+      return interpolateColor(current.color, next.color, ratio);
+    }
+  }
+
+  // Fallback to last color if percentile is above 100
+  return colorStops[colorStops.length - 1].color;
+}
+
+// Helper function to interpolate between two hex colors
+function interpolateColor(color1, color2, ratio) {
+  const hex1 = color1.replace('#', '');
+  const hex2 = color2.replace('#', '');
+
+  const r1 = parseInt(hex1.substring(0, 2), 16);
+  const g1 = parseInt(hex1.substring(2, 4), 16);
+  const b1 = parseInt(hex1.substring(4, 6), 16);
+
+  const r2 = parseInt(hex2.substring(0, 2), 16);
+  const g2 = parseInt(hex2.substring(2, 4), 16);
+  const b2 = parseInt(hex2.substring(4, 6), 16);
+
+  const r = Math.round(r1 + (r2 - r1) * ratio);
+  const g = Math.round(g1 + (g2 - g1) * ratio);
+  const b = Math.round(b1 + (b2 - b1) * ratio);
+
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+function selectCharger(feature) {
+  emit('select-charger', feature)
+}
+
+function closePopup() {
+  emit('close-popup')
+}
+</script>
+
+<style scoped>
+.charger-popup {
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
+}
+
+.popup-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.popup-header {
+  font-weight: 600;
+  font-size: 16px;
+  color: #2c3e50;
+  letter-spacing: -0.02em;
+}
+
+.popup-close-btn {
+  position: relative;
+  margin: 0;
+  min-width: 28px !important;
+  height: 28px !important;
+  font-size: 1.5rem;
+  padding: 0 !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 50%;
+}
+
+.popup-close-btn:hover {
+
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.popup-close-btn:active {
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.15),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7) !important;
+}
+
+.charger-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 240px;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.charger-item {
+  margin: 0 0 8px 0;
+}
+
+.charger-button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.charger-button-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lightning-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #ffffff;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lightning-svg {
+  width: 12px;
+  height: 12px;
+  filter: brightness(0) invert(1) drop-shadow(0 0 1px rgba(0, 0, 0, 0.3));
+}
+
+.charger-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.charger-button:hover {
+  background: #f8f9fa;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+
+.charger-button:active {
+  background: #f0f0f0;
+  transform: none;
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.15),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.charger-name {
+  font-weight: 600;
+  font-size: 0.9forem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+  color: #2c3e50;
+
+  line-height: 1.3;
+}
+
+.charger-details {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  opacity: 0.8;
+}
+</style>

@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, createApp } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/CompassButton.vue'
@@ -39,6 +39,7 @@ import StationCard from '@/components/StationCard.vue'
 import ChargerFilters from '@/components/ChargerFilters.vue'
 import SideCard from '@/components/SideCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
+import ChargerPopup from '@/components/ChargerPopup.vue'
 
 const isNorth = ref(false)
 const bearing = ref(0)
@@ -121,7 +122,7 @@ onMounted(() => {
             type: 'globe',
         });
   });
-
+  
   map.on('load',  () => {
     updateDirection()
     applyPercentileFilter()
@@ -139,27 +140,72 @@ onMounted(() => {
   });
 
   map.on("click", "chargers-point", (e) => {
-    const feature = e.features[0]
-    const p = feature.properties
+  const features = e.features || [];
+  if (!features.length) return;
+
+  const toStation = (f) => {
+    const p = f.properties || {};
     let eis = p.energyInfrastructureStation;
-
     if (typeof eis === "string") {
-      try { eis = JSON.parse(eis); }
-      catch (err) { console.warn("Failed to parse EIS JSON", err); }
+      try { eis = JSON.parse(eis); } catch {}
     }
-
-    selectedStation.value = {
+    
+    const typeOfSiteMap = {
+      openSpace:   'Open Space',
+      onstreet:    'On Street',
+      inBuilding:  'In Building',
+      other:       'Other'
+    };
+    
+    const siteType = p.typeOfSite || 'other';
+    const typeOfSite = typeOfSiteMap[siteType] || typeOfSiteMap.other;
+    
+    return {
       id:            p['@id'],
       name:          p.name,
       operator:      p.operator,
       percentile:    p.percentile,
       score:         p.score,
-      energyInfrastructureStation:  eis,
-      typeOfSite:    p.typeOfSite,
+      energyInfrastructureStation: eis,
+      typeOfSite:    typeOfSite,
       address:       p.address,
-      town:         p.town
+      town:          p.town
+    };
+  };
+
+  if (features.length === 1) {
+    // Single → open side card
+    selectedStation.value = toStation(features[0]);
+    return;
+  }
+
+  // Multiple → show a popup with clickable list using Vue component
+  const container = document.createElement('div');
+  
+  // Create a Vue app instance for the popup
+  const popupApp = createApp(ChargerPopup, {
+    features: features,
+    onSelectCharger: (feature) => {
+      selectedStation.value = toStation(feature);
+      popup.remove();
+      popupApp.unmount();
+    },
+    onClosePopup: () => {
+      popup.remove();
+      popupApp.unmount();
     }
+  });
+  
+  popupApp.mount(container);
+
+  const popup = new maplibregl.Popup({
+    closeButton: false    
   })
+    .setLngLat(e.lngLat)
+    .setDOMContent(container)
+    .addTo(map);
+});
+
 })
 </script>
 
@@ -192,5 +238,12 @@ onMounted(() => {
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0);
+}
+
+/* Remove default MapLibre popup padding */
+:global(.maplibregl-popup-content) {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
 }
 </style>

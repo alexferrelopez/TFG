@@ -4,7 +4,7 @@
     <p>{{ props.chargingStation.address || 'n/a' }}, {{ props.chargingStation.town || 'n/a' }}</p>
     <p><strong>Type of Site: </strong>
       <span class="type-badge" :class="badgeClass">
-        {{ badgeLabel }}
+        {{ props.chargingStation.typeOfSite }}
       </span>
     </p>
     <p><strong>{{ props.chargingStation.operator || 'n/a' }}</strong></p>
@@ -14,10 +14,8 @@
     <p><strong>Score:</strong> {{ props.chargingStation.score || 'n/a' }}</p>
     
     -->
-
-
-     <div class="refill-section">
-      <h4>Refill Points</h4>
+    <div class="refill-section">
+      <h4>{{ props.chargingStation.energyInfrastructureStation?.refillPoint?.length }} Refill Points</h4>
 
       <RefillPointCard
         v-for="p in props.chargingStation.energyInfrastructureStation?.refillPoint || []"
@@ -43,23 +41,14 @@ const props = defineProps({
   }
 })
 
-const labelMap = {
-  openSpace:   'Open Space',
-  onstreet:    'On Street',
-  inBuilding:  'In Building',
-  other:       'Other'
-}
-
 const classMap = {
-  openSpace:   'badge-open-space',
-  onstreet:    'badge-on-street',
-  inBuilding:  'badge-in-building',
-  other:       'badge-other'
+  'Open Space': 'badge-open-space',
+  'On Street': 'badge-on-street',
+  'In Building': 'badge-in-building',
+  'Other': 'badge-other',
 }
 
-const rawType = computed(() => props.chargingStation.typeOfSite || 'other')
-const badgeLabel = computed(() => labelMap[rawType.value] || labelMap.other)
-const badgeClass = computed(() => classMap[rawType.value] || classMap.other)
+const badgeClass = computed(() => classMap[props.chargingStation.typeOfSite] || classMap['Other'])
 </script>
 
 <style scoped>
