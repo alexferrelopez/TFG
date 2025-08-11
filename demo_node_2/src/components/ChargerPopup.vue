@@ -11,7 +11,7 @@
         <button @click="selectCharger(feature)" class="charger-button">
           <div class="charger-button-content">
             <div class="lightning-icon" :style="{ background: feature.layer.paint['icon-color'] }">
-              <img src="@/assets/lightning.svg" alt="Lightning" class="lightning-svg" />
+              <img src="@/assets/lightning.svg" alt="Lightning" :title="feature.properties.percentile" class="lightning-svg" />
             </div>
             <div class="charger-info">
               <div class="charger-name">
@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineEmits } from 'vue'
 import Button from '@/components/Button.vue'
 
 const props = defineProps({
@@ -105,13 +105,13 @@ function closePopup() {
 
 .popup-close-btn:hover {
   box-shadow:
-    inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.02),
     inset -1px -1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .popup-close-btn:active {
   box-shadow:
-    inset 3px 3px 6px rgba(0, 0, 0, 0.15),
+    inset 3px 3px 6px rgba(0, 0, 0, 0.1),
     inset -2px -2px 4px rgba(255, 255, 255, 0.7);
 }
 
@@ -122,7 +122,6 @@ function closePopup() {
   max-height: 240px;
   overflow: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
 .charger-item {
@@ -140,6 +139,24 @@ function closePopup() {
   border: 1px solid rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
+  transition: box-shadow .2s ease, color .2s ease;
+}
+
+.charger-button:hover {
+  background: #f8f9fa;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.charger-button:active {
+  background: #f0f0f0;
+  transform: none;
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.15),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 .charger-button-content {
@@ -170,24 +187,6 @@ function closePopup() {
 .charger-info {
   flex: 1;
   min-width: 0;
-}
-
-.charger-button:hover {
-  background: #f8f9fa;
-  box-shadow:
-    inset 2px 2px 4px rgba(0, 0, 0, 0.1),
-    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
-  border-color: rgba(0, 0, 0, 0.15);
-}
-
-
-.charger-button:active {
-  background: #f0f0f0;
-  transform: none;
-  box-shadow:
-    inset 3px 3px 6px rgba(0, 0, 0, 0.15),
-    inset -2px -2px 4px rgba(255, 255, 255, 0.7);
-  border-color: rgba(0, 0, 0, 0.2);
 }
 
 .charger-name {
