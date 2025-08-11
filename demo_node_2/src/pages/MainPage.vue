@@ -58,13 +58,13 @@ function applyPercentileFilter() {
     filters.push([
       'all',
       ['>=', getPct, 30],
-      ['<', getPct, 65]
+      ['<', getPct, 75]
     ])
   }
   if (showHigh.value) {
     filters.push([
       'all',
-      ['>=', getPct, 65],
+      ['>=', getPct, 75],
       ['<', getPct, 90]
     ])
   }
@@ -106,11 +106,6 @@ onMounted(() => {
     antialias: true
   })
 
-  map.on('style.load', () => {
-    map.setProjection({
-      type: 'globe',
-    });
-  });
 
   map.on('load', () => {
     updateDirection()
@@ -170,9 +165,12 @@ onMounted(() => {
 
     const container = document.createElement('div');
 
-    // Create a Vue app instance for the popup
     const popupApp = createApp(ChargerPopup, {
-      features: features,
+      features: features.sort((a, b) => {
+        const aPct = a.properties?.percentile || 0;
+        const bPct = b.properties?.percentile || 0;
+        return bPct - aPct; // Sort descending by percentile
+      }),
       onSelectCharger: (feature) => {
         selectedStation.value = toStation(feature);
         popup.remove();

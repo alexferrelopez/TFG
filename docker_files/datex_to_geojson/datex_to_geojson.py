@@ -165,8 +165,12 @@ def process_site(site):
     address_info = extract_address_info(site)
     site.update(address_info)
     
-    # Remove original locationReference
+    # Remove original locationReference, operating hours, version, lastUpdated, and accessibility
     site.pop('locationReference', None)
+    site.pop('operatingHours', None)
+    site.pop('@version', None)
+    site.pop('lastUpdated', None)
+    site.pop('accessibility', None)
 
     # Build feature
     feature = {
