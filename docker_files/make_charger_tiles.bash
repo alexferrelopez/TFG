@@ -25,13 +25,15 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/datex_to_geojson"
 
-# Ensure output folder for MBTiles exists
+# Ensure output folders exist
 mkdir -p ../mbtiles
+mkdir -p /files/ev_router_data
 
 # Configuration (all paths are now relative to datex_to_geojson/)
 URL="https://infocar.dgt.es/datex2/v3/miterd/EnergyInfrastructureTablePublication/electrolineras.xml"
 XML_FILE="electrolineras.xml"
-GEOJSON_FILE="chargers.geojson"
+GEOJSON_FILE_LOCAL="chargers.geojson"
+GEOJSON_FILE_TARGET="/files/ev_router_data/chargers.geojson"
 MBTILES_DIR="../mbtiles"
 MBTILES_FILE="$MBTILES_DIR/chargers.mbtiles"
 
@@ -59,9 +61,15 @@ TIPPECANOE_OPTS=(
 if [[ "$ONLY_TIPPECANOE" = true ]]; then
   echo "Tippecanoe-only mode: skipping download & conversion steps."
 
-  # Verify GeoJSON exists
-  if [[ ! -s "$GEOJSON_FILE" ]]; then
-    echo "Error: GeoJSON file '$GEOJSON_FILE' not found. Cannot build MBTiles." >&2
+  # Verify GeoJSON exists (check both local and target locations)
+  if [[ -s "$GEOJSON_FILE_LOCAL" ]]; then
+    echo "Using local GeoJSON file: $GEOJSON_FILE_LOCAL"
+    GEOJSON_FOR_TIPPECANOE="$GEOJSON_FILE_LOCAL"
+  elif [[ -s "$GEOJSON_FILE_TARGET" ]]; then
+    echo "Using target GeoJSON file: $GEOJSON_FILE_TARGET"
+    GEOJSON_FOR_TIPPECANOE="$GEOJSON_FILE_TARGET"
+  else
+    echo "Error: GeoJSON file not found in either '$GEOJSON_FILE_LOCAL' or '$GEOJSON_FILE_TARGET'. Cannot build MBTiles." >&2
     exit 1
   fi
 else
@@ -96,16 +104,24 @@ else
 
   echo "Using XML file: $XML_FILE"
 
-  # 3) Convert XML → GeoJSON
-  echo "Converting XML ($XML_FILE) to GeoJSON: $GEOJSON_FILE..."
-  python3 datex_to_geojson.py "$XML_FILE" "$GEOJSON_FILE"
+  # 3) Convert XML → GeoJSON (create local copy first)
+  echo "Converting XML ($XML_FILE) to GeoJSON: $GEOJSON_FILE_LOCAL..."
+  python3 datex_to_geojson.py "$XML_FILE" "$GEOJSON_FILE_LOCAL"
+
+  # Copy to target location
+  echo "Copying GeoJSON to target location: $GEOJSON_FILE_TARGET..."
+  cp "$GEOJSON_FILE_LOCAL" "$GEOJSON_FILE_TARGET"
+  
+  # Use local file for tippecanoe (since we're in the datex_to_geojson directory)
+  GEOJSON_FOR_TIPPECANOE="$GEOJSON_FILE_LOCAL"
 fi
 
 # 4) Build MBTiles
 echo "Building MBTiles with Tippecanoe: $MBTILES_FILE..."
-tippecanoe "${TIPPECANOE_OPTS[@]}" "$GEOJSON_FILE"
+tippecanoe "${TIPPECANOE_OPTS[@]}" "$GEOJSON_FOR_TIPPECANOE"
 
 echo "Done!"
 echo " • XML:     $XML_FILE"
-echo " • GeoJSON: $GEOJSON_FILE"
+echo " • GeoJSON (Local):  $GEOJSON_FILE_LOCAL"
+echo " • GeoJSON (Target): $GEOJSON_FILE_TARGET"
 echo " • MBTiles: $MBTILES_FILE"

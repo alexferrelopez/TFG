@@ -40,12 +40,13 @@ def load_and_parse_xml(xml_path):
 
 
 def process_refill_points(raw_rps):
-    """Process refill points and calculate total power"""
+    """Process refill points and calculate total power and max power"""
     if isinstance(raw_rps, dict):
         raw_rps = [raw_rps]
     
     trimmed_rps = []
     total_power = 0.0
+    max_power = 0.0
 
     for rp in raw_rps:
         name = flatten_name(rp)
@@ -66,6 +67,7 @@ def process_refill_points(raw_rps):
                 pwr = 0.0
             
             rp_power = max(rp_power, pwr)
+            max_power = max(max_power, pwr)
             connectors.append({
                 "connectorType": ctype,
                 "maxPowerAtSocket": c.get("maxPowerAtSocket")
@@ -78,7 +80,7 @@ def process_refill_points(raw_rps):
             "connectors": connectors
         })
 
-    return trimmed_rps, total_power
+    return trimmed_rps, total_power, max_power
 
 
 def extract_address_info(site):
@@ -152,7 +154,7 @@ def process_site(site):
     # Process energy infrastructure station
     station = site.get("energyInfrastructureStation", {})
     raw_rps = station.get("refillPoint", [])
-    trimmed_rps, total_power = process_refill_points(raw_rps)
+    trimmed_rps, total_power, max_power = process_refill_points(raw_rps)
 
     # Update station with trimmed data
     new_station = {
@@ -179,7 +181,8 @@ def process_site(site):
         "properties": site
     }
     feature["properties"]["score"] = total_power
-    
+    feature["properties"]["max_power"] = max_power
+
     return feature
 
 
