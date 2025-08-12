@@ -119,6 +119,7 @@ app.post('/ev-route', async (req, res) => {
     }
 
     // 5) Stitch legs for any successful path
+    const step5Start = performance.now()
     const result = { baseline: baseline } // keep baseline for debugging/overlay
     if (fastestKeys) {
       const fastestNodes = fastestKeys.map(k => byKey[k])
@@ -128,6 +129,10 @@ app.post('/ev-route', async (req, res) => {
       const shortestNodes = shortestKeys.map(k => byKey[k])
       result.shortest = await stitchPath(shortestNodes)
     }
+    timings.step5_stitch_paths = performance.now() - step5Start
+
+    // Calculate total time
+    timings.total_time = performance.now() - startTime
 
     // add small summaries (optional)
     result.summary = {
@@ -135,6 +140,31 @@ app.post('/ev-route', async (req, res) => {
       fastest: result.fastest?.summary || null,
       shortest: result.shortest?.summary || null
     }
+
+    // Add performance timings to response
+    result.performance = {
+      timings_ms: timings,
+      timings_formatted: {
+        step1_baseline_route: `${timings.step1_baseline_route.toFixed(2)}ms`,
+        step2_prune_candidates: `${timings.step2_prune_candidates.toFixed(2)}ms`,
+        step3_build_graph: `${timings.step3_build_graph.toFixed(2)}ms`,
+        step4a_dijkstra_fastest: `${timings.step4a_dijkstra_fastest.toFixed(2)}ms`,
+        step4b_dijkstra_shortest: `${timings.step4b_dijkstra_shortest.toFixed(2)}ms`,
+        step5_stitch_paths: `${timings.step5_stitch_paths.toFixed(2)}ms`,
+        total_time: `${timings.total_time.toFixed(2)}ms`
+      }
+    }
+
+    // Log performance summary to console
+    console.log('=== EV Route Performance ===')
+    console.log(`Total: ${timings.total_time.toFixed(2)}ms`)
+    console.log(`  1. Baseline route: ${timings.step1_baseline_route.toFixed(2)}ms`)
+    console.log(`  2. Prune candidates: ${timings.step2_prune_candidates.toFixed(2)}ms`)
+    console.log(`  3. Build graph: ${timings.step3_build_graph.toFixed(2)}ms`)
+    console.log(`  4a. Dijkstra (fastest): ${timings.step4a_dijkstra_fastest.toFixed(2)}ms`)
+    console.log(`  4b. Dijkstra (shortest): ${timings.step4b_dijkstra_shortest.toFixed(2)}ms`)
+    console.log(`  5. Stitch paths: ${timings.step5_stitch_paths.toFixed(2)}ms`)
+    console.log(`Candidates found: ${candidates.length}`)
 
     res.json(result)
   } catch (err) {
