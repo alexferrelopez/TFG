@@ -1,0 +1,43 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime files
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment variables
+.env
+.env.*
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+
+# Charger data
+data/*.geojson
+data/*.pbf
+data/*.mbtiles
+data/*.xml
+
+# VSCode
+.vscode/
+
+# JetBrains IDEs
+.idea/
+
+# Debug cache
+.cache/
