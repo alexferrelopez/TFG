@@ -3,6 +3,10 @@
 /demo_python/
 /datex_to_geojson/
 
-# ignore that zip file
+# Ignore everything in ors/ except config folder
+/ors/*
+!/ors/config/ors-config.yml
+
 /demo_node.zip
 /Noto_Sans.zip
+

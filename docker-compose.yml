@@ -1,7 +1,7 @@
 services:
   martin:
     image: ghcr.io/maplibre/martin:latest
-    command: ["--config", "/files/config.yaml"]           # this is the argument you pass in your `docker run`
+    command: ["--config", "/files/config.yaml"]
     ports:
       - "3000:3000"
     volumes:
@@ -12,3 +12,22 @@ services:
     init: true
     volumes:  
       - ./docker_files:/files
+      - ./ev_router/data:/files/ev_router_data
+
+  ors-app:
+    image: openrouteservice/openrouteservice:latest
+    container_name: ors
+    ports:
+      - "8080:8082"
+    environment:
+      CONTAINER_LOG_LEVEL: INFO
+      REBUILD_GRAPHS: "False"
+      ORS_CONFIG_LOCATION: /home/ors/config/ors-config.yml
+      XMS: 4g
+      XMX: 6g
+    volumes:
+      - ./ors/config:/home/ors/config
+      - ./ors/files:/home/ors/files
+      - ./ors/graphs:/home/ors/graphs
+      - ./ors/logs:/home/ors/logs
+      - ./ors/elevation_cache:/home/ors/elevation_cache
