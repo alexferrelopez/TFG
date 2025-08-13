@@ -7,7 +7,7 @@ function coordOf(feature) {
   return [lon, lat]
 }
 
-function estimateChargingTimeSeconds(feature, evMaxPowerKw = 150) {
+export function estimateChargingTimeSeconds(feature, evMaxPowerKw = 150) {
   const stationMaxW = Number(feature.properties?.max_power || 0)
   const stationMaxKw = stationMaxW / 1000
   
