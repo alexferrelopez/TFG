@@ -52,7 +52,8 @@ export async function orsRoute(coords) {
     coordinates: coords,
     instructions: false,
     geometry: true,
-    elevation: false
+    elevation: false,
+    preference: "fastest"
   }
 
   const result = await orsFetch(`directions/${PROFILE}/geojson`, body)
