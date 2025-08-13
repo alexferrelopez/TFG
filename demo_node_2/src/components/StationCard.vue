@@ -9,6 +9,22 @@
     </p>
     <p><strong>{{ props.chargingStation.operator || 'n/a' }}</strong></p>
     
+    <!-- Operating Hours -->
+    <p v-if="props.chargingStation.operatingHours" class="operating-hours">
+      <strong>Hours:</strong> {{ props.chargingStation.operatingHours }}
+    </p>
+    
+    <!-- Accessibility (only show if meaningful) -->
+    <p v-if="showAccessibility" class="accessibility">
+      <strong>Accessibility:</strong> 
+      <img v-if="isDisabilityAccessible" 
+           class="accessibility-icon" 
+           :src="accessibilityIconUrl" 
+           alt="Disability accessible" 
+           title="Disability accessible"
+           @error="onAccessibilityIconError" />
+    </p>
+    
     <!-- Payment Methods Section -->
     <div class="payment-section" v-if="paymentMethods.length > 0">
       <h4>Payment Methods</h4>
@@ -67,6 +83,21 @@ const paymentMethodMap = {
 
 const badgeClass = computed(() => classMap[props.chargingStation.typeOfSite] || classMap['Other'])
 
+const showAccessibility = computed(() => {
+  const accessibility = props.chargingStation.accessibility
+  return accessibility && 
+         accessibility.toLowerCase() !== 'unknown' && 
+         accessibility.toLowerCase() !== 'none' &&
+         accessibility.trim() !== ''
+})
+
+const isDisabilityAccessible = computed(() => {
+  const accessibility = props.chargingStation.accessibility
+  return accessibility && accessibility.toLowerCase() === 'disabilityaccessible'
+})
+
+const accessibilityIconUrl = new URL('../assets/accessible.svg', import.meta.url).href
+
 const paymentMethods = computed(() => {
   const methods = props.chargingStation.energyInfrastructureStation?.authenticationAndIdentificationMethods || []
   
@@ -93,11 +124,37 @@ function onPaymentIconError(event) {
   // Fallback to credit card icon if the specific icon fails to load
   img.src = new URL('../assets/credit_card.svg', import.meta.url).href;
 }
+
+function onAccessibilityIconError(event) {
+  const img = event.currentTarget;
+  img.onerror = null;
+  // Hide the icon if it fails to load
+  img.style.display = 'none';
+}
 </script>
 
 <style scoped>
 .refill-section {
   margin-top: 1rem;
+}
+
+.operating-hours {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.accessibility {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.accessibility-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
 }
 
 .payment-section {
