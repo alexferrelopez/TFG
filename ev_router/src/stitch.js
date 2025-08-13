@@ -2,6 +2,71 @@
 import { orsRoute } from './ors.js'
 import { estimateChargingTimeSeconds } from './solver.js'
 
+// Utility functions for formatting
+function formatDuration(seconds) {
+  return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`
+}
+
+function formatDistance(meters) {
+  return `${(meters / 1000).toFixed(1)} km`
+}
+
+function getNodeDisplayName(node, index, kind) {
+  if (kind === 'origin') return 'Origin'
+  if (kind === 'destination') return 'Destination'
+  return node.feature?.properties?.name || `Stop ${index}`
+}
+
+function createStop(node, evMaxPowerKw) {
+  const properties = node.feature?.properties || {}
+  const chargingTime = estimateChargingTimeSeconds(node.feature, evMaxPowerKw)
+  
+  return {
+    id: properties['@id'] ?? node.key,
+    lon: node.coord[0],
+    lat: node.coord[1],
+    name: properties.name,
+    operator: properties.operator,
+    address: properties.address,
+    town: properties.town,
+    max_power: properties.max_power,
+    estimatedChargingTimeSeconds: chargingTime,
+    estimatedChargingTimeFormatted: `${Math.floor(chargingTime / 60)}m`
+  }
+}
+
+function processLegGeometry(legGeo, nodeFrom, nodeTo, legIndex) {
+  const features = []
+  let legDuration = 0
+  let legDistance = 0
+  
+  if (legGeo?.features?.length) {
+    features.push(...legGeo.features)
+    // Sum up duration and distance from this leg
+    for (const feature of legGeo.features) {
+      if (feature.properties?.summary) {
+        legDuration += feature.properties.summary.duration || 0
+        legDistance += feature.properties.summary.distance || 0
+      }
+    }
+  }
+  
+  return {
+    features,
+    legDetail: {
+      legIndex,
+      from: getNodeDisplayName(nodeFrom, legIndex, nodeFrom.kind),
+      to: getNodeDisplayName(nodeTo, legIndex + 1, nodeTo.kind),
+      duration: legDuration,
+      distance: legDistance,
+      durationFormatted: formatDuration(legDuration),
+      distanceFormatted: formatDistance(legDistance)
+    },
+    duration: legDuration,
+    distance: legDistance
+  }
+}
+
 /**
  * Given a path as an array of node objects (each with coord & kind),
  * fetch leg geometries and produce a single FeatureCollection + stops list.
@@ -16,102 +81,63 @@ import { estimateChargingTimeSeconds } from './solver.js'
  * }>}
  */
 export async function stitchPath(nodesInPath, evMaxPowerKw = 150) {
-  // Build legs: [A->B, B->C, ..., Y->Z]
-  const legs = []
+  // Fetch ORS directions for each consecutive pair of nodes
+  const legPromises = []
   for (let i = 0; i < nodesInPath.length - 1; i++) {
-    const a = nodesInPath[i].coord
-    const b = nodesInPath[i + 1].coord
-    legs.push([a, b])
+    const coords = [nodesInPath[i].coord, nodesInPath[i + 1].coord]
+    legPromises.push(orsRoute(coords))
   }
+  
+  const legGeometries = await Promise.all(legPromises)
 
-  // Fetch ORS directions for each leg in parallel
-  const legGeo = await Promise.all(
-    legs.map(coords => orsRoute(coords)) // returns FeatureCollection
-  )
-
-  // Merge leg features and calculate totals in one pass
-  const features = []
+  // Process all legs and accumulate results
+  const allFeatures = []
   const legDetails = []
-  let totalDuration = 0
-  let totalDistance = 0
+  const totals = { duration: 0, distance: 0, chargingTime: 0 }
   
-  for (let i = 0; i < legGeo.length; i++) {
-    const fc = legGeo[i]
-    let legDuration = 0
-    let legDistance = 0
+  for (let i = 0; i < legGeometries.length; i++) {
+    const result = processLegGeometry(
+      legGeometries[i], 
+      nodesInPath[i], 
+      nodesInPath[i + 1], 
+      i
+    )
     
-    if (fc?.features?.length) {
-      features.push(...fc.features)
-      // Sum up duration and distance from each leg
-      for (const feature of fc.features) {
-        if (feature.properties?.summary) {
-          const duration = feature.properties.summary.duration || 0
-          const distance = feature.properties.summary.distance || 0
-          legDuration += duration
-          legDistance += distance
-          totalDuration += duration
-          totalDistance += distance
-        }
-      }
-    }
-    
-    // Create leg detail while we're iterating
-    legDetails.push({
-      legIndex: i,
-      from: nodesInPath[i].kind === 'origin' ? 'Origin' : 
-            nodesInPath[i].feature?.properties?.name || `Stop ${i}`,
-      to: nodesInPath[i + 1].kind === 'destination' ? 'Destination' : 
-          nodesInPath[i + 1].feature?.properties?.name || `Stop ${i + 1}`,
-      duration: legDuration, // seconds
-      distance: legDistance, // meters
-      durationFormatted: `${Math.floor(legDuration / 3600)}h ${Math.floor((legDuration % 3600) / 60)}m`,
-      distanceFormatted: `${(legDistance / 1000).toFixed(1)} km`
-    })
+    allFeatures.push(...result.features)
+    legDetails.push(result.legDetail)
+    totals.duration += result.duration
+    totals.distance += result.distance
   }
 
-  // Calculate charging time and create stops in one pass
+  // Create stops and calculate total charging time
   const stops = []
-  let totalChargingTime = 0
-  
   for (let i = 1; i < nodesInPath.length - 1; i++) {
-    const n = nodesInPath[i]
-    const p = n.feature?.properties || {}
-    const chargingTime = estimateChargingTimeSeconds(n.feature, evMaxPowerKw)
+    const node = nodesInPath[i]
+    const stop = createStop(node, evMaxPowerKw)
+    stops.push(stop)
     
-    // Add to total charging time
-    if (n.kind === 'charger' && n.feature) {
-      totalChargingTime += chargingTime
+    if (node.kind === 'charger' && node.feature) {
+      totals.chargingTime += stop.estimatedChargingTimeSeconds
     }
-    
-    stops.push({
-      id: p['@id'] ?? n.key,
-      lon: n.coord[0],
-      lat: n.coord[1],
-      name: p.name,
-      operator: p.operator,
-      address: p.address,
-      town: p.town,
-      max_power: p.max_power,
-      estimatedChargingTimeSeconds: chargingTime,
-      estimatedChargingTimeFormatted: `${Math.floor(chargingTime / 60)}m`
-    })
   }
+
+  const totalTripTime = totals.duration + totals.chargingTime
 
   return {
-    geojson: { type: 'FeatureCollection', features },
+    geojson: { type: 'FeatureCollection', features: allFeatures },
     stops,
-    legs: legDetails, // Detailed breakdown of each leg
+    legs: legDetails,
     summary: { 
-      legs: legs.length, 
+      legs: legGeometries.length, 
       stops: Math.max(0, nodesInPath.length - 2),
-      totalDuration: totalDuration, // driving time in seconds
-      totalDistance: totalDistance, // in meters
-      totalChargingTime: totalChargingTime, // charging time in seconds
-      totalTripTime: totalDuration + totalChargingTime, // complete trip time in seconds
-      totalDurationFormatted: `${Math.floor(totalDuration / 3600)}h ${Math.floor((totalDuration % 3600) / 60)}m`,
-      totalDistanceFormatted: `${(totalDistance / 1000).toFixed(1)} km`,
-      totalChargingTimeFormatted: `${Math.floor(totalChargingTime / 3600)}h ${Math.floor((totalChargingTime % 3600) / 60)}m`,
-      totalTripTimeFormatted: `${Math.floor((totalDuration + totalChargingTime) / 3600)}h ${Math.floor(((totalDuration + totalChargingTime) % 3600) / 60)}m`
+      totalDuration: totals.duration,
+      totalDistance: totals.distance,
+      totalChargingTime: totals.chargingTime,
+      totalTripTime,
+      totalDurationFormatted: formatDuration(totals.duration),
+      totalDistanceFormatted: formatDistance(totals.distance),
+      totalChargingTimeFormatted: formatDuration(totals.chargingTime),
+      totalTripTimeFormatted: formatDuration(totalTripTime)
     }
   }
 }
