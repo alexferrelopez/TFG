@@ -174,7 +174,6 @@ app.post('/ev-route', async (req, res) => {
 
     // Build result
     const result = {
-      baseline_route: baseline,
       recommended_route: recommendedPath
     }
 
