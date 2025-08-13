@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
+import compression from 'compression'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -19,6 +20,7 @@ const app = express()
 const port = process.env.PORT || 3001
 
 // Middleware
+app.use(compression())
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json({ limit: '1mb' }))
