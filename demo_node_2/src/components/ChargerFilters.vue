@@ -61,6 +61,7 @@ defineEmits([
 }
 
 .filter-controls input[type="checkbox"] {
+  margin: 0;
   margin-right: 8px;
   transform: scale(1.1);
   cursor: pointer;
