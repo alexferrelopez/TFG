@@ -3,11 +3,9 @@
     <SearchBar />
   </div>
   <transition name="slide">
-
     <SideCard v-if="selectedStation" :key="selectedStation.id" @close="selectedStation = null">
       <StationCard v-if="selectedStation" :chargingStation="selectedStation" />
     </SideCard>
-
   </transition>
 
   <div class="map-container">
@@ -42,38 +40,21 @@ watch([showLow, showMid, showHigh, showVeryHigh], applyPercentileFilter)
 
 function applyPercentileFilter() {
   if (!map) return
-  const filters = []
 
-  // NOTE: property may be string — convert to number
   const getPct = ['to-number', ['get', 'percentile']]
+  const ranges = [
+    { show: showLow, min: 0, max: 30 },
+    { show: showMid, min: 30, max: 75 },
+    { show: showHigh, min: 75, max: 90 },
+    { show: showVeryHigh, min: 90, max: Infinity }
+  ]
 
-  if (showLow.value) {
-    filters.push([
-      'all',
-      ['>=', getPct, 0],
-      ['<', getPct, 30]
-    ])
-  }
-  if (showMid.value) {
-    filters.push([
-      'all',
-      ['>=', getPct, 30],
-      ['<', getPct, 75]
-    ])
-  }
-  if (showHigh.value) {
-    filters.push([
-      'all',
-      ['>=', getPct, 75],
-      ['<', getPct, 90]
-    ])
-  }
-  if (showVeryHigh.value) {
-    filters.push([
-      'all',
-      ['>=', getPct, 90]
-    ])
-  }
+  const filters = ranges
+    .filter(range => range.show.value)
+    .map(range => range.max === Infinity
+      ? ['>=', getPct, range.min]
+      : ['all', ['>=', getPct, range.min], ['<', getPct, range.max]]
+    )
 
   const expr = filters.length
     ? ['any', ...filters]
