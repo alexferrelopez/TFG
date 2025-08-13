@@ -59,6 +59,7 @@ export function divideChargersByPower(chargers, minPowerKw = 50) {
  * @param {number} [opts.bufferKm=25]
  * @param {number} [opts.segmentKm=75]
  * @param {number} [opts.topPerSegment=3]
+ * @param {number} [opts.evMaxPowerKw=150]        EV max charging power for effective power calculations
  * @param {boolean} [opts.includePerformance=false] Whether to include performance timings
  * @returns {Array<Feature<Point>>|Object} Array of features, or object with features and performance if includePerformance=true
  */
@@ -74,6 +75,7 @@ export function pruneAlongCorridor(opts) {
     bufferKm = 25,
     segmentKm = 75,
     topPerSegment = 3,
+    evMaxPowerKw = 150,
     includePerformance = false
   } = opts
 
@@ -127,7 +129,7 @@ export function pruneAlongCorridor(opts) {
 
     if (segPts.length === 0) continue
 
-    // sort: higher percentile first, then higher power, then closer to segment midpoint
+    // sort: higher percentile first, then higher effective power (limited by EV), then closer to segment midpoint
     const mid = turf.along(segLine, turf.length(segLine, { units: 'kilometers' }) / 2, { units: 'kilometers' })
     
     // Cache distance calculations to avoid repeated computation
@@ -140,9 +142,14 @@ export function pruneAlongCorridor(opts) {
       const pa = Number(a.point.properties?.percentile ?? 0)
       const pb = Number(b.point.properties?.percentile ?? 0)
       if (pb !== pa) return pb - pa
-      const ka = a.point.properties?.max_power / 1000 || 0
-      const kb = b.point.properties?.max_power / 1000 || 0
-      if (kb !== ka) return kb - ka
+      
+      // Use effective power (limited by EV's max charging power)
+      const stationMaxKwA = a.point.properties?.max_power / 1000 || 0
+      const stationMaxKwB = b.point.properties?.max_power / 1000 || 0
+      const effectiveKwA = Math.min(stationMaxKwA, evMaxPowerKw)
+      const effectiveKwB = Math.min(stationMaxKwB, evMaxPowerKw)
+      if (effectiveKwB !== effectiveKwA) return effectiveKwB - effectiveKwA
+      
       return a.distance - b.distance
     })
 

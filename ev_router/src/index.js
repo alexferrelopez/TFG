@@ -12,7 +12,6 @@ import { stitchPath } from './stitch.js'
 import { orsRoute } from './ors.js'
 import { pruneAlongCorridor, divideChargersByPower } from './prune.js'
 
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const app = express()
@@ -29,13 +28,13 @@ const chargersRaw = JSON.parse(fs.readFileSync(chargersPath, 'utf8'))
 const chargers = chargersRaw.features || []
 
 // Divide chargers by power level on startup
-const { highPower, lowPower } = divideChargersByPower(chargers, 100)
-console.log(`Loaded ${chargers.length} chargers: ${highPower.length} high-power (≥100kW), ${lowPower.length} low-power (<100kW)`)
+const { highPower, lowPower } = divideChargersByPower(chargers, 50)
+console.log(`Loaded ${chargers.length} chargers: ${highPower.length} high-power (≥50kW), ${lowPower.length} low-power (<50kW)`)
 
 // Test route
 app.get('/', (req, res) => {
-  res.json({ 
-    ok: true, 
+  res.json({
+    ok: true,
     chargers: chargers.length,
     highPower: highPower.length,
     lowPower: lowPower.length
@@ -46,19 +45,31 @@ app.get('/', (req, res) => {
 app.post('/ev-route', async (req, res) => {
   const startTime = performance.now()
   const timings = {}
-  
+
   try {
     const {
       origin,
       destination,
       evRangeKm = Number(process.env.RANGE_KM || 250),
+      evMaxPowerKw = Number(process.env.EV_MAX_POWER_KW || 150),
       connectors = ['iec62196T2COMBO'],
       minPowerKw = Number(process.env.MIN_POWER_KW || 100),
       bufferKm = Number(process.env.BUFFER_KM || 25),
       segmentKm = Number(process.env.SEGMENT_KM || 75),
       topPerSegment = 3,
-      stopPenaltySec = Number(process.env.STOP_PENALTY_SEC || 900)
     } = req.body
+
+    console.log('EV Route Request:', {
+      origin,
+      destination,
+      evRangeKm,
+      evMaxPowerKw,
+      connectors,
+      minPowerKw,
+      bufferKm,
+      segmentKm,
+      topPerSegment,
+    })
 
     if (!Array.isArray(origin) || !Array.isArray(destination)) {
       return res.status(400).json({ error: 'origin and destination must be [lon,lat]' })
@@ -81,6 +92,7 @@ app.post('/ev-route', async (req, res) => {
       bufferKm,
       segmentKm,
       topPerSegment,
+      evMaxPowerKw,
       includePerformance: true
     })
     const candidates = pruneResult.features
@@ -89,84 +101,63 @@ app.post('/ev-route', async (req, res) => {
 
     // 3) Build EV-feasible graph from O + candidates + D
     const step3Start = performance.now()
-    const { nodes, makeGraph } = await buildChargerGraph({
-      origin, destination, chargers: candidates, evRangeKm
+    const { nodes, graph } = await buildChargerGraph({
+      origin, destination, chargers: candidates, evRangeKm, evMaxPowerKw
     })
     timings.step3_build_graph = performance.now() - step3Start
 
-    // handy index by key
-    const byKey = Object.fromEntries(nodes.map(n => [n.key, n]))
-
-    // 4a) FASTEST: durations + stop penalties (+ low power bias)
-    const step4aStart = performance.now()
-    const G_time = makeGraph({ weight: 'duration', stopPenaltySec, addLowPowerBias: true })
-    let fastestKeys
+    // 4) Find recommended (fastest) path
+    const step4Start = performance.now()
+    let recommendedKeys
     try {
-      fastestKeys = dijkstra.find_path(G_time, 'O', 'D')
+      recommendedKeys = dijkstra.find_path(graph, 'O', 'D')
     } catch {
-      fastestKeys = null
+      recommendedKeys = null
     }
-    timings.step4a_dijkstra_fastest = performance.now() - step4aStart
-
-    // 4b) SHORTEST: distance + tiny stop penalty, no bias
-    const step4bStart = performance.now()
-    const G_dist = makeGraph({ weight: 'distance', stopPenaltySec: 1, addLowPowerBias: false })
-    let shortestKeys
-    try {
-      shortestKeys = dijkstra.find_path(G_dist, 'O', 'D')
-    } catch {
-      shortestKeys = null
-    }
-    timings.step4b_dijkstra_shortest = performance.now() - step4bStart
+    timings.step4_dijkstra = performance.now() - step4Start
 
     // If no feasible path, report helpful info
-    if (!fastestKeys && !shortestKeys) {
+    if (!recommendedKeys) {
       return res.status(422).json({
         error: 'No feasible route within range and filters',
         diagnostics: {
           candidates_considered: candidates.length,
-          hint: 'Try increasing range, lowering minPowerKw, or widening bufferKm'
+          hint: 'Try increasing range, lowering minPowerKw, widening bufferKm, or adjusting evMaxPowerKw'
         }
       })
     }
 
-    // 5) Stitch legs for any successful path
+    // 5) Stitch path legs
     const step5Start = performance.now()
-    const result = { baseline: baseline } // keep baseline for debugging/overlay
-    if (fastestKeys) {
-      const fastestNodes = fastestKeys.map(k => byKey[k])
-      result.fastest = await stitchPath(fastestNodes)
-    }
-    if (shortestKeys) {
-      const shortestNodes = shortestKeys.map(k => byKey[k])
-      result.shortest = await stitchPath(shortestNodes)
-    }
-    timings.step5_stitch_paths = performance.now() - step5Start
+    const byKey = Object.fromEntries(nodes.map(n => [n.key, n]))
+    const recommendedNodes = recommendedKeys.map(k => byKey[k])
+    const recommendedPath = await stitchPath(recommendedNodes)
+
+    timings.step5_stitch_path = performance.now() - step5Start
 
     // Calculate total time
     timings.total_time = performance.now() - startTime
 
-    // add small summaries (optional)
-    result.summary = {
-      candidates: candidates.length,
-      fastest: result.fastest?.summary || null,
-      shortest: result.shortest?.summary || null
-    }
-
-    // Add performance timings to response
-    result.performance = {
-      timings_ms: timings,
-      timings_formatted: {
-        step1_baseline_route: `${timings.step1_baseline_route.toFixed(2)}ms`,
-        step2_prune_candidates: `${timings.step2_prune_candidates.toFixed(2)}ms`,
-        step3_build_graph: `${timings.step3_build_graph.toFixed(2)}ms`,
-        step4a_dijkstra_fastest: `${timings.step4a_dijkstra_fastest.toFixed(2)}ms`,
-        step4b_dijkstra_shortest: `${timings.step4b_dijkstra_shortest.toFixed(2)}ms`,
-        step5_stitch_paths: `${timings.step5_stitch_paths.toFixed(2)}ms`,
-        total_time: `${timings.total_time.toFixed(2)}ms`
+    // Build result
+    const result = {
+      baseline: baseline, // keep baseline for debugging/overlay
+      recommended: recommendedPath,
+      summary: {
+        candidates: candidates.length,
+        recommended: recommendedPath?.summary || null
       },
-      // Detailed pruning performance
-      prune_performance: prunePerformance
+      performance: {
+        timings_ms: timings,
+        timings_formatted: {
+          step1_baseline_route: `${timings.step1_baseline_route.toFixed(2)}ms`,
+          step2_prune_candidates: `${timings.step2_prune_candidates.toFixed(2)}ms`,
+          step3_build_graph: `${timings.step3_build_graph.toFixed(2)}ms`,
+          step4_dijkstra: `${timings.step4_dijkstra.toFixed(2)}ms`,
+          step5_stitch_path: `${timings.step5_stitch_path.toFixed(2)}ms`,
+          total_time: `${timings.total_time.toFixed(2)}ms`
+        },
+        prune_performance: prunePerformance
+      }
     }
 
     // Log performance summary to console
@@ -175,60 +166,14 @@ app.post('/ev-route', async (req, res) => {
     console.log(`  1. Baseline route: ${timings.step1_baseline_route.toFixed(2)}ms`)
     console.log(`  2. Prune candidates: ${timings.step2_prune_candidates.toFixed(2)}ms`)
     console.log(`  3. Build graph: ${timings.step3_build_graph.toFixed(2)}ms`)
-    console.log(`  4a. Dijkstra (fastest): ${timings.step4a_dijkstra_fastest.toFixed(2)}ms`)
-    console.log(`  4b. Dijkstra (shortest): ${timings.step4b_dijkstra_shortest.toFixed(2)}ms`)
-    console.log(`  5. Stitch paths: ${timings.step5_stitch_paths.toFixed(2)}ms`)
+    console.log(`  4. Dijkstra (recommended): ${timings.step4_dijkstra.toFixed(2)}ms`)
+    console.log(`  5. Stitch path: ${timings.step5_stitch_path.toFixed(2)}ms`)
     console.log(`Candidates found: ${candidates.length}`)
 
     res.json(result)
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: err.message || String(err) })
-  }
-})
-
-app.get('/test-prune', (req, res) => {
-  const lon = parseFloat(req.query.lon);
-  const lat = parseFloat(req.query.lat);
-  const range = parseFloat(req.query.range || '1');
-
-  if (isNaN(lon) || isNaN(lat)) {
-    return res.status(400).json({ error: 'Invalid coordinates' });
-  }
-
-  const result = pruneChargers(chargers, [lon, lat], range, 50);
-  res.json({ count: result.length, features: result });
-});
-
-app.post('/test-route', async (req, res) => {
-  const { coords } = req.body // Expects array of [lon, lat] pairs
-
-  if (!Array.isArray(coords) || coords.length < 2) {
-    return res.status(400).json({ error: 'Need at least 2 coordinates' })
-  }
-
-  try {
-    const route = await orsRoute(coords)
-    res.json({ ok: true, route })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: err.message })
-  }
-})
-
-app.post('/test-matrix', async (req, res) => {
-  const { coords } = req.body
-
-  if (!Array.isArray(coords) || coords.length < 2) {
-    return res.status(400).json({ error: 'Need at least 2 coordinates' })
-  }
-
-  try {
-    const matrix = await orsMatrix(coords)
-    res.json({ ok: true, matrix })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: err.message })
   }
 })
 
