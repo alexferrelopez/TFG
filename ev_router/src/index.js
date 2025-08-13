@@ -52,9 +52,9 @@ app.get('/', (req, res) => {
 
 // Server-controlled performance parameters (not exposed to users)
 const PERFORMANCE_CONFIG = {
-  bufferKm: Number(process.env.BUFFER_KM || 25),      
-  segmentKm: Number(process.env.SEGMENT_KM || 75),    
-  topPerSegment: 3,                                   
+  bufferKm: Number(process.env.BUFFER_KM || 25),
+  segmentKm: Number(process.env.SEGMENT_KM || 75),
+  topPerSegment: 3,
   requestTimeoutMs: 30000                             // 30 second timeout
 }
 
@@ -62,7 +62,7 @@ const PERFORMANCE_CONFIG = {
 app.post('/ev-route', async (req, res) => {
   const startTime = performance.now()
   const timings = {}
-  
+
   // Set request timeout
   const timeout = setTimeout(() => {
     if (!res.headersSent) {
@@ -83,7 +83,7 @@ app.post('/ev-route', async (req, res) => {
     const validationErrors = validateEvRouteRequest(req.body)
     if (validationErrors.length > 0) {
       clearTimeout(timeout)
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Validation failed',
         details: validationErrors
       })
@@ -187,7 +187,7 @@ app.post('/ev-route', async (req, res) => {
     console.log(`  4. Dijkstra: ${timings.step4_dijkstra.toFixed(2)}ms`)
     console.log(`  5. Stitch path: ${timings.step5_stitch_path.toFixed(2)}ms`)
     console.log(`Candidates found: ${candidates.length}`)
-    
+
     // Log trip summary
     if (recommendedPath?.summary) {
       console.log('=== Trip Summary ===')
@@ -206,7 +206,7 @@ app.post('/ev-route', async (req, res) => {
       timestamp: new Date().toISOString()
     })
     if (!res.headersSent) {
-      res.status(500).json({ 
+      res.status(500).json({
         error: err.message || String(err),
         timestamp: new Date().toISOString()
       })
