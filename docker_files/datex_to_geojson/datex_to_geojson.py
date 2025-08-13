@@ -157,8 +157,15 @@ def process_site(site):
     trimmed_rps, total_power, max_power = process_refill_points(raw_rps)
 
     # Update station with trimmed data
+    auth_methods = station.get("authenticationAndIdentificationMethods", [])
+    # Normalize to always be a list
+    if isinstance(auth_methods, str):
+        auth_methods = [auth_methods]
+    elif not isinstance(auth_methods, list):
+        auth_methods = []
+    
     new_station = {
-        "authenticationAndIdentificationMethods": station.get("authenticationAndIdentificationMethods", []),
+        "authenticationAndIdentificationMethods": auth_methods,
         "refillPoint": trimmed_rps
     }
     site["energyInfrastructureStation"] = new_station
@@ -166,13 +173,14 @@ def process_site(site):
     # Extract and add address info
     address_info = extract_address_info(site)
     site.update(address_info)
-    
-    # Remove original locationReference, operating hours, version, lastUpdated, and accessibility
+
+    # Simplify operating hours
+    site["operatingHours"] = site.get("operatingHours", {}).get("label", "")
+
+    # Remove original locationReference, version and lastUpdated
     site.pop('locationReference', None)
-    site.pop('operatingHours', None)
     site.pop('@version', None)
     site.pop('lastUpdated', None)
-    site.pop('accessibility', None)
 
     # Build feature
     feature = {

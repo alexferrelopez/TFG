@@ -154,7 +154,9 @@ onMounted(() => {
         energyInfrastructureStation: eis,
         typeOfSite: typeOfSite,
         address: p.address,
-        town: p.town
+        town: p.town,
+        accessibility: p.accessibility,
+        operatingHours: p.operatingHours
       };
     };
 

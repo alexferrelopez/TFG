@@ -8,6 +8,19 @@
       </span>
     </p>
     <p><strong>{{ props.chargingStation.operator || 'n/a' }}</strong></p>
+    
+    <!-- Payment Methods Section -->
+    <div class="payment-section" v-if="paymentMethods.length > 0">
+      <h4>Payment Methods</h4>
+      <div class="payment-methods">
+        <div v-for="method in paymentMethods" :key="method.type" class="payment-method">
+          <img class="payment-icon" :src="getPaymentIconUrl(method.type)" :alt="method.type" :title="method.label" @error="onPaymentIconError" />
+          <span class="payment-label">{{ method.label }}</span>
+        </div>
+      </div>
+      <p v-if="paymentMethods.length === 0" class="empty">No payment methods available.</p>
+    </div>
+    
     <!-- 
      
     <p><strong>Percentile:</strong> {{ props.chargingStation.percentile || 'n/a' }}</p>
@@ -43,12 +56,88 @@ const classMap = {
   'Other': 'badge-other',
 }
 
+const paymentMethodMap = {
+  'apps': { label: 'Mobile App', icon: 'mobile.svg' },
+  'rfid': { label: 'RFID', icon: 'contactless.svg' },
+  'creditCard': { label: 'Credit Card', icon: 'credit_card.svg' },
+  'nfc': { label: 'NFC', icon: 'contactless.svg' },
+  'debitCard': { label: 'Debit Card', icon: 'credit_card.svg' },
+  'pinpad': { label: 'PIN Pad', icon: 'credit_card.svg' } // Using credit_card as fallback for pinpad
+}
+
 const badgeClass = computed(() => classMap[props.chargingStation.typeOfSite] || classMap['Other'])
+
+const paymentMethods = computed(() => {
+  const methods = props.chargingStation.energyInfrastructureStation?.authenticationAndIdentificationMethods || []
+  
+  // Normalize to array if it's a single string
+  const normalizedMethods = Array.isArray(methods) ? methods : [methods]
+  
+  return normalizedMethods
+    .filter(method => method && typeof method === 'string') // Filter out null/undefined/empty values
+    .map(method => ({
+      type: method,
+      label: paymentMethodMap[method]?.label || method,
+      icon: paymentMethodMap[method]?.icon || 'credit_card.svg'
+    }))
+})
+
+function getPaymentIconUrl(type) {
+  const iconName = paymentMethodMap[type]?.icon || 'credit_card.svg'
+  return new URL(`../assets/${iconName}`, import.meta.url).href
+}
+
+function onPaymentIconError(event) {
+  const img = event.currentTarget;
+  img.onerror = null;
+  // Fallback to credit card icon if the specific icon fails to load
+  img.src = new URL('../assets/credit_card.svg', import.meta.url).href;
+}
 </script>
 
 <style scoped>
 .refill-section {
   margin-top: 1rem;
+}
+
+.payment-section {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.payment-section h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.payment-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 45%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: #f8fafc;
+}
+
+.payment-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.payment-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
 }
 
 .empty {
