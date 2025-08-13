@@ -10,7 +10,7 @@ import dijkstra from 'dijkstrajs'
 import { buildChargerGraph } from './solver.js'
 import { stitchPath } from './stitch.js'
 import { orsRoute } from './ors.js'
-import { pruneAlongCorridor } from './prune.js'
+import { pruneAlongCorridor, divideChargersByPower } from './prune.js'
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -28,9 +28,18 @@ const chargersPath = path.join(__dirname, '../data/chargers.geojson')
 const chargersRaw = JSON.parse(fs.readFileSync(chargersPath, 'utf8'))
 const chargers = chargersRaw.features || []
 
+// Divide chargers by power level on startup
+const { highPower, lowPower } = divideChargersByPower(chargers, 100)
+console.log(`Loaded ${chargers.length} chargers: ${highPower.length} high-power (≥100kW), ${lowPower.length} low-power (<100kW)`)
+
 // Test route
 app.get('/', (req, res) => {
-  res.json({ ok: true, chargers: chargers.length })
+  res.json({ 
+    ok: true, 
+    chargers: chargers.length,
+    highPower: highPower.length,
+    lowPower: lowPower.length
+  })
 })
 
 // Route for EV routing
@@ -64,15 +73,18 @@ app.post('/ev-route', async (req, res) => {
 
     // 2) Prune candidates along corridor
     const step2Start = performance.now()
-    const candidates = pruneAlongCorridor({
-      features: chargers,
+    const pruneResult = pruneAlongCorridor({
+      features: highPower,
       baseLine,
       connectors,
       minPowerKw,
       bufferKm,
       segmentKm,
-      topPerSegment
+      topPerSegment,
+      includePerformance: true
     })
+    const candidates = pruneResult.features
+    const prunePerformance = pruneResult.performance
     timings.step2_prune_candidates = performance.now() - step2Start
 
     // 3) Build EV-feasible graph from O + candidates + D
@@ -152,7 +164,9 @@ app.post('/ev-route', async (req, res) => {
         step4b_dijkstra_shortest: `${timings.step4b_dijkstra_shortest.toFixed(2)}ms`,
         step5_stitch_paths: `${timings.step5_stitch_paths.toFixed(2)}ms`,
         total_time: `${timings.total_time.toFixed(2)}ms`
-      }
+      },
+      // Detailed pruning performance
+      prune_performance: prunePerformance
     }
 
     // Log performance summary to console
