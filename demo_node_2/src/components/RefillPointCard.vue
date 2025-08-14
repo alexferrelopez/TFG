@@ -3,7 +3,7 @@
     <h4 class="name">{{ point.name }}</h4>
     <div class="connector-groups">
       <div v-for="(grp, i) in groupedConnectors" :key="i" class="connector-group">
-        <img class="icon" :src="getIconUrl(grp.type)" :alt="grp.type" :title="grp.type" @error="onIconError" />
+        <img class="icon" :src="getConnectorIconUrl(grp.type)" :alt="grp.type" :title="grp.type" @error="onIconError" />
         <span v-if="grp.count > 1" class="count">x{{ grp.count }}</span>
         <span class="power">{{ formatPower(grp.power) }}</span>
       </div>
@@ -13,6 +13,7 @@
 
 <script setup>
 import { computed, toRefs } from 'vue'
+import { getConnectorIconUrl } from '@/config/connectors.js'
 
 const props = defineProps({ point: { type: Object, required: true } })
 const { point } = toRefs(props)
@@ -32,16 +33,10 @@ function formatPower(kW) {
   return `${kW % 1 === 0 ? kW.toFixed(0) : kW.toFixed(1)} kW`
 }
 
-const unknownIconUrl = new URL('../assets/unknown_charger.svg', import.meta.url).href
-
-function getIconUrl(type) {
-  return new URL(`../assets/${type}.svg`, import.meta.url).href
-}
-
 function onIconError(event) {
   const img = event.currentTarget;
   img.onerror = null;
-  img.src = unknownIconUrl;
+  img.src = new URL('../assets/unknown_charger.svg', import.meta.url).href;
 }
 </script>
 
