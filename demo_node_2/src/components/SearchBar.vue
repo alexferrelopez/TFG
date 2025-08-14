@@ -33,7 +33,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'clear'])
 
 const searchQuery = ref('')
 const searchResults = ref([])
@@ -43,17 +43,22 @@ const searchInput = ref(null)
 let abortController = null
 
 // Watch for external value changes and update the search query
-watch(() => props.value, (newValue) => {
+watch(() => props.value, (newValue, oldValue) => {
+  // Only update search query if the new value has a name (selection made)
+  // Don't update if value is being cleared (null/undefined)
   if (newValue?.name) {
     searchQuery.value = newValue.name
-  } else if (!newValue) {
-    searchQuery.value = ''
   }
 }, { immediate: true })
 
 const handleInput = (event) => {
   const query = event.target.value
   searchQuery.value = query
+  
+  // If user is typing and there's a selected value, clear it
+  if (props.value && query !== props.value.name) {
+    emit('clear')
+  }
   
   if (query.trim()) {
     performSearch(query)

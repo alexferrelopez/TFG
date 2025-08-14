@@ -1,17 +1,15 @@
 <template>
   <div class="route-card">
     <h2>Plan Route</h2>
-    <p>Set up your charging route</p>
-
     <div class="route-points">
       <div class="search-container">
         <div class="search-fields">
           <div class="search-section">
-            <SearchBar @select="handleOriginSelect" :key="'origin'" placeholder="Search origin" :value="originData" />
+            <SearchBar @select="(location) => originData = location" @clear="originData = null" :key="'origin'" placeholder="Search origin" :value="originData" />
           </div>
           
           <div class="search-section">
-            <SearchBar @select="handleDestinationSelect" :key="'destination'" placeholder="Search destination" :value="destinationData" />
+            <SearchBar @select="(location) => destinationData = location" @clear="destinationData = null" :key="'destination'" placeholder="Search destination" :value="destinationData" />
           </div>
         </div>
         
@@ -25,15 +23,15 @@
       <h4>Route Preferences</h4>
       <div class="option-row">
         <label>Vehicle Range (km)</label>
-        <input v-model.number="routeOptions.evRangeKm" type="text" inputmode="numeric" class="number-input" @input="ensureNumeric" />
+        <input v-model.number="routeOptions.evRangeKm" type="number" min="0" class="number-input" />
       </div>
       <div class="option-row">
         <label>Max Charging Power (kW)</label>
-        <input v-model.number="routeOptions.evMaxPowerKw" type="text" inputmode="numeric" class="number-input" @input="ensureNumeric" />
+        <input v-model.number="routeOptions.evMaxPowerKw" type="number" min="0" class="number-input" />
       </div>
       <div class="option-row">
         <label>Min Charging Power (kW)</label>
-        <input v-model.number="routeOptions.minPowerKw" type="text" inputmode="numeric" class="number-input" @input="ensureNumeric" />
+        <input v-model.number="routeOptions.minPowerKw" type="number" min="0" class="number-input" />
       </div>
       
       <div class="connector-section">
@@ -89,51 +87,30 @@ watch(() => props.selectedLocation, (newLocation) => {
   }
 }, { immediate: true })
 
-// Auto-plan route when both origin and destination are set
-watch([originData, destinationData], ([newOrigin, newDestination]) => {
+// Auto-plan route when both origin and destination are set, or when route options change
+watch([originData, destinationData, routeOptions], ([newOrigin, newDestination, newOptions]) => {
   if (newOrigin && newDestination) {
-    planRoute()
+    emit('planRoute', {
+      origin: newOrigin,
+      destination: newDestination,
+      options: newOptions
+    })
   }
 }, { deep: true })
 
-function handleOriginSelect(location) {
-  originData.value = location
+const swapOriginDestination = () => {
+  [originData.value, destinationData.value] = [destinationData.value, originData.value]
 }
 
-function handleDestinationSelect(location) {
-  destinationData.value = location
-}
-
-function swapOriginDestination() {
-  const temp = originData.value
-  originData.value = destinationData.value
-  destinationData.value = temp
-}
-
-function toggleConnector(connectorId) {
-  const index = routeOptions.value.connectors.indexOf(connectorId)
+const toggleConnector = (connectorId) => {
+  const connectors = routeOptions.value.connectors
+  const index = connectors.indexOf(connectorId)
+  
   if (index > -1) {
-    routeOptions.value.connectors.splice(index, 1)
+    connectors.splice(index, 1)
   } else {
-    routeOptions.value.connectors.push(connectorId)
+    connectors.push(connectorId)
   }
-}
-
-function ensureNumeric(event) {
-  // Allow only numeric input
-  const value = event.target.value
-  const numericValue = value.replace(/[^0-9.]/g, '')
-  if (value !== numericValue) {
-    event.target.value = numericValue
-  }
-}
-
-function planRoute() {
-  emit('planRoute', {
-    origin: originData.value,
-    destination: destinationData.value,
-    options: routeOptions.value
-  })
 }
 </script>
 
@@ -200,6 +177,19 @@ input:focus {
 .number-input {
   width: 80px;
   text-align: right;
+}
+
+/* Hide spinner buttons for number inputs */
+.number-input::-webkit-outer-spin-button,
+.number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* For Firefox */
+.number-input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Swap button styling */
