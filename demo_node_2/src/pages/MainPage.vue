@@ -1,10 +1,11 @@
 <template>
   <div class="search-container">
-    <SearchBar />
+    <SearchBar @select="handleLocationSelect" />
   </div>
   <transition name="slide">
-    <SideCard v-if="selectedStation" :key="selectedStation.id" @close="selectedStation = null">
+    <SideCard v-if="selectedStation || selectedLocation" :key="selectedStation?.id || selectedLocation?.display_name" @close="closeSideCard">
       <StationCard v-if="selectedStation" :chargingStation="selectedStation" />
+      <RouteCard v-else-if="selectedLocation" :selectedLocation="selectedLocation" @planRoute="handlePlanRoute" @close="closeSideCard" />
     </SideCard>
   </transition>
 
@@ -22,6 +23,7 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/CompassButton.vue'
 import StationCard from '@/components/StationCard.vue'
+import RouteCard from '@/components/RouteCard.vue'
 import ChargerFilters from '@/components/ChargerFilters.vue'
 import SideCard from '@/components/SideCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
@@ -30,6 +32,7 @@ import ChargerPopup from '@/components/ChargerPopup.vue'
 const isNorth = ref(false)
 const bearing = ref(0)
 const selectedStation = ref(null)
+const selectedLocation = ref(null)
 const showLow = ref(true)
 const showMid = ref(true)
 const showHigh = ref(true)
@@ -37,6 +40,34 @@ const showVeryHigh = ref(true)
 let map
 
 watch([showLow, showMid, showHigh, showVeryHigh], applyPercentileFilter)
+
+function handleLocationSelect(selectedLocationData) {
+  console.log('Selected location:', selectedLocationData)
+  
+  // Clear any selected station and set the selected location for route planning
+  selectedStation.value = null
+  selectedLocation.value = selectedLocationData
+  
+  if (map && selectedLocationData.coordinates) {
+    const [lng, lat] = selectedLocationData.coordinates
+    map.flyTo({
+      center: [lng, lat],
+      zoom: 14,
+      duration: 2000
+    })
+  }
+}
+
+function handlePlanRoute(routeData) {
+  console.log('Planning route:', routeData)
+  // This will be implemented to call your existing EV route API
+  // For now, just log the data
+}
+
+function closeSideCard() {
+  selectedStation.value = null
+  selectedLocation.value = null
+}
 
 function applyPercentileFilter() {
   if (!map) return
