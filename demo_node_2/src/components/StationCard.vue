@@ -30,19 +30,12 @@
       <h4>Payment Methods</h4>
       <div class="payment-methods">
         <div v-for="method in paymentMethods" :key="method.type" class="payment-method">
-          <img class="payment-icon" :src="getPaymentIconUrl(method.type)" :alt="method.type" :title="method.label" @error="onPaymentIconError" />
+          <img class="payment-icon" :src="getPaymentMethodIconUrl(method.type)" :alt="method.type" :title="method.label" @error="onPaymentIconError" />
           <span class="payment-label">{{ method.label }}</span>
         </div>
       </div>
       <p v-if="paymentMethods.length === 0" class="empty">No payment methods available.</p>
     </div>
-    
-    <!-- 
-     
-    <p><strong>Percentile:</strong> {{ props.chargingStation.percentile || 'n/a' }}</p>
-    <p><strong>Score:</strong> {{ props.chargingStation.score || 'n/a' }}</p>
-    
-    -->
     <div class="refill-section">
       <h4>{{ props.chargingStation.energyInfrastructureStation?.refillPoint?.length }} Refill Points</h4>
 
@@ -57,6 +50,7 @@
 <script setup>
 import { computed } from 'vue'
 import RefillPointCard from '@/components/RefillPointCard.vue'
+import { getPaymentMethodIconUrl, processPaymentMethods } from '@/config/paymentMethods.js'
 
 const props = defineProps({
   chargingStation: {
@@ -70,15 +64,6 @@ const classMap = {
   'On Street': 'badge-on-street',
   'In Building': 'badge-in-building',
   'Other': 'badge-other',
-}
-
-const paymentMethodMap = {
-  'apps': { label: 'Mobile App', icon: 'mobile.svg' },
-  'rfid': { label: 'RFID', icon: 'contactless.svg' },
-  'creditCard': { label: 'Credit Card', icon: 'credit_card.svg' },
-  'nfc': { label: 'NFC', icon: 'contactless.svg' },
-  'debitCard': { label: 'Debit Card', icon: 'credit_card.svg' },
-  'pinpad': { label: 'PIN Pad', icon: 'credit_card.svg' } // Using credit_card as fallback for pinpad
 }
 
 const badgeClass = computed(() => classMap[props.chargingStation.typeOfSite] || classMap['Other'])
@@ -100,29 +85,14 @@ const accessibilityIconUrl = new URL('../assets/accessible.svg', import.meta.url
 
 const paymentMethods = computed(() => {
   const methods = props.chargingStation.energyInfrastructureStation?.authenticationAndIdentificationMethods || []
-  
-  // Normalize to array if it's a single string
-  const normalizedMethods = Array.isArray(methods) ? methods : [methods]
-  
-  return normalizedMethods
-    .filter(method => method && typeof method === 'string') // Filter out null/undefined/empty values
-    .map(method => ({
-      type: method,
-      label: paymentMethodMap[method]?.label || method,
-      icon: paymentMethodMap[method]?.icon || 'credit_card.svg'
-    }))
+  return processPaymentMethods(methods)
 })
-
-function getPaymentIconUrl(type) {
-  const iconName = paymentMethodMap[type]?.icon || 'credit_card.svg'
-  return new URL(`../assets/${iconName}`, import.meta.url).href
-}
 
 function onPaymentIconError(event) {
   const img = event.currentTarget;
   img.onerror = null;
   // Fallback to credit card icon if the specific icon fails to load
-  img.src = new URL('../assets/credit_card.svg', import.meta.url).href;
+  img.src = new URL('../assets/payment-methods/credit_card.svg', import.meta.url).href;
 }
 
 function onAccessibilityIconError(event) {
