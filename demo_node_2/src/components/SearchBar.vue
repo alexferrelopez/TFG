@@ -4,9 +4,6 @@
       <input ref="searchInput" v-model="searchQuery" type="text" placeholder="Search destination" class="search-input"
         spellcheck="false" @input="handleInput" @focus="showResults = true" @blur="handleBlur"
         @keydown="handleKeydown" />
-      <button class="search-btn" type="button" @click="handleSearch">
-        <div class="search-icon"></div>
-      </button>
     </div>
 
     <div v-if="showResults && searchResults.length > 0" class="autocomplete-dropdown">
@@ -80,16 +77,6 @@ const performSearch = async (query) => {
       console.error('Geocoding search failed:', error)
       searchResults.value = []
     }
-  }
-}
-
-const handleSearch = () => {
-  // Only trigger search if no results are showing or input changed
-  if (searchQuery.value.trim() && (!showResults.value || searchResults.value.length === 0)) {
-    performSearch(searchQuery.value.trim())
-  } else if (showResults.value && searchResults.value.length > 0 && selectedIndex.value >= 0) {
-    // If results are showing and something is selected, select it
-    selectResult(searchResults.value[selectedIndex.value])
   }
 }
 
@@ -168,7 +155,7 @@ const formatResultDetails = (properties) => {
 <style scoped>
 .searchbar-container {
   position: relative;
-  max-width: 250px;
+  max-width: 300px;
   width: 100%;
 }
 
@@ -181,13 +168,11 @@ const formatResultDetails = (properties) => {
   overflow: hidden;
   width: 100%;
   min-width: 120px;
-  /* Ensures minimum size to keep button visible */
 }
 
 .search-input {
   flex: 1;
   min-width: 0;
-  /* Allows input to shrink below its content size */
   border: none;
   outline: none;
   padding: 12px 16px;
@@ -199,38 +184,6 @@ const formatResultDetails = (properties) => {
 
 .search-input::placeholder {
   color: #999;
-}
-
-.search-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-}
-
-.search-icon {
-  width: 24px;
-  height: 24px;
-  background-color: #666;
-  mask: url('@/assets/search.svg') no-repeat center;
-  mask-size: contain;
-  -webkit-mask: url('@/assets/search.svg') no-repeat center;
-  -webkit-mask-size: contain;
-  transition: background-color 0.2s ease;
-}
-
-.search-btn:hover .search-icon {
-  background-color: #3b82f6;
-}
-
-.search-btn:active .search-icon {
-  background-color: #2563eb;
 }
 
 .autocomplete-dropdown {
