@@ -30,6 +30,7 @@ function createStop(node, evMaxPowerKw) {
     address: properties.address,
     town: properties.town,
     max_power: properties.max_power,
+    maxPowerFormatted: `${Math.floor(properties.max_power / 1000)} kW`,
     estimatedChargingTimeSeconds: chargingTime,
     estimatedChargingTimeFormatted: `${Math.floor(chargingTime / 60)}m`
   }
