@@ -1,35 +1,18 @@
 <template>
   <div class="searchbar-container">
     <div class="search-bar">
-      <input 
-        ref="searchInput"
-        v-model="searchQuery"
-        type="text" 
-        placeholder="Search destination" 
-        class="search-input"
-        spellcheck="false"
-        @input="handleInput"
-        @focus="showResults = true"
-        @blur="handleBlur"
-        @keydown="handleKeydown"
-      />
+      <input ref="searchInput" v-model="searchQuery" type="text" placeholder="Search destination" class="search-input"
+        spellcheck="false" @input="handleInput" @focus="showResults = true" @blur="handleBlur"
+        @keydown="handleKeydown" />
       <button class="search-btn" type="button" @click="handleSearch">
         <div class="search-icon"></div>
       </button>
     </div>
-    
-    <div 
-      v-if="showResults && searchResults.length > 0" 
-      class="autocomplete-dropdown"
-    >
-      <div 
-        v-for="(result, index) in searchResults" 
-        :key="index"
-        class="autocomplete-item"
+
+    <div v-if="showResults && searchResults.length > 0" class="autocomplete-dropdown">
+      <div v-for="(result, index) in searchResults" :key="index" class="autocomplete-item"
         :class="{ active: selectedIndex === index || (selectedIndex === -1 && index === 0) }"
-        @mousedown="selectResult(result)"
-        @mouseenter="selectedIndex = index"
-      >
+        @mousedown="selectResult(result)" @mouseenter="selectedIndex = index">
         <div class="result-name">{{ result.properties.name }}</div>
         <div class="result-details">
           {{ formatResultDetails(result.properties) }}
@@ -54,25 +37,25 @@ let currentAbortController = null
 const handleInput = (event) => {
   const query = event.target.value
   searchQuery.value = query
-  
+
   // Cancel any ongoing request
   if (currentAbortController) {
     currentAbortController.abort()
   }
-  
+
   // Immediate search with request cancellation
   performSearch(query)
 }
 
 const performSearch = async (query) => {
   if (!query) return
-  
+
   // Create new abort controller for this request
   currentAbortController = new AbortController()
   const signal = currentAbortController.signal
-  
+
   selectedIndex.value = -1
-  
+
   try {
     // Call the geocoding endpoint from ev_router with limit parameter
     const response = await fetch(`http://192.168.1.153:3001/geocode?q=${encodeURIComponent(query)}&limit=4`, {
@@ -82,15 +65,15 @@ const performSearch = async (query) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    
+
     const data = await response.json()
-    
+
     // Only update results if this request wasn't cancelled
     if (!signal.aborted) {
       searchResults.value = data.features || []
       showResults.value = true
     }
-    
+
   } catch (error) {
     // Don't log errors for aborted requests (normal behavior)
     if (error.name !== 'AbortError') {
@@ -160,24 +143,24 @@ const selectResult = (result) => {
   searchQuery.value = result.properties.name || ''
   showResults.value = false
   selectedIndex.value = -1
-  
+
   // Emit the selected result to parent component
   emit('select', {
     name: result.properties.name,
     coordinates: result.geometry.coordinates, // [lng, lat]
     properties: result.properties
   })
-  
+
   searchInput.value?.blur()
 }
 
 const formatResultDetails = (properties) => {
   const parts = []
-  
+
   if (properties.city) parts.push(properties.city)
   if (properties.state) parts.push(properties.state)
   if (properties.country) parts.push(properties.country)
-  
+
   return parts.join(', ')
 }
 </script>
@@ -197,12 +180,14 @@ const formatResultDetails = (properties) => {
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
   overflow: hidden;
   width: 100%;
-  min-width: 120px; /* Ensures minimum size to keep button visible */
+  min-width: 120px;
+  /* Ensures minimum size to keep button visible */
 }
 
 .search-input {
   flex: 1;
-  min-width: 0; /* Allows input to shrink below its content size */
+  min-width: 0;
+  /* Allows input to shrink below its content size */
   border: none;
   outline: none;
   padding: 12px 16px;
@@ -224,9 +209,9 @@ const formatResultDetails = (properties) => {
   border: none;
   background: transparent;
   cursor: pointer;
-  flex-shrink: 0; /* Prevents button from shrinking */
-  width: 44px; /* Fixed width for consistent button size */
-  height: 44px; /* Fixed height for consistent button size */
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
 }
 
 .search-icon {
