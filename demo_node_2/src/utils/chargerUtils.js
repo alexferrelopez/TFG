@@ -31,6 +31,7 @@ export function createStationFromFeature(feature) {
     address: p.address,
     town: p.town,
     accessibility: p.accessibility,
-    operatingHours: p.operatingHours
+    operatingHours: p.operatingHours,
+    coordinates: feature.geometry?.coordinates
   }
 }

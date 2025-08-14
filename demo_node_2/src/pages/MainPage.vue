@@ -4,7 +4,7 @@
   </div>
   <transition name="slide">
     <SideCard v-if="selectedStation || selectedLocation" :key="selectedStation?.id || selectedLocation?.display_name" @close="closeSideCard">
-      <StationCard v-if="selectedStation" :chargingStation="selectedStation" />
+      <StationCard v-if="selectedStation" :chargingStation="selectedStation" @setAsDestination="handleSetAsDestination" />
       <RouteCard v-else-if="selectedLocation" :selectedLocation="selectedLocation" @planRoute="handlePlanRoute" @close="closeSideCard" />
     </SideCard>
   </transition>
@@ -61,6 +61,14 @@ function handleLocationSelect(selectedLocationData) {
 
 function handlePlanRoute(routeData) {
   planRoute(routeData, map(), { addOrUpdateSource, addOrUpdateLineLayer })
+}
+
+function handleSetAsDestination(stationLocationData) {
+  console.log('Setting station as destination:', stationLocationData)
+  
+  // Clear selected station and set as location for route planning
+  selectedStation.value = null
+  selectedLocation.value = stationLocationData
 }
 
 function closeSideCard() {
