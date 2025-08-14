@@ -9,6 +9,9 @@ services:
 
   mbtiles-maker:
     image: alex/mbtiles-maker:latest
+    build:
+      context: ./docker_images/mbtiles-maker
+      dockerfile: Dockerfile 
     init: true
     volumes:  
       - ./docker_files:/files
@@ -31,3 +34,15 @@ services:
       - ./ors/graphs:/home/ors/graphs
       - ./ors/logs:/home/ors/logs
       - ./ors/elevation_cache:/home/ors/elevation_cache
+
+  photon:
+    image: alex/photon:latest
+    build:
+      context: ./docker_images/photon
+      dockerfile: Dockerfile
+    init: true
+    volumes:
+     - ./photon_data:/photon/photon_data
+    ports:
+      - 2322:2322
+
