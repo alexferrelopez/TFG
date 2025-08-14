@@ -1,14 +1,14 @@
 <template>
   <div class="searchbar-container">
-    <div class="search-bar">
+    <form class="search-bar" @submit="handleSubmit">
       <input ref="searchInput" v-model="searchQuery" type="text" :placeholder="placeholder" class="search-input"
         spellcheck="false" @input="handleInput" @focus="showResults = true" @blur="handleBlur"
         @keydown="handleKeydown" />
-    </div>
+    </form>
 
     <div v-if="showResults && searchResults.length > 0" class="autocomplete-dropdown">
       <div v-for="(result, index) in searchResults" :key="index" class="autocomplete-item"
-        :class="{ active: selectedIndex === index || (selectedIndex === -1 && index === 0) }"
+        :class="{ active: selectedIndex === index }"
         @mousedown="selectResult(result)" @mouseenter="selectedIndex = index">
         <div class="result-name">{{ result.properties.name }}</div>
         <div class="result-details">
@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   placeholder: {
@@ -40,11 +40,11 @@ const searchResults = ref([])
 const showResults = ref(false)
 const selectedIndex = ref(-1)
 const searchInput = ref(null)
-let currentAbortController = null
+let abortController = null
 
 // Watch for external value changes and update the search query
 watch(() => props.value, (newValue) => {
-  if (newValue && newValue.name) {
+  if (newValue?.name) {
     searchQuery.value = newValue.name
   } else if (!newValue) {
     searchQuery.value = ''
@@ -54,29 +54,25 @@ watch(() => props.value, (newValue) => {
 const handleInput = (event) => {
   const query = event.target.value
   searchQuery.value = query
-
-  // Cancel any ongoing request
-  if (currentAbortController) {
-    currentAbortController.abort()
+  
+  if (query.trim()) {
+    performSearch(query)
+  } else {
+    searchResults.value = []
+    showResults.value = false
   }
-
-  // Immediate search with request cancellation
-  performSearch(query)
 }
 
 const performSearch = async (query) => {
-  if (!query) return
-
-  // Create new abort controller for this request
-  currentAbortController = new AbortController()
-  const signal = currentAbortController.signal
+  // Cancel previous request
+  abortController?.abort()
+  abortController = new AbortController()
 
   selectedIndex.value = -1
 
   try {
-    // Call the geocoding endpoint from ev_router with limit parameter
     const response = await fetch(`http://192.168.1.153:3001/geocode?q=${encodeURIComponent(query)}&limit=4`, {
-      signal // Pass abort signal to fetch
+      signal: abortController.signal
     })
 
     if (!response.ok) {
@@ -84,19 +80,23 @@ const performSearch = async (query) => {
     }
 
     const data = await response.json()
-
-    // Only update results if this request wasn't cancelled
-    if (!signal.aborted) {
-      searchResults.value = data.features || []
-      showResults.value = true
-    }
+    searchResults.value = data.features || []
+    showResults.value = true
 
   } catch (error) {
-    // Don't log errors for aborted requests (normal behavior)
     if (error.name !== 'AbortError') {
       console.error('Geocoding search failed:', error)
       searchResults.value = []
     }
+  }
+}
+const handleSubmit = (event) => {
+  event.preventDefault()
+  
+  // If there are search results, select the first one
+  if (searchResults.value.length > 0) {
+    const indexToSelect = selectedIndex.value >= 0 ? selectedIndex.value : 0
+    selectResult(searchResults.value[indexToSelect])
   }
 }
 
@@ -108,33 +108,24 @@ const handleBlur = () => {
 }
 
 const handleKeydown = (event) => {
+  if (!showResults.value || searchResults.value.length === 0) return
+
   switch (event.key) {
     case 'ArrowDown':
-      if (showResults.value && searchResults.value.length > 0) {
-        event.preventDefault()
-        // First press goes to index 1 (second item), since index 0 is "selected by default"
-        if (selectedIndex.value === -1) {
-          selectedIndex.value = searchResults.value.length > 1 ? 1 : 0
-        } else {
-          selectedIndex.value = Math.min(selectedIndex.value + 1, searchResults.value.length - 1)
-        }
-      }
+      event.preventDefault()
+      selectedIndex.value = selectedIndex.value < searchResults.value.length - 1 
+        ? selectedIndex.value + 1 
+        : 0
       break
     case 'ArrowUp':
-      if (showResults.value && searchResults.value.length > 0) {
-        event.preventDefault()
-        // Going up from second item (index 1) should go to "no selection" (first item default)
-        if (selectedIndex.value <= 1) {
-          selectedIndex.value = -1
-        } else {
-          selectedIndex.value = Math.max(selectedIndex.value - 1, -1)
-        }
-      }
+      event.preventDefault()
+      selectedIndex.value = selectedIndex.value > 0 
+        ? selectedIndex.value - 1 
+        : searchResults.value.length - 1
       break
     case 'Enter':
       event.preventDefault()
-      if (showResults.value && searchResults.value.length > 0) {
-        // If something is highlighted, select it; otherwise select the first result
+      if (searchResults.value.length > 0) {
         const indexToSelect = selectedIndex.value >= 0 ? selectedIndex.value : 0
         selectResult(searchResults.value[indexToSelect])
       }
@@ -151,10 +142,9 @@ const selectResult = (result) => {
   showResults.value = false
   selectedIndex.value = -1
 
-  // Emit the selected result to parent component
   emit('select', {
     name: result.properties.name,
-    coordinates: result.geometry.coordinates, // [lng, lat]
+    coordinates: result.geometry.coordinates,
     properties: result.properties
   })
 
@@ -163,11 +153,9 @@ const selectResult = (result) => {
 
 const formatResultDetails = (properties) => {
   const parts = []
-
   if (properties.city) parts.push(properties.city)
   if (properties.state) parts.push(properties.state)
   if (properties.country) parts.push(properties.country)
-
   return parts.join(', ')
 }
 </script>
