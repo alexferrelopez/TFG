@@ -18,12 +18,15 @@
       </button>
     </div>
     
-    <div v-if="showResults && searchResults.length > 0" class="autocomplete-dropdown">
+    <div 
+      v-if="showResults && searchResults.length > 0" 
+      class="autocomplete-dropdown"
+    >
       <div 
         v-for="(result, index) in searchResults" 
         :key="index"
         class="autocomplete-item"
-        :class="{ active: selectedIndex === index }"
+        :class="{ active: selectedIndex === index || (selectedIndex === -1 && index === 0) }"
         @mousedown="selectResult(result)"
         @mouseenter="selectedIndex = index"
       >
@@ -33,60 +36,48 @@
         </div>
       </div>
     </div>
-    
-    <div v-if="showResults && isLoading" class="autocomplete-dropdown">
-      <div class="autocomplete-item loading">
-        Searching...
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, nextTick } from 'vue'
 
-const emit = defineEmits(['search', 'select'])
+const emit = defineEmits(['select'])
 
 const searchQuery = ref('')
 const searchResults = ref([])
 const showResults = ref(false)
-const isLoading = ref(false)
 const selectedIndex = ref(-1)
 const searchInput = ref(null)
-let searchTimeout = null
+let currentAbortController = null
 
 const handleInput = (event) => {
   const query = event.target.value
   searchQuery.value = query
   
-  // Clear previous timeout
-  if (searchTimeout) {
-    clearTimeout(searchTimeout)
+  // Cancel any ongoing request
+  if (currentAbortController) {
+    currentAbortController.abort()
   }
   
-  if (query.trim().length < 2) {
-    searchResults.value = []
-    showResults.value = false
-    return
-  }
-  
-  // Debounce search requests
-  searchTimeout = setTimeout(() => {
-    performSearch(query)
-  }, 300)
-  
-  emit('search', query)
+  // Immediate search with request cancellation
+  performSearch(query)
 }
 
 const performSearch = async (query) => {
-  if (!query || query.length < 2) return
+  if (!query) return
   
-  isLoading.value = true
+  // Create new abort controller for this request
+  currentAbortController = new AbortController()
+  const signal = currentAbortController.signal
+  
   selectedIndex.value = -1
   
   try {
-    // Call the geocoding endpoint from ev_router
-    const response = await fetch(`http://192.168.1.153:3001/geocode?q=${encodeURIComponent(query)}`)
+    // Call the geocoding endpoint from ev_router with limit parameter
+    const response = await fetch(`http://192.168.1.153:3001/geocode?q=${encodeURIComponent(query)}&limit=4`, {
+      signal // Pass abort signal to fetch
+    })
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -94,21 +85,28 @@ const performSearch = async (query) => {
     
     const data = await response.json()
     
-    // Photon returns results in features array
-    searchResults.value = data.features || []
-    showResults.value = true
+    // Only update results if this request wasn't cancelled
+    if (!signal.aborted) {
+      searchResults.value = data.features || []
+      showResults.value = true
+    }
     
   } catch (error) {
-    console.error('Geocoding search failed:', error)
-    searchResults.value = []
-  } finally {
-    isLoading.value = false
+    // Don't log errors for aborted requests (normal behavior)
+    if (error.name !== 'AbortError') {
+      console.error('Geocoding search failed:', error)
+      searchResults.value = []
+    }
   }
 }
 
 const handleSearch = () => {
-  if (searchQuery.value.trim()) {
+  // Only trigger search if no results are showing or input changed
+  if (searchQuery.value.trim() && (!showResults.value || searchResults.value.length === 0)) {
     performSearch(searchQuery.value.trim())
+  } else if (showResults.value && searchResults.value.length > 0 && selectedIndex.value >= 0) {
+    // If results are showing and something is selected, select it
+    selectResult(searchResults.value[selectedIndex.value])
   }
 }
 
@@ -120,21 +118,35 @@ const handleBlur = () => {
 }
 
 const handleKeydown = (event) => {
-  if (!showResults.value || searchResults.value.length === 0) return
-  
   switch (event.key) {
     case 'ArrowDown':
-      event.preventDefault()
-      selectedIndex.value = Math.min(selectedIndex.value + 1, searchResults.value.length - 1)
+      if (showResults.value && searchResults.value.length > 0) {
+        event.preventDefault()
+        // First press goes to index 1 (second item), since index 0 is "selected by default"
+        if (selectedIndex.value === -1) {
+          selectedIndex.value = searchResults.value.length > 1 ? 1 : 0
+        } else {
+          selectedIndex.value = Math.min(selectedIndex.value + 1, searchResults.value.length - 1)
+        }
+      }
       break
     case 'ArrowUp':
-      event.preventDefault()
-      selectedIndex.value = Math.max(selectedIndex.value - 1, -1)
+      if (showResults.value && searchResults.value.length > 0) {
+        event.preventDefault()
+        // Going up from second item (index 1) should go to "no selection" (first item default)
+        if (selectedIndex.value <= 1) {
+          selectedIndex.value = -1
+        } else {
+          selectedIndex.value = Math.max(selectedIndex.value - 1, -1)
+        }
+      }
       break
     case 'Enter':
       event.preventDefault()
-      if (selectedIndex.value >= 0) {
-        selectResult(searchResults.value[selectedIndex.value])
+      if (showResults.value && searchResults.value.length > 0) {
+        // If something is highlighted, select it; otherwise select the first result
+        const indexToSelect = selectedIndex.value >= 0 ? selectedIndex.value : 0
+        selectResult(searchResults.value[indexToSelect])
       }
       break
     case 'Escape':
@@ -244,8 +256,6 @@ const formatResultDetails = (properties) => {
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
-  max-height: 300px;
-  overflow-y: auto;
   z-index: 1000;
   margin-top: 4px;
 }
@@ -257,8 +267,15 @@ const formatResultDetails = (properties) => {
   transition: background-color 0.2s ease;
 }
 
+.autocomplete-item:first-child {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
 .autocomplete-item:last-child {
   border-bottom: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .autocomplete-item:hover,
@@ -266,14 +283,16 @@ const formatResultDetails = (properties) => {
   background-color: #f8f9fa;
 }
 
-.autocomplete-item.loading {
-  color: #666;
-  font-style: italic;
-  cursor: default;
+/* Ensure first item respects container border radius when active */
+.autocomplete-item:first-child.active {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
-.autocomplete-item.loading:hover {
-  background-color: transparent;
+/* Ensure last item respects container border radius when active */
+.autocomplete-item:last-child.active {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .result-name {
