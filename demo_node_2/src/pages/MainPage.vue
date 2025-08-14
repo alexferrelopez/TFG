@@ -11,9 +11,11 @@
 
   <div class="map-container">
     <div id="map" class="map-placeholder"></div>
-    <CompassButton :bearing="bearing" :isNorth="isNorth" @reset="resetNorth" />
-    <ChargerFilters v-model:showHigh="showHigh" v-model:showMid="showMid" v-model:showLow="showLow"
-      v-model:showVeryHigh="showVeryHigh" />
+    <div class="bottom-right-controls">
+      <CompassButton :bearing="bearing" :isNorth="isNorth" @reset="resetNorth" />
+      <ChargerFilters v-model:showHigh="showHigh" v-model:showMid="showMid" v-model:showLow="showLow"
+        v-model:showVeryHigh="showVeryHigh" />
+    </div>
   </div>
 </template>
 
@@ -144,6 +146,17 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+.bottom-right-controls {
+  position: absolute;
+  bottom: 40px;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  z-index: 2;
 }
 
 .map-placeholder {

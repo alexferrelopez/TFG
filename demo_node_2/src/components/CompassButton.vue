@@ -31,9 +31,6 @@ const props = defineProps({
   width: 4rem;
   height: 4rem;
   margin: 5px;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
   z-index: 2;
   background: white;
   border: none;

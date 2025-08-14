@@ -36,9 +36,6 @@ defineEmits([
 
 <style scoped>
 .filter-controls {
-  position: absolute;
-  bottom: 40px;
-  right: 10px;
   background: rgba(248, 250, 252, 0.9);
   backdrop-filter: blur(8px);
   padding: 10px;
