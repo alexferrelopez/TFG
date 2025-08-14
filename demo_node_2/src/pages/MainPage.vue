@@ -39,7 +39,7 @@ const selectedLocation = ref(null)
 
 // Composables
 const { map, isNorth, bearing, resetNorth, addOrUpdateSource, addOrUpdateLineLayer, initializeMap } = useMapSetup()
-const { planRoute } = useRouteManagement()
+const { planRoute, clearExistingRoute } = useRouteManagement()
 const { showLow, showMid, showHigh, showVeryHigh, applyPercentileFilter, setupFilterWatcher } = useChargerFilters()
 
 // Event handlers
@@ -72,6 +72,11 @@ function handleSetAsDestination(stationLocationData) {
 }
 
 function closeSideCard() {
+  // If we're closing a RouteCard (selectedLocation is set), clear the route from the map
+  if (selectedLocation.value && map()) {
+    clearExistingRoute(map())
+  }
+  
   selectedStation.value = null
   selectedLocation.value = null
 }
