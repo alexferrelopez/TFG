@@ -54,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { connectorConfig } from '@/config/connectors.js'
 
@@ -97,6 +97,85 @@ watch([originData, destinationData, routeOptions], ([newOrigin, newDestination, 
     })
   }
 }, { deep: true })
+
+// Auto-request location and set origin on component mount
+onMounted(() => {
+  // Only auto-request location if no origin is set and geolocation is available
+  if (!originData.value && navigator.geolocation) {
+    requestCurrentLocation()
+  }
+})
+
+const requestCurrentLocation = async () => {
+  try {
+    const position = await getCurrentPosition()
+    const { latitude, longitude } = position.coords
+    
+    // Use reverse geocoding to get address for current location
+    const locationData = await reverseGeocode(latitude, longitude)
+    
+    if (locationData) {
+      // Transform the Photon response to match SearchBar format
+      originData.value = {
+        name: locationData.properties.name || 'Current Location',
+        coordinates: locationData.geometry.coordinates,
+        properties: locationData.properties
+      }
+    } else {
+      // Fallback: create a basic location object with coordinates
+      originData.value = {
+        name: 'Current Location',
+        coordinates: [longitude, latitude],
+        properties: {
+          name: 'Current Location',
+          housenumber: '',
+          street: '',
+          city: '',
+          country: ''
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error getting location:', error)
+    // Silently fail - user can manually enter origin if needed
+  }
+}
+
+const getCurrentPosition = () => {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      resolve,
+      reject,
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      }
+    )
+  })
+}
+
+const reverseGeocode = async (lat, lon) => {
+  try {
+    const response = await fetch(`http://192.168.1.153:3001/reverse?lat=${lat}&lon=${lon}&limit=1&lang=en`)
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    
+    // Return the first result if available
+    if (data.features && data.features.length > 0) {
+      return data.features[0]
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Reverse geocoding failed:', error)
+    return null
+  }
+}
 
 const swapOriginDestination = () => {
   [originData.value, destinationData.value] = [destinationData.value, originData.value]
