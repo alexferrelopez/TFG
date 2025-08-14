@@ -74,7 +74,7 @@ router.post('/ev-route', async (req, res) => {
     // 2) Prune candidates along corridor
     const step2Start = performance.now()
     const pruneResult = pruneAlongCorridor({
-      features: chargerData.highPower,
+      features: chargerData.chargers,
       baseLine,
       connectors,
       minPowerKw,
