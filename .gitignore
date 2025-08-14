@@ -2,6 +2,7 @@
 /demo_node/
 /demo_python/
 /datex_to_geojson/
+/photon_data/
 
 # Ignore everything in ors/ except config folder
 /ors/*
@@ -9,4 +10,3 @@
 
 /demo_node.zip
 /Noto_Sans.zip
-
