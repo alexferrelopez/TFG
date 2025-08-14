@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, createApp } from 'vue'
+import { onMounted, ref, createApp } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/CompassButton.vue'
@@ -28,29 +28,30 @@ import ChargerFilters from '@/components/ChargerFilters.vue'
 import SideCard from '@/components/SideCard.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import ChargerPopup from '@/components/ChargerPopup.vue'
+import { useMapSetup } from '@/composables/useMapSetup.js'
+import { useRouteManagement } from '@/composables/useRouteManagement.js'
+import { useChargerFilters } from '@/composables/useChargerFilters.js'
+import { createStationFromFeature } from '@/utils/chargerUtils.js'
 
-const isNorth = ref(false)
-const bearing = ref(0)
+// Reactive state
 const selectedStation = ref(null)
 const selectedLocation = ref(null)
-const showLow = ref(true)
-const showMid = ref(true)
-const showHigh = ref(true)
-const showVeryHigh = ref(true)
-let map
 
-watch([showLow, showMid, showHigh, showVeryHigh], applyPercentileFilter)
+// Composables
+const { map, isNorth, bearing, resetNorth, addOrUpdateSource, addOrUpdateLineLayer, initializeMap } = useMapSetup()
+const { planRoute } = useRouteManagement()
+const { showLow, showMid, showHigh, showVeryHigh, applyPercentileFilter, setupFilterWatcher } = useChargerFilters()
 
+// Event handlers
 function handleLocationSelect(selectedLocationData) {
   console.log('Selected location:', selectedLocationData)
   
-  // Clear any selected station and set the selected location for route planning
   selectedStation.value = null
   selectedLocation.value = selectedLocationData
   
-  if (map && selectedLocationData.coordinates) {
+  if (map() && selectedLocationData.coordinates) {
     const [lng, lat] = selectedLocationData.coordinates
-    map.flyTo({
+    map().flyTo({
       center: [lng, lat],
       zoom: 14,
       duration: 2000
@@ -59,9 +60,7 @@ function handleLocationSelect(selectedLocationData) {
 }
 
 function handlePlanRoute(routeData) {
-  console.log('Planning route:', routeData)
-  // This will be implemented to call your existing EV route API
-  // For now, just log the data
+  planRoute(routeData, map(), { addOrUpdateSource, addOrUpdateLineLayer })
 }
 
 function closeSideCard() {
@@ -69,143 +68,53 @@ function closeSideCard() {
   selectedLocation.value = null
 }
 
-function applyPercentileFilter() {
-  if (!map) return
+function handleChargerClick(e) {
+  const features = e.features || []
+  if (!features.length) return
 
-  const getPct = ['to-number', ['get', 'percentile']]
-  const ranges = [
-    { show: showLow, min: 0, max: 30 },
-    { show: showMid, min: 30, max: 75 },
-    { show: showHigh, min: 75, max: 90 },
-    { show: showVeryHigh, min: 90, max: Infinity }
-  ]
+  if (features.length === 1) {
+    selectedLocation.value = null
+    selectedStation.value = createStationFromFeature(features[0])
+    return
+  }
 
-  const filters = ranges
-    .filter(range => range.show.value)
-    .map(range => range.max === Infinity
-      ? ['>=', getPct, range.min]
-      : ['all', ['>=', getPct, range.min], ['<', getPct, range.max]]
-    )
+  // Multiple chargers - show popup
+  const container = document.createElement('div')
+  const popupApp = createApp(ChargerPopup, {
+    features: features.sort((a, b) => {
+      const aPct = a.properties?.percentile || 0
+      const bPct = b.properties?.percentile || 0
+      return bPct - aPct
+    }),
+    onSelectCharger: (feature) => {
+      selectedLocation.value = null
+      selectedStation.value = createStationFromFeature(feature)
+      popup.remove()
+      popupApp.unmount()
+    },
+    onClosePopup: () => {
+      popup.remove()
+      popupApp.unmount()
+    }
+  })
 
-  const expr = filters.length
-    ? ['any', ...filters]
-    : ['==', ['literal', 0], ['literal', 1]]
-
-  map.setFilter('chargers-point', expr)
-}
-
-function updateDirection() {
-  // normalize bearing into [0,360)
-  const b = ((map.getBearing() % 360) + 360) % 360
-  // within 0.5° of north → treat as north
-  bearing.value = b
-  isNorth.value = Math.abs(b) < 0.5
-}
-
-function resetNorth() {
-  map.rotateTo(0, { duration: 800 });
+  popupApp.mount(container)
+  const popup = new maplibregl.Popup({ closeButton: false })
+    .setLngLat(e.lngLat)
+    .setDOMContent(container)
+    .addTo(map())
 }
 
 onMounted(() => {
-  map = new maplibregl.Map({
-    container: 'map',
-    style: 'http://192.168.1.153:3000/style/style',
-    center: [3.7492, 40.4637],
-    zoom: 2,
-    maxZoom: 19,
-    minZoom: 4,
-    hash: true,
-    antialias: true
+  const mapInstance = initializeMap()
+  
+  mapInstance.on('load', () => {
+    applyPercentileFilter(mapInstance)
   })
-
-
-  map.on('load', () => {
-    updateDirection()
-    applyPercentileFilter()
-  })
-
-  map.on('rotate', updateDirection)
-  map.on('moveend', updateDirection)
-
-  // change cursor on hover
-  map.on("mouseenter", "chargers-point", () => {
-    map.getCanvas().style.cursor = "pointer";
-  });
-  map.on("mouseleave", "chargers-point", () => {
-    map.getCanvas().style.cursor = "";
-  });
-
-  map.on("click", "chargers-point", (e) => {
-    const features = e.features || [];
-
-    if (!features.length) return;
-
-    const toStation = (f) => {
-      const p = f.properties || {};
-      let eis = p.energyInfrastructureStation;
-      if (typeof eis === "string") {
-        try { eis = JSON.parse(eis); } catch { }
-      }
-
-      const typeOfSiteMap = {
-        openSpace: 'Open Space',
-        onstreet: 'On Street',
-        inBuilding: 'In Building',
-        other: 'Other'
-      };
-
-      const siteType = p.typeOfSite || 'other';
-      const typeOfSite = typeOfSiteMap[siteType] || typeOfSiteMap.other;
-
-      return {
-        id: p['@id'],
-        name: p.name,
-        operator: p.operator,
-        percentile: p.percentile,
-        score: p.score,
-        energyInfrastructureStation: eis,
-        typeOfSite: typeOfSite,
-        address: p.address,
-        town: p.town,
-        accessibility: p.accessibility,
-        operatingHours: p.operatingHours
-      };
-    };
-
-    if (features.length === 1) {
-      selectedStation.value = toStation(features[0]);
-      return;
-    }
-
-    const container = document.createElement('div');
-
-    const popupApp = createApp(ChargerPopup, {
-      features: features.sort((a, b) => {
-        const aPct = a.properties?.percentile || 0;
-        const bPct = b.properties?.percentile || 0;
-        return bPct - aPct; // Sort descending by percentile
-      }),
-      onSelectCharger: (feature) => {
-        selectedStation.value = toStation(feature);
-        popup.remove();
-        popupApp.unmount();
-      },
-      onClosePopup: () => {
-        popup.remove();
-        popupApp.unmount();
-      }
-    });
-
-    popupApp.mount(container);
-
-    const popup = new maplibregl.Popup({
-      closeButton: false
-    })
-      .setLngLat(e.lngLat)
-      .setDOMContent(container)
-      .addTo(map);
-  });
-
+  
+  mapInstance.on('click', 'chargers-point', handleChargerClick)
+  
+  setupFilterWatcher(mapInstance)
 })
 </script>
 
