@@ -4,33 +4,20 @@
     <p>Set up your charging route</p>
 
     <div class="route-points">
-      <div class="point-section">
-        <h4>
-          From
-        </h4>
-        <input 
-          v-model="origin" 
-          type="text" 
-          placeholder="Enter starting location"
-          class="location-input"
-        />
-      </div>
-
-      <div class="point-section">
-        <h4>
-          To
-        </h4>
-        <div class="destination-row">
-          <input 
-            v-model="destination" 
-            type="text" 
-            placeholder="Enter destination"
-            class="location-input"
-          />
-          <button @click="swapOriginDestination" class="swap-btn" :disabled="!origin && !destination" title="Swap origin and destination">
-            ⇅
-          </button>
+      <div class="search-container">
+        <div class="search-fields">
+          <div class="search-section">
+            <SearchBar @select="handleOriginSelect" :key="'origin'" placeholder="Search origin" :value="originData" />
+          </div>
+          
+          <div class="search-section">
+            <SearchBar @select="handleDestinationSelect" :key="'destination'" placeholder="Search destination" :value="destinationData" />
+          </div>
         </div>
+        
+        <button @click="swapOriginDestination" class="swap-btn" :disabled="!originData && !destinationData" title="Swap origin and destination">
+          <img src="@/assets/swap_vert.svg" alt="Swap" class="swap-icon" />
+        </button>
       </div>
     </div>
 
@@ -38,26 +25,40 @@
       <h4>Route Preferences</h4>
       <div class="option-row">
         <label>Vehicle Range (km)</label>
-        <input v-model.number="routeOptions.evRangeKm" type="number" min="50" max="1000" class="number-input" />
+        <input v-model.number="routeOptions.evRangeKm" type="text" inputmode="numeric" class="number-input" @input="ensureNumeric" />
       </div>
       <div class="option-row">
         <label>Max Charging Power (kW)</label>
-        <input v-model.number="routeOptions.evMaxPowerKw" type="number" min="10" max="500" class="number-input" />
+        <input v-model.number="routeOptions.evMaxPowerKw" type="text" inputmode="numeric" class="number-input" @input="ensureNumeric" />
       </div>
       <div class="option-row">
         <label>Min Charging Power (kW)</label>
-        <input v-model.number="routeOptions.minPowerKw" type="number" min="10" max="500" class="number-input" />
+        <input v-model.number="routeOptions.minPowerKw" type="text" inputmode="numeric" class="number-input" @input="ensureNumeric" />
+      </div>
+      
+      <div class="connector-section">
+        <h4>Connector Types</h4>
+        <div class="connector-grid">
+          <button 
+            v-for="connector in availableConnectors" 
+            :key="connector.id"
+            @click="toggleConnector(connector.id)"
+            :class="['connector-btn', { active: routeOptions.connectors.includes(connector.id) }]"
+            :title="connector.name"
+          >
+            <img :src="connector.icon" :alt="connector.name" class="connector-icon" />
+            <span class="connector-name">{{ connector.name }}</span>
+          </button>
+        </div>
       </div>
     </div>
-
-    <button @click="planRoute" class="plan-btn" :disabled="!canPlanRoute">
-      Plan Route
-    </button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { connectorConfig } from '@/config/connectors.js'
 
 const props = defineProps({
   selectedLocation: {
@@ -68,8 +69,12 @@ const props = defineProps({
 
 const emit = defineEmits(['planRoute', 'close'])
 
-const origin = ref('')
-const destination = ref('')
+const originData = ref(null)
+const destinationData = ref(null)
+
+// Use shared connector configuration
+const availableConnectors = ref(connectorConfig)
+
 const routeOptions = ref({
   evRangeKm: 300,
   evMaxPowerKw: 150,
@@ -79,27 +84,54 @@ const routeOptions = ref({
 
 // Auto-populate destination when a location is selected
 watch(() => props.selectedLocation, (newLocation) => {
-  if (newLocation?.display_name) {
-    destination.value = newLocation.display_name
+  if (newLocation) {
+    destinationData.value = newLocation
   }
 }, { immediate: true })
 
-const canPlanRoute = computed(() => {
-  return origin.value.trim() && destination.value.trim()
-})
+// Auto-plan route when both origin and destination are set
+watch([originData, destinationData], ([newOrigin, newDestination]) => {
+  if (newOrigin && newDestination) {
+    planRoute()
+  }
+}, { deep: true })
+
+function handleOriginSelect(location) {
+  originData.value = location
+}
+
+function handleDestinationSelect(location) {
+  destinationData.value = location
+}
 
 function swapOriginDestination() {
-  const temp = origin.value
-  origin.value = destination.value
-  destination.value = temp
+  const temp = originData.value
+  originData.value = destinationData.value
+  destinationData.value = temp
+}
+
+function toggleConnector(connectorId) {
+  const index = routeOptions.value.connectors.indexOf(connectorId)
+  if (index > -1) {
+    routeOptions.value.connectors.splice(index, 1)
+  } else {
+    routeOptions.value.connectors.push(connectorId)
+  }
+}
+
+function ensureNumeric(event) {
+  // Allow only numeric input
+  const value = event.target.value
+  const numericValue = value.replace(/[^0-9.]/g, '')
+  if (value !== numericValue) {
+    event.target.value = numericValue
+  }
 }
 
 function planRoute() {
-  if (!canPlanRoute.value) return
-  
   emit('planRoute', {
-    origin: origin.value,
-    destination: destination.value,
+    origin: originData.value,
+    destination: destinationData.value,
     options: routeOptions.value
   })
 }
@@ -111,8 +143,35 @@ function planRoute() {
   margin-top: 1rem;
 }
 
-.point-section {
-  margin-bottom: 1rem;
+.search-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.search-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-container :deep(.searchbar-container) {
+  max-width: none;
+}
+
+.search-container :deep(.search-bar) {
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+}
+
+.search-container :deep(.search-bar):hover {
+  border-color: #a0a9b3;
 }
 
 h4 {
@@ -120,6 +179,7 @@ h4 {
   font-size: 1rem;
 }
 
+/* Base input styling for all text inputs */
 input {
   padding: 0.5rem;
   border: 1px solid #e2e8f0;
@@ -127,72 +187,110 @@ input {
   font-size: 0.875rem;
 }
 
+input:hover {
+  border-color: #a0a9b3;
+}
+
 input:focus {
   outline: none;
   border-color: #3b82f6;
 }
 
-.location-input {
-  width: 100%;
+/* Specific styling for number inputs */
+.number-input {
+  width: 80px;
+  text-align: right;
 }
 
-.destination-row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.destination-row .location-input {
-  flex: 1;
-}
-
+/* Swap button styling */
 .swap-btn {
-  width: 40px;
-  height: 40px;
-  background-color: #6b7280;
-  color: white;
+  width: 44px;
+  height: 44px;
+  background: none;
+  color: black;
   border: none;
-  border-radius: 0.375rem;
   cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swap-icon {
+  width: 20px;
+  height: 20px;
+  filter: none;
 }
 
 .swap-btn:hover:not(:disabled) {
-  background-color: #4b5563;
+  opacity: 0.7;
 }
 
 .swap-btn:disabled {
-  background-color: #d1d5db;
+  opacity: 0.2;
   cursor: not-allowed;
 }
 
+.swap-btn:disabled .swap-icon {
+  filter: grayscale(1);
+}
+
+/* Layout styling */
 .option-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.75rem;
 }
 
-.option-row .number-input {
-  width: 80px;
+.connector-section {
+  margin-top: 1.5rem;
 }
 
-.plan-btn {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+.connector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.connector-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: white;
   cursor: pointer;
-  margin-top: 1rem;
+  transition: all 0.1s ease;
+  min-height: 80px;
 }
 
-.plan-btn:hover:not(:disabled) {
-  background-color: #2563eb;
+.connector-btn:hover {
+  border-color: #3b82f6;
 }
 
-.plan-btn:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
+.connector-btn.active {
+  border-color: #3b82f6;
+  background-color: #dbeafe;
+}
+
+.connector-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0.25rem;
+}
+
+.connector-name {
+  font-size: 0.75rem;
+  color: #374151;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.connector-btn.active .connector-name {
+  color: #1d4ed8;
+  font-weight: 500;
 }
 </style>

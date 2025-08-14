@@ -1,7 +1,7 @@
 <template>
   <div class="searchbar-container">
     <div class="search-bar">
-      <input ref="searchInput" v-model="searchQuery" type="text" placeholder="Search destination" class="search-input"
+      <input ref="searchInput" v-model="searchQuery" type="text" :placeholder="placeholder" class="search-input"
         spellcheck="false" @input="handleInput" @focus="showResults = true" @blur="handleBlur"
         @keydown="handleKeydown" />
     </div>
@@ -20,7 +20,18 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, watch } from 'vue'
+
+const props = defineProps({
+  placeholder: {
+    type: String,
+    default: 'Search destination'
+  },
+  value: {
+    type: Object,
+    default: null
+  }
+})
 
 const emit = defineEmits(['select'])
 
@@ -30,6 +41,15 @@ const showResults = ref(false)
 const selectedIndex = ref(-1)
 const searchInput = ref(null)
 let currentAbortController = null
+
+// Watch for external value changes and update the search query
+watch(() => props.value, (newValue) => {
+  if (newValue && newValue.name) {
+    searchQuery.value = newValue.name
+  } else if (!newValue) {
+    searchQuery.value = ''
+  }
+}, { immediate: true })
 
 const handleInput = (event) => {
   const query = event.target.value
@@ -183,7 +203,7 @@ const formatResultDetails = (properties) => {
 }
 
 .search-input::placeholder {
-  color: #999;
+  color: #777777;
 }
 
 .autocomplete-dropdown {
