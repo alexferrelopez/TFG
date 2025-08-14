@@ -5,15 +5,18 @@
       <div class="search-container">
         <div class="search-fields">
           <div class="search-section">
-            <SearchBar @select="(location) => originData = location" @clear="originData = null" :key="'origin'" placeholder="Search origin" :value="originData" />
+            <SearchBar @select="(location) => originData = location" @clear="originData = null" :key="'origin'"
+              placeholder="Search origin" :value="originData" />
           </div>
-          
+
           <div class="search-section">
-            <SearchBar @select="(location) => destinationData = location" @clear="destinationData = null" :key="'destination'" placeholder="Search destination" :value="destinationData" />
+            <SearchBar @select="(location) => destinationData = location" @clear="destinationData = null"
+              :key="'destination'" placeholder="Search destination" :value="destinationData" />
           </div>
         </div>
-        
-        <button @click="swapOriginDestination" class="swap-btn" :disabled="!originData && !destinationData" title="Swap origin and destination">
+
+        <button @click="swapOriginDestination" class="swap-btn" :disabled="!originData && !destinationData"
+          title="Swap origin and destination">
           <img src="@/assets/swap_vert.svg" alt="Swap" class="swap-icon" />
         </button>
       </div>
@@ -33,17 +36,13 @@
         <label>Min Charging Power (kW)</label>
         <input v-model.number="routeOptions.minPowerKw" type="number" min="0" class="number-input" />
       </div>
-      
+
       <div class="connector-section">
         <h4>Connector Types</h4>
         <div class="connector-grid">
-          <button 
-            v-for="connector in availableConnectors" 
-            :key="connector.id"
-            @click="toggleConnector(connector.id)"
+          <button v-for="connector in availableConnectors" :key="connector.id" @click="toggleConnector(connector.id)"
             :class="['connector-btn', { active: routeOptions.connectors.includes(connector.id) }]"
-            :title="connector.name"
-          >
+            :title="connector.name">
             <img :src="connector.icon" :alt="connector.name" class="connector-icon" />
             <span class="connector-name">{{ connector.name }}</span>
           </button>
@@ -110,10 +109,10 @@ const requestCurrentLocation = async () => {
   try {
     const position = await getCurrentPosition()
     const { latitude, longitude } = position.coords
-    
+
     // Use reverse geocoding to get address for current location
     const locationData = await reverseGeocode(latitude, longitude)
-    
+
     if (locationData) {
       // Transform the Photon response to match SearchBar format
       originData.value = {
@@ -137,7 +136,6 @@ const requestCurrentLocation = async () => {
     }
   } catch (error) {
     console.error('Error getting location:', error)
-    // Silently fail - user can manually enter origin if needed
   }
 }
 
@@ -158,18 +156,18 @@ const getCurrentPosition = () => {
 const reverseGeocode = async (lat, lon) => {
   try {
     const response = await fetch(`http://192.168.1.153:3001/reverse?lat=${lat}&lon=${lon}&limit=1&lang=en`)
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
     const data = await response.json()
-    
+
     // Return the first result if available
     if (data.features && data.features.length > 0) {
       return data.features[0]
     }
-    
+
     return null
   } catch (error) {
     console.error('Reverse geocoding failed:', error)
@@ -184,7 +182,7 @@ const swapOriginDestination = () => {
 const toggleConnector = (connectorId) => {
   const connectors = routeOptions.value.connectors
   const index = connectors.indexOf(connectorId)
-  
+
   if (index > -1) {
     connectors.splice(index, 1)
   } else {
@@ -201,7 +199,7 @@ const toggleConnector = (connectorId) => {
 
 .search-container {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -273,8 +271,8 @@ input:focus {
 
 /* Swap button styling */
 .swap-btn {
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
   background: none;
   color: black;
   border: none;
@@ -286,8 +284,6 @@ input:focus {
 }
 
 .swap-icon {
-  width: 20px;
-  height: 20px;
   filter: none;
 }
 

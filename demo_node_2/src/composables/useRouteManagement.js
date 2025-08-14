@@ -4,13 +4,13 @@ export function useRouteManagement() {
   function clearExistingRoute(map) {
     const layersToRemove = ['ev-recommended-line', 'ev-stops-circle']
     const sourcesToRemove = ['ev-recommended', 'ev-stops']
-    
+
     layersToRemove.forEach(layerId => {
       if (map.getLayer(layerId)) {
         map.removeLayer(layerId)
       }
     })
-    
+
     sourcesToRemove.forEach(sourceId => {
       if (map.getSource(sourceId)) {
         map.removeSource(sourceId)
@@ -20,7 +20,7 @@ export function useRouteManagement() {
 
   function displayRoute(routeData, addOrUpdateSource, addOrUpdateLineLayer) {
     if (!routeData?.geojson) return
-    
+
     addOrUpdateSource('ev-recommended', routeData.geojson)
     addOrUpdateLineLayer('ev-recommended-line', 'ev-recommended', {
       'line-color': '#0077ff',
@@ -72,7 +72,7 @@ export function useRouteManagement() {
 
   function fitMapToRoute(routeData, map) {
     if (!routeData?.geojson) return
-    
+
     const coords = []
     for (const feature of routeData.geojson.features || []) {
       const { geometry } = feature
@@ -84,7 +84,7 @@ export function useRouteManagement() {
         coords.push(geometry.coordinates)
       }
     }
-    
+
     if (coords.length) {
       const lons = coords.map(c => c[0])
       const lats = coords.map(c => c[1])
@@ -98,15 +98,15 @@ export function useRouteManagement() {
 
   async function planRoute(routeData, map, { addOrUpdateSource, addOrUpdateLineLayer }) {
     console.log('Planning route:', routeData)
-    
+
     // Cancel previous route request
     routeAbortController?.abort()
     routeAbortController = new AbortController()
-    
+
     const { origin, destination, options } = routeData
     const originCoords = origin.coordinates
     const destinationCoords = destination.coordinates
-    
+
     if (!originCoords || !destinationCoords) {
       console.error('Missing coordinates for origin or destination')
       return
@@ -138,11 +138,11 @@ export function useRouteManagement() {
       // Clear existing route and display new one
       clearExistingRoute(map)
       displayRoute(recommendedRoute, addOrUpdateSource, addOrUpdateLineLayer)
-      
+
       // Create and display stops
       const stopsData = createStopsData(originCoords, destinationCoords, recommendedRoute?.stops)
       displayStops(stopsData, map, addOrUpdateSource)
-      
+
       // Fit map to show the route
       fitMapToRoute(recommendedRoute, map)
 

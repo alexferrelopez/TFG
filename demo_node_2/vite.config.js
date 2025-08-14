@@ -11,9 +11,7 @@ export default defineConfig({
     }
   },
   server: {
-    // Proxy example for future API/server:
-    // proxy: {
-    //   '/api': 'http://localhost:3000'
-    // }
+
+
   }
 })
