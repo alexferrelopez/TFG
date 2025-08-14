@@ -1,54 +1,82 @@
 <template>
-  <div class="searchBar">
-    <input id="searchQueryInput" type="text" name="searchQueryInput" placeholder="Search destination" value="" />
-    <button id="searchQuerySubmit" type="submit" name="searchQuerySubmit">
-      <svg style="width:24px;height:24px" viewBox="0 0 24 24">
-        <path fill="#666666"
-          d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
-      </svg>
+  <div class="search-bar">
+    <input 
+      type="text" 
+      placeholder="Search destination" 
+      class="search-input"
+      spellcheck="false"
+      @input="handleInput"
+    />
+    <button class="search-btn" type="button">
+      <div class="search-icon"></div>
     </button>
   </div>
 </template>
 
+<script setup>
+const emit = defineEmits(['search'])
+
+const handleInput = (event) => {
+  const target = event.target
+  if (target) {
+    emit('search', target.value)
+  }
+}
+</script>
+
 <style scoped>
-.label {
-  font-size: .625rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: +1.3px;
-  margin-bottom: 1rem;
-}
-
-.searchBar {
-  width: 100%;
-  max-width: 31.25rem;
+.search-bar {
   display: flex;
-  flex-direction: row;
   align-items: center;
-}
-
-#searchQueryInput {
+  background: white;
+  border-radius: 12px;
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
+  overflow: hidden;
+  max-width: 400px;
   width: 100%;
-  height: 2.8rem;
-  background: #f5f5f5;
-  outline: none;
-  border: none;
-  border-radius: 1.625rem;
-  padding: 0 3.5rem 0 1.5rem;
-  font-size: 1rem;
 }
 
-#searchQuerySubmit {
-  width: 3.5rem;
-  height: 2.8rem;
-  margin-left: -3.5rem;
-  background: none;
+.search-input {
+  flex: 1;
   border: none;
   outline: none;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-family: inherit;
+  background: transparent;
+  color: #333;
 }
 
-#searchQuerySubmit:hover {
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: none;
+  background: transparent;
   cursor: pointer;
+}
+
+.search-icon {
+  width: 24px;
+  height: 24px;
+  background-color: #666;
+  mask: url('@/assets/search.svg') no-repeat center;
+  mask-size: contain;
+  -webkit-mask: url('@/assets/search.svg') no-repeat center;
+  -webkit-mask-size: contain;
+  transition: background-color 0.2s ease;
+}
+
+.search-btn:hover .search-icon {
+  background-color: #3b82f6;
+}
+
+.search-btn:active .search-icon {
+  background-color: #2563eb;
 }
 </style>
