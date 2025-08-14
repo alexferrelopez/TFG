@@ -1,6 +1,3 @@
-// composables/useRouteManagement.js
-import { ref } from 'vue'
-
 export function useRouteManagement() {
   let routeAbortController = null
 
