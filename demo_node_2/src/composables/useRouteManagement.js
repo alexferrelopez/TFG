@@ -1,5 +1,10 @@
+import { useNotifications } from '@/composables/useNotifications.js'
+
 export function useRouteManagement() {
   let routeAbortController = null
+
+  
+  const { showError, showWarning } = useNotifications()
 
   function clearExistingRoute(map) {
     const layersToRemove = ['ev-recommended-line', 'ev-stops-circle']
@@ -97,8 +102,6 @@ export function useRouteManagement() {
   }
 
   async function planRoute(routeData, map, { addOrUpdateSource, addOrUpdateLineLayer }) {
-    console.log('Planning route:', routeData)
-
     // Cancel previous route request
     routeAbortController?.abort()
     routeAbortController = new AbortController()
@@ -108,7 +111,7 @@ export function useRouteManagement() {
     const destinationCoords = destination.coordinates
 
     if (!originCoords || !destinationCoords) {
-      console.error('Missing coordinates for origin or destination')
+      showError('Route Planning Failed', 'Missing origin or destination coordinates')
       return
     }
 
@@ -128,7 +131,18 @@ export function useRouteManagement() {
       })
 
       if (!response.ok) {
-        console.error('EV route error:', await response.text())
+        clearExistingRoute(map)
+        
+        // Show appropriate error message based on status code
+        if (response.status === 422) {
+          showWarning('No Route Found', 'No feasible route found with current settings. Try adjusting your EV range or charging requirements.')
+        } else if (response.status === 400) {
+          showError('Invalid Request', 'Invalid route parameters. Please check your origin and destination.')
+        } else if (response.status === 504) {
+          showError('Request Timeout', 'Route calculation is taking too long. Please try again.')
+        } else {
+          showError('Route Planning Failed', 'Unable to calculate route. Please try again later.')
+        }
         return
       }
 
@@ -148,8 +162,15 @@ export function useRouteManagement() {
 
       console.log('Route planned successfully:', data)
     } catch (error) {
+      clearExistingRoute(map)
       if (error.name !== 'AbortError') {
-        console.error('Error planning route:', error)
+        
+        // Show user-friendly error message
+        if (error.message?.includes('fetch')) {
+          showError('Connection Error', 'Unable to connect to routing service. Please check your internet connection and try again.')
+        } else {
+          showError('Route Planning Failed', 'An unexpected error occurred while planning your route. Please try again.')
+        }
       }
     }
   }
