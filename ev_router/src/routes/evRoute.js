@@ -14,11 +14,26 @@ router.post('/ev-route', async (req, res) => {
   const startTime = performance.now()
   const timings = {}
 
+  // Helper functions for consistent error handling
+  const cleanupAndRespond = (statusCode, data) => {
+    clearTimeout(timeout)
+    if (!res.headersSent) {
+      res.status(statusCode).json(data)
+    }
+  }
+
+  const createErrorResponse = (type, message, details = null) => ({
+    error: {
+      type,
+      message,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  })
+
   // Set request timeout
   const timeout = setTimeout(() => {
-    if (!res.headersSent) {
-      res.status(504).json({ error: 'Request timeout - route calculation taking too long' })
-    }
+    cleanupAndRespond(504, createErrorResponse('timeout', 'Request timeout - route calculation taking too long'))
   }, PERFORMANCE_CONFIG.requestTimeoutMs)
 
   try {
@@ -33,11 +48,12 @@ router.post('/ev-route', async (req, res) => {
     // Validate request body
     const validationErrors = validateEvRouteRequest(req.body)
     if (validationErrors.length > 0) {
-      clearTimeout(timeout)
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: validationErrors
+      console.error('Validation Error:', { 
+        validationErrors, 
+        body: req.body,
+        timestamp: new Date().toISOString()
       })
+      return cleanupAndRespond(400, createErrorResponse('validation', 'Invalid request parameters', validationErrors))
     }
 
     const {
@@ -105,12 +121,20 @@ router.post('/ev-route', async (req, res) => {
 
     // If no feasible path, report helpful info
     if (!recommendedKeys) {
-      const errorResponse = {
-        error: 'No feasible route within range and filters',
-        hint: 'Try increasing evRangeKm, lowering minPowerKw, or adjusting evMaxPowerKw'
-      }
-      clearTimeout(timeout)
-      return res.status(422).json(errorResponse)
+      console.log('No feasible route found:', {
+        origin,
+        destination,
+        evRangeKm,
+        evMaxPowerKw,
+        minPowerKw,
+        candidatesFound: candidates.length,
+        timestamp: new Date().toISOString()
+      })
+      return cleanupAndRespond(422, createErrorResponse(
+        'no_route',
+        'No feasible route within range and filters',
+        { hint: 'Try increasing evRangeKm, lowering minPowerKw, or adjusting evMaxPowerKw' }
+      ))
     }
 
     // 5) Stitch path legs
@@ -148,19 +172,37 @@ router.post('/ev-route', async (req, res) => {
 
     clearTimeoutAndSend(result)
   } catch (err) {
-    clearTimeout(timeout)
+    // Log full error details server-side only
     console.error('EV Route Error:', {
       message: err.message,
       stack: err.stack,
-      request: { origin, destination, evRangeKm, evMaxPowerKw, minPowerKw },
+      request: { 
+        origin: req.body.origin, 
+        destination: req.body.destination, 
+        evRangeKm: req.body.evRangeKm, 
+        evMaxPowerKw: req.body.evMaxPowerKw, 
+        minPowerKw: req.body.minPowerKw 
+      },
       timestamp: new Date().toISOString()
     })
-    if (!res.headersSent) {
-      res.status(500).json({
-        error: err.message || String(err),
-        timestamp: new Date().toISOString()
-      })
+
+    // Determine safe error message to expose to client (no stack trace or internal details)
+    let safeMessage = 'Internal server error'
+    let errorType = 'server'
+
+    if (err.message?.includes('ORS') || err.message?.includes('routing')) {
+      safeMessage = 'Routing service temporarily unavailable'
+      errorType = 'service'
+    } else if (err.message?.includes('timeout')) {
+      safeMessage = 'Request processing timeout'
+      errorType = 'timeout'
+    } else if (err.message?.includes('No baseline route')) {
+      safeMessage = 'Unable to find route between origin and destination'
+      errorType = 'routing'
     }
+
+    // Only send safe, sanitized error response to client
+    cleanupAndRespond(500, createErrorResponse(errorType, safeMessage))
   }
 })
 

@@ -28,7 +28,7 @@ console.log(`Loaded ${chargers.length} chargers: ${highPower.length} high-power 
 export const PERFORMANCE_CONFIG = {
   bufferKm: Number(process.env.BUFFER_KM || 25),
   segmentKm: Number(process.env.SEGMENT_KM || 75),
-  topPerSegment: 3,
+  topPerSegment: Number(process.env.TOP_PER_SEGMENT || 3),
   requestTimeoutMs: 30000 // 30 second timeout
 }
 
@@ -38,7 +38,7 @@ export const chargerData = { chargers, highPower, lowPower }
 // Rate limiting configuration
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 60, // limit each IP to 60 requests per minute
+  max: 200, // limit each IP to 60 requests per minute
   message: {
     error: 'Too many requests from this IP, please try again later.',
     retryAfter: '1 minute'

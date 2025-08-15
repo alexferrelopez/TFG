@@ -10,13 +10,22 @@ function normalizeToArray(value) {
 function hasConnectorWithMinPower(feature, wanted = ['iec62196T2COMBO'], minPowerKw = 100) {
   const refillPoints = normalizeToArray(feature?.properties?.energyInfrastructureStation?.refillPoint)
 
-  return refillPoints.some(point => {
+  let totalValidConnectors = 0
+  const hasValidConnector = refillPoints.some(point => {
     const connectors = normalizeToArray(point?.connectors)
-    return connectors.some(connector => {
+    const validConnectorsInPoint = connectors.filter(connector => {
       if (!connector?.connectorType || !wanted.includes(connector.connectorType)) return false
       return (connector.maxPowerAtSocket || 0) / 1000 >= minPowerKw
     })
+    totalValidConnectors += validConnectorsInPoint.length
+    return validConnectorsInPoint.length > 0
   })
+
+  // Add the count as a property for later sorting
+  if (!feature.properties) feature.properties = {}
+  feature.properties.validConnectorCount = totalValidConnectors
+
+  return hasValidConnector
 }
 
 function isHighPowerCharger(feature, minPowerKw = 50) {
@@ -46,9 +55,9 @@ function sortSegmentPoints(points, segmentMidpoint, evMaxPowerKw) {
       distance: turf.distance(segmentMidpoint, turf.point(pt.geometry.coordinates))
     }))
     .sort((a, b) => {
-      // Sort by percentile (higher first)
-      const percentileDiff = (b.point.properties?.percentile || 0) - (a.point.properties?.percentile || 0)
-      if (percentileDiff !== 0) return percentileDiff
+      // Sort by valid connector count (more connectors first)
+      const connectorCountDiff = (b.point.properties?.validConnectorCount || 0) - (a.point.properties?.validConnectorCount || 0)
+      if (connectorCountDiff !== 0) return connectorCountDiff
       
       // Then by effective power (higher first)
       const effectivePowerA = Math.min((a.point.properties?.max_power || 0) / 1000, evMaxPowerKw)
