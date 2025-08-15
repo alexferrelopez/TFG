@@ -10,22 +10,13 @@ function normalizeToArray(value) {
 function hasConnectorWithMinPower(feature, wanted = ['iec62196T2COMBO'], minPowerKw = 100) {
   const refillPoints = normalizeToArray(feature?.properties?.energyInfrastructureStation?.refillPoint)
 
-  let totalValidConnectors = 0
-  const hasValidConnector = refillPoints.some(point => {
+  return refillPoints.some(point => {
     const connectors = normalizeToArray(point?.connectors)
-    const validConnectorsInPoint = connectors.filter(connector => {
+    return connectors.some(connector => {
       if (!connector?.connectorType || !wanted.includes(connector.connectorType)) return false
       return (connector.maxPowerAtSocket || 0) / 1000 >= minPowerKw
     })
-    totalValidConnectors += validConnectorsInPoint.length
-    return validConnectorsInPoint.length > 0
   })
-
-  // Add the count as a property for later sorting
-  if (!feature.properties) feature.properties = {}
-  feature.properties.validConnectorCount = totalValidConnectors
-
-  return hasValidConnector
 }
 
 function isHighPowerCharger(feature, minPowerKw = 50) {
@@ -48,24 +39,53 @@ function createPointsFromFeatures(features) {
   )
 }
 
-function sortSegmentPoints(points, segmentMidpoint, evMaxPowerKw) {
+function calculateChargerScore(feature, wanted = ['iec62196T2COMBO'], minPowerKw = 100) {
+  const props = feature.properties || {}
+  const refillPoints = normalizeToArray(props?.energyInfrastructureStation?.refillPoint)
+  
+  let totalScore = 0
+
+  refillPoints.forEach(point => {
+    const connectors = normalizeToArray(point?.connectors)
+    
+    // Find maximum power among wanted connectors in this refill point
+    let maxRefillPointPower = 0
+    const hasWantedConnector = connectors.some(connector => {
+      if (!connector?.connectorType || !wanted.includes(connector.connectorType)) return false
+      const powerKw = (connector.maxPowerAtSocket || 0) / 1000
+      maxRefillPointPower = Math.max(maxRefillPointPower, powerKw)
+      return true
+    })
+
+    // Only count this refill point if it has wanted connectors and meets minimum power
+    if (hasWantedConnector && maxRefillPointPower >= minPowerKw) {
+      totalScore += 1 
+    }
+  })
+
+  return totalScore
+}
+
+function sortSegmentPoints(points, segmentLine, wanted = ['iec62196T2COMBO'], minPowerKw = 100) {
+  // Calculate segment midpoint for tie-breaking
+  const segmentMidpoint = turf.along(
+    segmentLine, 
+    turf.length(segmentLine, { units: 'kilometers' }) / 2, 
+    { units: 'kilometers' }
+  )
+
   return points
     .map(pt => ({
       point: pt,
+      score: calculateChargerScore(pt, wanted, minPowerKw),
       distance: turf.distance(segmentMidpoint, turf.point(pt.geometry.coordinates))
     }))
     .sort((a, b) => {
-      // Sort by valid connector count (more connectors first)
-      const connectorCountDiff = (b.point.properties?.validConnectorCount || 0) - (a.point.properties?.validConnectorCount || 0)
-      if (connectorCountDiff !== 0) return connectorCountDiff
+      // Primary sort by calculated score (higher is better)
+      const scoreDiff = b.score - a.score
+      //if (Math.abs(scoreDiff) > 0.1) return scoreDiff // Use score if difference is meaningful
       
-      // Then by effective power (higher first)
-      const effectivePowerA = Math.min((a.point.properties?.max_power || 0) / 1000, evMaxPowerKw)
-      const effectivePowerB = Math.min((b.point.properties?.max_power || 0) / 1000, evMaxPowerKw)
-      const powerDiff = effectivePowerB - effectivePowerA
-      if (powerDiff !== 0) return powerDiff
-      
-      // Finally by distance (closer first)
+      // Fallback to distance to midpoint for ties (faster calculation)
       return a.distance - b.distance
     })
     .map(item => item.point)
@@ -84,7 +104,7 @@ function deduplicateByStationId(features) {
  * Corridor pruning:
  *  1) filter by connector + min power
  *  2) keep only inside a buffer around the baseline route
- *  3) thin per segment: keep top K by percentile (then power) in each segment
+ *  3) thin per segment: keep top K in each segment
  *
  * @param {Object} opts
  * @param {Array<Feature<Point>>} opts.features   Raw charger features
@@ -94,7 +114,6 @@ function deduplicateByStationId(features) {
  * @param {number} [opts.bufferKm=25]
  * @param {number} [opts.segmentKm=75]
  * @param {number} [opts.topPerSegment=3]
- * @param {number} [opts.evMaxPowerKw=150]        EV max charging power for effective power calculations
  * @returns {Array<Feature<Point>>} Array of pruned charger features
  */
 export function pruneAlongCorridor(opts) {
@@ -106,7 +125,6 @@ export function pruneAlongCorridor(opts) {
     bufferKm = 25,
     segmentKm = 75,
     topPerSegment = 3,
-    evMaxPowerKw = 150
   } = opts
 
   // 1) Filter by connector and power requirements
@@ -142,16 +160,16 @@ export function pruneAlongCorridor(opts) {
     if (segmentChargers.length === 0) continue
 
     // Sort and select top chargers for this segment
-    const segmentMidpoint = turf.along(
-      segmentLine, 
-      turf.length(segmentLine, { units: 'kilometers' }) / 2, 
-      { units: 'kilometers' }
-    )
-    
-    const sortedChargers = sortSegmentPoints(segmentChargers, segmentMidpoint, evMaxPowerKw)
+    const sortedChargers = sortSegmentPoints(segmentChargers, segmentLine, connectors, minPowerKw)
     selectedChargers.push(...sortedChargers.slice(0, topPerSegment))
   }
 
+  const deduplicatedChargers = deduplicateByStationId(selectedChargers)
+
+  console.log(`Maximum possible: ${segments * topPerSegment} chargers after pruning`)
+  console.log(`Retained ${selectedChargers.length} chargers within corridor`)
+  console.log(`Pruned ${deduplicatedChargers.length} unique chargers along corridor`)
+
   // 4) Remove duplicates by station ID
-  return deduplicateByStationId(selectedChargers)
+  return deduplicatedChargers
 }
