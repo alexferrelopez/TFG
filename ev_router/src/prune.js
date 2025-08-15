@@ -113,7 +113,7 @@ function deduplicateByStationId(features) {
  * @param {number} [opts.minPowerKw=100]
  * @param {number} [opts.bufferKm=25]
  * @param {number} [opts.segmentKm=75]
- * @param {number} [opts.topPerSegment=3]
+ * @param {number} [opts.maxOrsCandidates=120]
  * @returns {Array<Feature<Point>>} Array of pruned charger features
  */
 export function pruneAlongCorridor(opts) {
@@ -124,7 +124,7 @@ export function pruneAlongCorridor(opts) {
     minPowerKw = 100,
     bufferKm = 25,
     segmentKm = 75,
-    topPerSegment = 3,
+    maxOrsCandidates = 120
   } = opts
 
   // 1) Filter by connector and power requirements
@@ -144,6 +144,7 @@ export function pruneAlongCorridor(opts) {
   // 3) Process segments and select top chargers per segment
   const totalKm = turf.length(simpleLine, { units: 'kilometers' })
   const segments = Math.max(1, Math.ceil(totalKm / segmentKm))
+  const topPerSegment = Math.floor(maxOrsCandidates / segments)
   const selectedChargers = []
 
   for (let i = 0; i < segments; i++) {
@@ -166,7 +167,7 @@ export function pruneAlongCorridor(opts) {
 
   const deduplicatedChargers = deduplicateByStationId(selectedChargers)
 
-  console.log(`Maximum possible: ${segments * topPerSegment} chargers after pruning`)
+  console.log(`Maximum possible chargers: ${segments * topPerSegment}, ${topPerSegment} candidates per segment`)
   console.log(`Retained ${selectedChargers.length} chargers within corridor`)
   console.log(`Pruned ${deduplicatedChargers.length} unique chargers along corridor`)
 

@@ -66,7 +66,7 @@ router.post('/ev-route', async (req, res) => {
     } = req.body
 
     // Use server-controlled performance parameters
-    const { bufferKm, segmentKm, topPerSegment } = PERFORMANCE_CONFIG
+    const { bufferKm, segmentKm, maxOrsCandidates } = PERFORMANCE_CONFIG
 
     console.log('EV Route Request:', {
       origin,
@@ -77,7 +77,7 @@ router.post('/ev-route', async (req, res) => {
       minPowerKw,
       bufferKm,
       segmentKm,
-      topPerSegment
+      maxOrsCandidates
     })
 
     // 1) Baseline route (for corridor)
@@ -96,7 +96,7 @@ router.post('/ev-route', async (req, res) => {
       minPowerKw,
       bufferKm,
       segmentKm,
-      topPerSegment,
+      maxOrsCandidates,
       evMaxPowerKw
     })
     const candidates = pruneResult.features || pruneResult

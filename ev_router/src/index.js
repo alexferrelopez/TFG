@@ -28,7 +28,7 @@ console.log(`Loaded ${chargers.length} chargers: ${highPower.length} high-power 
 export const PERFORMANCE_CONFIG = {
   bufferKm: Number(process.env.BUFFER_KM || 25),
   segmentKm: Number(process.env.SEGMENT_KM || 75),
-  topPerSegment: Number(process.env.TOP_PER_SEGMENT || 3),
+  maxOrsCandidates: Number(process.env.MAX_ORS_CANDIDATES || 120),
   requestTimeoutMs: 30000 // 30 second timeout
 }
 
