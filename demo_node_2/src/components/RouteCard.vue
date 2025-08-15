@@ -56,6 +56,7 @@
 import { ref, watch, onMounted } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { connectorConfig } from '@/config/connectors.js'
+import { useNotifications } from '@/composables/useNotifications.js'
 
 const props = defineProps({
   selectedLocation: {
@@ -65,6 +66,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['planRoute', 'close'])
+
+const { showError } = useNotifications()
 
 const originData = ref(null)
 const destinationData = ref(null)
@@ -135,7 +138,7 @@ const requestCurrentLocation = async () => {
       }
     }
   } catch (error) {
-    console.error('Error getting location:', error)
+    showError('Location Access Failed', 'Unable to access your current location. Please enter your origin manually.')
   }
 }
 
@@ -155,22 +158,12 @@ const getCurrentPosition = () => {
 
 const reverseGeocode = async (lat, lon) => {
   try {
-    const response = await fetch(`http://192.168.1.153:3001/reverse?lat=${lat}&lon=${lon}&limit=1&lang=en`)
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    // Return the first result if available
-    if (data.features && data.features.length > 0) {
-      return data.features[0]
-    }
-
-    return null
-  } catch (error) {
-    console.error('Reverse geocoding failed:', error)
+    const res = await fetch(`http://192.168.1.153:3001/reverse?lat=${lat}&lon=${lon}&limit=1&lang=en`)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    return data.features?.[0] ?? null
+  } catch (e) {
+    showError('Location Service Error', 'Unable to determine your address. Using coordinates only.')
     return null
   }
 }

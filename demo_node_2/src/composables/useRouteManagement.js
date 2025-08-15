@@ -137,7 +137,7 @@ export function useRouteManagement() {
         if (response.status === 422) {
           showWarning('No Route Found', 'No feasible route found with current settings. Try adjusting your EV range or charging requirements.')
         } else if (response.status === 400) {
-          showError('Invalid Request', 'Invalid route parameters. Please check your origin and destination.')
+          showError('Invalid Request', 'Invalid route parameters. Please check your origin, destination and other preferences.')
         } else if (response.status === 504) {
           showError('Request Timeout', 'Route calculation is taking too long. Please try again.')
         } else {

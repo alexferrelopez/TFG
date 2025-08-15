@@ -46,8 +46,6 @@ const { showLow, showMid, showHigh, showVeryHigh, applyPercentileFilter, setupFi
 
 // Event handlers
 function handleLocationSelect(selectedLocationData) {
-  console.log('Selected location:', selectedLocationData)
-  
   selectedStation.value = null
   selectedLocation.value = selectedLocationData
   
@@ -66,8 +64,6 @@ function handlePlanRoute(routeData) {
 }
 
 function handleSetAsDestination(stationLocationData) {
-  console.log('Setting station as destination:', stationLocationData)
-  
   // Clear selected station and set as location for route planning
   selectedStation.value = null
   selectedLocation.value = stationLocationData
