@@ -59,10 +59,10 @@ router.post('/ev-route', async (req, res) => {
     const {
       origin,
       destination,
-      evRangeKm = Number(process.env.RANGE_KM || 250),
-      evMaxPowerKw = Number(process.env.EV_MAX_POWER_KW || 150),
+      evRangeKm,
+      evMaxPowerKw,
       connectors = ['iec62196T2COMBO'],
-      minPowerKw = Number(process.env.MIN_POWER_KW || 100),
+      minPowerKw,
     } = req.body
 
     // Use server-controlled performance parameters
