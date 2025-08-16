@@ -7,7 +7,6 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import 'dotenv/config'
-import { divideChargersByPower } from './prune.js'
 import setupRoutes from './routes/index.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -18,11 +17,7 @@ const port = process.env.PORT || 3001
 // Load charger data once at startup
 const chargersPath = path.join(__dirname, '../data/chargers.geojson')
 const chargersRaw = JSON.parse(fs.readFileSync(chargersPath, 'utf8'))
-const chargers = chargersRaw.features || []
-
-// Divide chargers by power level on startup
-const { highPower, lowPower } = divideChargersByPower(chargers, 50)
-console.log(`Loaded ${chargers.length} chargers: ${highPower.length} high-power (≥50kW), ${lowPower.length} low-power (<50kW)`)
+export const chargers = chargersRaw.features || []
 
 // Server-controlled performance parameters (not exposed to users)
 export const PERFORMANCE_CONFIG = {
@@ -32,8 +27,6 @@ export const PERFORMANCE_CONFIG = {
   requestTimeoutMs: 30000 // 30 second timeout
 }
 
-// Export charger data for routes
-export const chargerData = { chargers, highPower, lowPower }
 
 // Rate limiting configuration
 const limiter = rateLimit({

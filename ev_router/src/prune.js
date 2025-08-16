@@ -19,18 +19,6 @@ function hasConnectorWithMinPower(feature, wanted = ['iec62196T2COMBO'], minPowe
   })
 }
 
-function isHighPowerCharger(feature, minPowerKw = 50) {
-  return (feature?.properties?.max_power || 0) / 1000 >= minPowerKw
-}
-
-export function divideChargersByPower(chargers, minPowerKw = 50) {
-  return chargers.reduce((acc, charger) => {
-    const target = isHighPowerCharger(charger, minPowerKw) ? 'highPower' : 'lowPower'
-    acc[target].push(charger)
-    return acc
-  }, { highPower: [], lowPower: [] })
-}
-
 // --- main ------------------------------------------------------
 
 function createPointsFromFeatures(features) {

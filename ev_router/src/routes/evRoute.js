@@ -5,7 +5,7 @@ import { stitchPath } from '../stitch.js'
 import { orsRoute } from '../ors.js'
 import { pruneAlongCorridor } from '../prune.js'
 import { validateEvRouteRequest } from '../validation.js'
-import { chargerData, PERFORMANCE_CONFIG } from '../index.js'
+import { chargers, PERFORMANCE_CONFIG } from '../index.js'
 
 const router = express.Router()
 
@@ -90,7 +90,7 @@ router.post('/ev-route', async (req, res) => {
     // 2) Prune candidates along corridor
     const step2Start = performance.now()
     const pruneResult = pruneAlongCorridor({
-      features: chargerData.chargers,
+      features: chargers,
       baseLine,
       connectors,
       minPowerKw,

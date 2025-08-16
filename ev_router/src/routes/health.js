@@ -1,5 +1,5 @@
 import express from 'express'
-import { chargerData } from '../index.js'
+import { chargers } from '../index.js'
 
 const router = express.Router()
 
@@ -15,9 +15,7 @@ router.get('/health', (req, res) => {
 router.get('/', (req, res) => {
   res.json({
     ok: true,
-    chargers: chargerData.chargers.length,
-    highPower: chargerData.highPower.length,
-    lowPower: chargerData.lowPower.length
+    chargers: chargers.length
   })
 })
 
