@@ -19,7 +19,7 @@ const collapsed = ref(false);
 <style scoped>
 .card-container {
   position: absolute;
-  width: 450px;
+  width: 440px;
   height: 100%;
   transform: translateX(0);
   transition: transform 0.2s ease;
@@ -33,7 +33,7 @@ const collapsed = ref(false);
 .content-area {
   position: relative;
   height: 100%;
-  padding: 2.5rem;
+  padding: 2.4rem;
   box-sizing: border-box;
   background: white;
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);

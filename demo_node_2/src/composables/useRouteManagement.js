@@ -81,20 +81,6 @@ export function useRouteManagement() {
     }
   }
 
-  function getRouteMidCoord(geojson) {
-    if (!geojson?.features?.length) return null
-    const coords = []
-    for (const f of geojson.features) {
-      const g = f.geometry
-      if (!g) continue
-      if (g.type === 'LineString') coords.push(...g.coordinates)
-      else if (g.type === 'MultiLineString') coords.push(...g.coordinates.flat())
-      else if (g.type === 'Point') coords.push(g.coordinates)
-    }
-    if (!coords.length) return null
-    return coords[Math.floor(coords.length / 2)] // simple midpoint by index
-  }
-
   function removeRoutePopup() {
     try { routePopupApp?.unmount?.() } catch (e) { }
     routePopupApp = null
@@ -144,7 +130,7 @@ export function useRouteManagement() {
         [Math.min(...lons), Math.min(...lats)],
         [Math.max(...lons), Math.max(...lats)]
       ]
-      map.fitBounds(bounds, { padding: 200, duration: 800 })
+      map.fitBounds(bounds, { padding: 400, duration: 800 })
     }
   }
 

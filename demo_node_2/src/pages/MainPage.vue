@@ -175,13 +175,6 @@ onMounted(() => {
   transform: translateX(0);
 }
 
-.ev-route-popup{
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 10;         /* above map UI */
-}
-
 /* Remove default MapLibre popup padding */
 :global(.maplibregl-popup-content) {
   padding: 0 !important;
