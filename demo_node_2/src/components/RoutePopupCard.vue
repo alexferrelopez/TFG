@@ -209,8 +209,8 @@ const isMin = ref(false)
   font-size: 14px;
   font-weight: 700;
   color: #374151;
-  padding: 0 var(--pad);
-  margin: 6px 0;
+
+  margin: 8px 0;
 }
 
 .legs {
@@ -278,13 +278,14 @@ const isMin = ref(false)
 .meta {
   color: var(--muted);
   flex-wrap: wrap;
-  line-height: 1; 
+  line-height: 1;
 }
 
 .empty {
   font-size: 14px;
   color: var(--muted);
   padding: 8px var(--pad) 12px;
+  margin: 0;
 }
 
 .stops {
