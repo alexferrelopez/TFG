@@ -1,39 +1,36 @@
 <template>
-  <div class="rcard" :class="{ 'is-min': isMin }">
+  <div class="rcard" :class="{ min: isMin }">
     <!-- Header / Summary -->
-    <header class="rcard-header">
-      <div class="rcard-title">Trip summary</div>
+    <header class="head">
+      <h3 class="title">Trip summary</h3>
 
       <button class="rcard-minbtn" @click="isMin = !isMin">
         <img :src="isMin ? '/src/assets/expand.svg' : '/src/assets/minimize.svg'" />
       </button>
 
-      <div class="rcard-stats">
-        <div><small>Distance</small><span>{{ summary.totalDistanceFormatted }}</span></div>
-        <div><small>Drive time</small><span>{{ summary.totalDurationFormatted }}</span></div>
-        <div><small>Charging</small><span>{{ summary.totalChargingTimeFormatted }}</span></div>
-        <div><small>Total trip</small><span>{{ summary.totalTripTimeFormatted }}</span></div>
+      <div class="stats">
+        <div class="stat"><small>Distance</small><b>{{ summary.totalDistanceFormatted }}</b></div>
+        <div class="stat"><small>Drive time</small><b>{{ summary.totalDurationFormatted }}</b></div>
+        <div class="stat"><small>Charging</small><b>{{ summary.totalChargingTimeFormatted }}</b></div>
+        <div class="stat"><small>Total trip</small><b>{{ summary.totalTripTimeFormatted }}</b></div>
       </div>
     </header>
 
     <!-- Body -->
-    <div class="rcard-body" :class="{ 'is-collapsed': isMin }">
+    <div class="body" :class="{ collapsed: isMin }">
       <!-- Legs -->
-      <section class="rcard-legs" v-if="legs.length">
-        <div class="rcard-sec-title">{{ legs.length }} Legs</div>
-        <ul class="rcard-leglist">
-          <li v-for="leg in legs" :key="leg.legIndex" class="rcard-leg">
-            <div class="rcard-leg-dot"></div>
-            <div class="rcard-leg-main">
-              <div class="rcard-leg-line">
-                <span class="rcard-leg-from">{{ leg.from }}</span>
-                <span class="rcard-leg-arrow">→</span>
-                <span class="rcard-leg-to">{{ leg.to }}</span>
+      <section v-if="legs.length">
+        <h4 class="sec">{{ legs.length }} Legs</h4>
+        <ul class="legs">
+          <li v-for="leg in legs" :key="leg.legIndex" class="leg">
+            <div class="legcol">
+              <div class="legline">
+                <span class="from">{{ leg.from }}</span>
+                <span class="arrow">→</span>
+                <span class="to">{{ leg.to }}</span>
               </div>
-              <div class="rcard-leg-meta">
-                <span>{{ leg.distanceFormatted }}</span>
-                <span>•</span>
-                <span>{{ leg.durationFormatted }}</span>
+              <div class="meta">
+                <span>{{ leg.distanceFormatted }}</span><span>•</span><span>{{ leg.durationFormatted }}</span>
               </div>
             </div>
           </li>
@@ -41,34 +38,25 @@
       </section>
 
       <!-- Stops -->
-      <section class="rcard-stops">
-        <div class="rcard-sec-title">{{ stops.length }} Charging stops</div>
+      <section>
+        <h4 class="sec">{{ stops.length }} Charging stops</h4>
+        <p v-if="!stops.length" class="empty">No charging stops on this route.</p>
 
-        <div v-if="!stops.length" class="rcard-empty">No charging stops on this route.</div>
-
-        <div v-else class="rcard-stoplist">
-          <article v-for="(s, i) in stops" :key="s.id || i" class="rcard-stop">
-            <div class="rcard-stop-row rcard-stop-top">
-              <div class="rcard-stop-title">{{ s.name }}</div>
-              <div class="rcard-stop-badge">{{ s.estimatedChargingTimeFormatted }}</div>
+        <div v-else class="stops">
+          <article v-for="(s, i) in stops" :key="s.id || i" class="stop">
+            <div class="row top">
+              <div class="stoptitle">{{ s.name }}</div>
+              <span class="badge">{{ s.estimatedChargingTimeFormatted }}</span>
             </div>
 
-            <div class="rcard-stop-row rcard-stop-sub">
-              <div class="rcard-stop-subitem">
-                <span>{{ s.town }}</span>
-              </div>
-              <div class="rcard-stop-subitem">
-                <span>{{ s.validConnectors }} x {{ s.maxPowerFormatted }}</span>
-              </div>
+            <div class="row sub">
+              <span>{{ s.town }}</span>
+              <span>{{ s.validConnectors }} x {{ s.maxPowerFormatted }}</span>
             </div>
 
-            <div class="rcard-stop-row rcard-stop-meta">
-              <div class="rcard-stop-metaitem">
-                <span class="rcard-ellipsis">{{ s.operator }}</span>
-              </div>
-              <div class="rcard-stop-metaitem">
-                <span class="rcard-ellipsis">{{ s.address }}</span>
-              </div>
+            <div class="row meta">
+              <span class="ellipsis">{{ s.operator }}</span>
+              <span class="ellipsis">{{ s.address }}</span>
             </div>
           </article>
         </div>
@@ -82,16 +70,30 @@ import { ref } from 'vue'
 
 defineProps({
   summary: { type: Object, required: true },
-  legs:    { type: Array,  required: true },
-  stops:   { type: Array,  required: true }
+  legs: { type: Array, required: true },
+  stops: { type: Array, required: true }
 })
 
 const isMin = ref(false)
 </script>
 
 <style scoped>
-/* CARD CONTAINER */
 .rcard {
+  --bg: #fff;
+  --fg: #111827;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --chip-bg: #f9fafb;
+  --chip-br: #f3f4f6;
+  --ok-fg: #065f46;
+  --ok-bg: #ecfdf5;
+  --ok-br: #d1fae5;
+  --radius: 14px;
+  --pad: 12px;
+  --gap: 8px;
+  --accent: #3b82f6;
+  --accent-ring: #93c5fd;
+
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -99,16 +101,16 @@ const isMin = ref(false)
   z-index: 2;
   width: 380px;
   max-width: 92vw;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  box-shadow: 0 10px 24px rgba(0,0,0,.12);
-  display: flex;
-  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .12);
   overflow: hidden;
+  animation: slideUp .3s ease-out;
   font-family: system-ui, -apple-system, sans-serif;
-  color: #111827;
-  animation: slideUp 0.3s ease-out;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 @keyframes slideUp {
@@ -118,16 +120,16 @@ const isMin = ref(false)
   }
 }
 
-/* HEADER */
-.rcard-header {
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
+.head {
+  position: relative;
+  padding: var(--pad);
+  border-bottom: 1px solid var(--line);
 }
 
-.rcard-title {
-  font-size: 14px;
+.title {
+  font-size: 17px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin: 0 0 12px;
 }
 
 .rcard-minbtn {
@@ -137,13 +139,13 @@ const isMin = ref(false)
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border: 1px solid var(--line);
+  background: var(--chip-bg);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.15s ease;
+  transition: background-color .15s;
 }
 
 .rcard-minbtn:hover {
@@ -155,91 +157,170 @@ const isMin = ref(false)
   height: 12px;
 }
 
-.rcard-stats {
+.stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 
-.rcard-stats > div {
-  background: #f9fafb;
-  border: 1px solid #f3f4f6;
+.stat {
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-br);
   border-radius: 10px;
   padding: 8px;
   text-align: center;
 }
 
-.rcard-stats small { 
+.stat small {
   display: block;
-  font-size: 11px; 
-  color: #6b7280; 
-  margin-bottom: 2px; 
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 2px;
 }
 
-.rcard-stats span { 
-  font-size: 13px; 
-  font-weight: 700; 
+.stat b {
+  font-size: 14px;
 }
 
-/* BODY (scrolls and animates) */
-.rcard-body {
-  max-height: 45vh;
-  overflow-y: overlay;
+.body {
+  max-height: 35vh;
+  overflow-y: auto;
   padding: 10px 0;
-  transition: max-height 0.3s ease, opacity 0.2s ease;
-  opacity: 1;
+  transition: max-height .3s ease, opacity .2s ease;
+  scrollbar-gutter: stable both-edges;
+  contain: layout paint;
+  will-change: max-height, opacity;
 }
 
-.rcard-body.is-collapsed {
+@supports not (scrollbar-gutter: stable) {
+  .body {
+    overflow-y: scroll;
+  }
+}
+
+.body.collapsed {
   max-height: 0;
   opacity: 0;
   padding: 0;
   overflow: hidden;
 }
 
-/* SECTIONS / TITLES */
-.rcard-sec-title {
-  font-size: 12px;
+.sec {
+  font-size: 14px;
   font-weight: 700;
   color: #374151;
-  padding: 0 12px;
+  padding: 0 var(--pad);
   margin: 6px 0;
 }
 
-/* LEGS */
-.rcard-legs { padding-top: 2px; }
-.rcard-leglist { list-style: none; margin: 0; padding: 0 10px 0 18px; }
-.rcard-leg { position: relative; padding: 8px 4px 8px 16px; border-left: 2px solid #e5e7eb; }
-.rcard-leg-dot { position: absolute; left: -6px; top: 14px; width: 10px; height: 10px; background: #3b82f6; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px #93c5fd; }
-.rcard-leg-main { display: flex; flex-direction: column; gap: 2px; }
-.rcard-leg-line { font-size: 13px; font-weight: 600; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-.rcard-leg-arrow { color: #6b7280; }
-.rcard-leg-meta { font-size: 12px; color: #6b7280; display: flex; gap: 6px; }
+.legs {
+  list-style: none;
+  margin: 0;
+  padding: 0 10px 0 18px;
+}
 
-/* STOPS */
-.rcard-empty { font-size: 12px; color: #6b7280; padding: 8px 12px 12px; }
+.leg {
+  position: relative;
+  padding: 8px 4px 8px 16px;
+  border-left: 2px solid var(--line);
+}
 
-.rcard-stoplist {
+.leg::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 12px;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--accent-ring);
+}
+
+.legcol {
+  display: grid;
+  gap: 2px;
+}
+
+.legline {
+  font-size: 14px;
+  font-weight: 600;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.arrow {
+  color: var(--muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sub,
+.meta {
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.sub {
+  color: #374151;
+}
+
+.meta {
+  color: var(--muted);
+  flex-wrap: wrap;
+  line-height: 1; 
+}
+
+.empty {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 8px var(--pad) 12px;
+}
+
+.stops {
+  display: grid;
+  gap: var(--gap);
   padding: 0 8px 8px;
 }
 
-.rcard-stop {
-  border: 1px solid #e5e7eb;
+.stop {
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
-  background: #fff;
+  background: var(--bg);
 }
 
-.rcard-stop-row { display: flex; align-items: center; justify-content: space-between; }
-.rcard-stop-top { gap: 8px; }
-.rcard-stop-title { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
-.rcard-stop-badge { font-size: 11px; font-weight: 700; color: #065f46; background: #ecfdf5; border: 1px solid #d1fae5; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
-.rcard-stop-sub { justify-content: flex-start; gap: 12px; margin-top: 6px; }
-.rcard-stop-subitem { font-size: 12px; color: #374151; }
-.rcard-stop-meta { justify-content: flex-start; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
-.rcard-stop-metaitem { font-size: 12px; color: #6b7280; min-width: 0; }
-.rcard-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px; }
+.top .stoptitle {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ok-fg);
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-br);
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
+}
 </style>
