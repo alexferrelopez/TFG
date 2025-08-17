@@ -9,11 +9,12 @@ function coordOf(feature) {
 }
 
 
-function getStationMaxPower(feature, wanted, minPowerKw = 100) {
+export function getStationMaxPower(feature, wanted, minPowerKw = 100) {
   const props = feature.properties || {}
   const refillPoints = normalizeToArray(props?.energyInfrastructureStation?.refillPoint)
 
   let maxPower = 0
+  let validConnectors = 0
 
   refillPoints.forEach(point => {
     normalizeToArray(point?.connectors).forEach(connector => {
@@ -21,18 +22,21 @@ function getStationMaxPower(feature, wanted, minPowerKw = 100) {
       const powerKw = (connector.maxPowerAtSocket || 0) / 1000
       if (powerKw >= minPowerKw) {
         maxPower = Math.max(maxPower, powerKw)
+        validConnectors++
       }
     })
   })
 
-  return maxPower
+  return { maxPower, validConnectors }
 }
 
 export function estimateChargingTimeSeconds(feature, evMaxPowerKw, connectors, minPowerKw) {
-  const stationMaxKw = getStationMaxPower(feature, connectors, minPowerKw)
+  const { maxPower } = getStationMaxPower(feature, connectors, minPowerKw)
+
+  console.log('Station Max Power:', maxPower)
 
   // Effective power is limited by both station and EV capabilities
-  const effectiveKw = Math.min(stationMaxKw, evMaxPowerKw)
+  const effectiveKw = Math.min(maxPower, evMaxPowerKw)
 
   if (effectiveKw <= 0) return Infinity
 

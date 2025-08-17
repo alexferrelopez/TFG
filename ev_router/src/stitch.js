@@ -1,6 +1,6 @@
 // src/stitch.js
 import { orsRoute } from './ors.js'
-import { estimateChargingTimeSeconds } from './solver.js'
+import { estimateChargingTimeSeconds, getStationMaxPower } from './solver.js'
 
 // Utility functions for formatting
 function formatDuration(seconds) {
@@ -19,6 +19,9 @@ function getNodeDisplayName(node, index, kind) {
 
 function createStop(node, evMaxPowerKw, connectors, minPowerKw) {
   const properties = node.feature?.properties || {}
+
+  const { maxPower, validConnectors } = getStationMaxPower(node.feature, connectors, minPowerKw)
+
   const chargingTime = estimateChargingTimeSeconds(node.feature, evMaxPowerKw, connectors, minPowerKw)
 
   return {
@@ -29,8 +32,9 @@ function createStop(node, evMaxPowerKw, connectors, minPowerKw) {
     operator: properties.operator,
     address: properties.address,
     town: properties.town,
-    max_power: properties.max_power,
-    maxPowerFormatted: `${Math.floor(properties.max_power / 1000)} kW`,
+    max_power: maxPower,
+    maxPowerFormatted: `${maxPower} kW`,
+    validConnectors: validConnectors,
     estimatedChargingTimeSeconds: chargingTime,
     estimatedChargingTimeFormatted: `${Math.floor(chargingTime / 60)}m`
   }
