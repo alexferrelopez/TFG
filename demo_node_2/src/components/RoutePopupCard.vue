@@ -30,7 +30,7 @@
                 <span class="to">{{ leg.to }}</span>
               </div>
               <div class="meta">
-                <span>{{ leg.distanceFormatted }}</span><span>•</span><span>{{ leg.durationFormatted }}</span>
+                <span>{{ leg.distanceFormatted }}</span><span> • </span><span>{{ leg.durationFormatted }}</span>
               </div>
             </div>
           </li>
@@ -43,7 +43,11 @@
         <p v-if="!stops.length" class="empty">No charging stops on this route.</p>
 
         <div v-else class="stops">
-          <article v-for="(s, i) in stops" :key="s.id || i" class="stop">
+          <article v-for="(s, i) in stops" 
+            :key="s.id || i" 
+            class="stop"
+            @click="zoomToStop(s)"
+          >
             <div class="row top">
               <div class="stoptitle">{{ s.name }}</div>
               <span class="badge">{{ s.estimatedChargingTimeFormatted }}</span>
@@ -51,12 +55,15 @@
 
             <div class="row sub">
               <span>{{ s.town }}</span>
-              <span>{{ s.validConnectors }} x {{ s.maxPowerFormatted }}</span>
+              <b>{{ s.validConnectors }} x {{ s.maxPowerFormatted }}</b>
             </div>
 
             <div class="row meta">
               <span class="ellipsis">{{ s.operator }}</span>
-              <span class="ellipsis">{{ s.address }}</span>
+              <span class="ellipsis">
+                <img src="@/assets/location.svg" alt="" class="icon" />
+                {{ s.address }}
+              </span>
             </div>
           </article>
         </div>
@@ -68,11 +75,23 @@
 <script setup>
 import { ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   summary: { type: Object, required: true },
   legs: { type: Array, required: true },
-  stops: { type: Array, required: true }
+  stops: { type: Array, required: true },
+  map: { type: Object, required: true }
 })
+
+function zoomToStop(stop) {
+  if (!props.map || !stop.lon || !stop.lat) return
+    props.map.flyTo({
+    center: [stop.lon, stop.lat],
+    zoom: 16,
+    speed: 1.2,
+    curve: 1.42,
+    essential: true
+  })
+}
 
 const isMin = ref(false)
 </script>
@@ -268,7 +287,7 @@ const isMin = ref(false)
   justify-content: flex-start;
   gap: 12px;
   margin-top: 6px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .sub {
@@ -278,7 +297,7 @@ const isMin = ref(false)
 .meta {
   color: var(--muted);
   flex-wrap: wrap;
-  line-height: 1;
+  row-gap: 4px;
 }
 
 .empty {
@@ -289,17 +308,37 @@ const isMin = ref(false)
 }
 
 .stops {
+  margin: 0 8px;
   display: grid;
   gap: var(--gap);
   padding: 0 8px 8px;
 }
 
 .stop {
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
   padding: 10px;
   background: var(--bg);
+  transition: background-color .2s;
+  cursor: pointer;
+  transition: box-shadow .2s ease, color .2s ease;
 }
+.stop:hover {
+  background: #f8f9fa;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+.stop:active {
+  background: #f0f0f0;
+  transform: none;
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.15),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
 
 .top .stoptitle {
   font-size: 13px;
@@ -318,7 +357,15 @@ const isMin = ref(false)
   white-space: nowrap;
 }
 
+.icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(15%);
+}
+
 .ellipsis {
+  align-items: center; 
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
