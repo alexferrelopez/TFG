@@ -105,7 +105,7 @@ router.post('/ev-route', async (req, res) => {
     // 3) Build EV-feasible graph from O + candidates + D
     const step3Start = performance.now()
     const { nodes, graph } = await buildChargerGraph({
-      origin, destination, chargers: candidates, evRangeKm, evMaxPowerKw
+      origin, destination, chargers: candidates, evRangeKm, evMaxPowerKw, connectors, minPowerKw
     })
     timings.step3_build_graph = performance.now() - step3Start
 
@@ -141,7 +141,7 @@ router.post('/ev-route', async (req, res) => {
     const step5Start = performance.now()
     const byKey = Object.fromEntries(nodes.map(n => [n.key, n]))
     const recommendedNodes = recommendedKeys.map(k => byKey[k])
-    const recommendedPath = await stitchPath(recommendedNodes, evMaxPowerKw)
+    const recommendedPath = await stitchPath(recommendedNodes, evMaxPowerKw, connectors, minPowerKw)
     timings.step5_stitch_path = performance.now() - step5Start
 
     // Calculate total time

@@ -3,7 +3,7 @@ import * as turf from '@turf/turf'
 
 // --- helpers ----------------------------------------------------
 
-function normalizeToArray(value) {
+export function normalizeToArray(value) {
   return Array.isArray(value) ? value : (value ? [value] : [])
 }
 

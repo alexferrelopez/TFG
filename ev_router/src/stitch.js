@@ -17,10 +17,10 @@ function getNodeDisplayName(node, index, kind) {
   return node.feature?.properties?.name || `Stop ${index}`
 }
 
-function createStop(node, evMaxPowerKw) {
+function createStop(node, evMaxPowerKw, connectors, minPowerKw) {
   const properties = node.feature?.properties || {}
-  const chargingTime = estimateChargingTimeSeconds(node.feature, evMaxPowerKw)
-  
+  const chargingTime = estimateChargingTimeSeconds(node.feature, evMaxPowerKw, connectors, minPowerKw)
+
   return {
     id: properties['@id'] ?? node.key,
     lon: node.coord[0],
@@ -74,6 +74,8 @@ function processLegGeometry(legGeo, nodeFrom, nodeTo, legIndex) {
  *
  * @param {Array<{key:string, kind:string, coord:[number,number], feature?:any}>} nodesInPath
  * @param {number} [evMaxPowerKw=150] - Max charging power of the EV for charging time calculation
+ * @param {Array<string>} connectors - Supported connector types
+ * @param {number} minPowerKw - Minimum power requirement for charging
  * @returns {Promise<{ 
  *   geojson: GeoJSON.FeatureCollection, 
  *   stops: Array<Object>, 
@@ -81,7 +83,7 @@ function processLegGeometry(legGeo, nodeFrom, nodeTo, legIndex) {
  *   summary: {legs:number, stops:number, totalDuration:number, totalDistance:number, totalChargingTime:number, totalTripTime:number} 
  * }>}
  */
-export async function stitchPath(nodesInPath, evMaxPowerKw = 150) {
+export async function stitchPath(nodesInPath, evMaxPowerKw = 150, connectors, minPowerKw) {
   // Fetch ORS directions for each consecutive pair of nodes
   const legPromises = []
   for (let i = 0; i < nodesInPath.length - 1; i++) {
@@ -114,7 +116,7 @@ export async function stitchPath(nodesInPath, evMaxPowerKw = 150) {
   const stops = []
   for (let i = 1; i < nodesInPath.length - 1; i++) {
     const node = nodesInPath[i]
-    const stop = createStop(node, evMaxPowerKw)
+    const stop = createStop(node, evMaxPowerKw, connectors, minPowerKw)
     stops.push(stop)
     
     if (node.kind === 'charger' && node.feature) {
