@@ -36,7 +36,7 @@ function formatPower(kW) {
 function onIconError(event) {
   const img = event.currentTarget;
   img.onerror = null;
-  img.src = new URL('../assets/unknown_charger.svg', import.meta.url).href;
+  img.src = new URL('@/assets/connectors/unknown_charger.svg', import.meta.url).href;
 }
 </script>
 

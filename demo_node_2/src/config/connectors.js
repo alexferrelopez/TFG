@@ -62,10 +62,10 @@ export const connectorMap = connectorConfig.reduce((map, connector) => {
 export function getConnectorIconUrl(connectorId) {
   const connector = connectorMap[connectorId]
   if (connector) {
-    return new URL(connector.icon.replace('/src/', '../'), import.meta.url).href
+    return new URL(connector.icon, import.meta.url).href
   }
   // Fallback to unknown charger icon
-  return new URL('../assets/unknown_charger.svg', import.meta.url).href
+  return new URL('@/assets/connectors/unknown_charger.svg', import.meta.url).href
 }
 
 // Helper function to get connector display name

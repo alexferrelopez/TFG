@@ -42,10 +42,10 @@ export const paymentMethodMap = paymentMethodConfig.reduce((map, method) => {
 export function getPaymentMethodIconUrl(methodId) {
   const method = paymentMethodMap[methodId]
   if (method) {
-    return new URL(method.icon.replace('/src/', '../'), import.meta.url).href
+    return new URL(method.icon.replace('/src/', '@/'), import.meta.url).href
   }
   // Fallback to credit card icon
-  return new URL('../assets/payment-methods/credit_card.svg', import.meta.url).href
+  return new URL('@/assets/payment-methods/credit_card.svg', import.meta.url).href
 }
 
 // Helper function to get payment method display label

@@ -89,7 +89,7 @@ const isDisabilityAccessible = computed(() => {
   return accessibility && accessibility.toLowerCase() === 'disabilityaccessible'
 })
 
-const accessibilityIconUrl = new URL('../assets/accessible.svg', import.meta.url).href
+const accessibilityIconUrl = new URL('@/assets/accessible.svg', import.meta.url).href
 
 const paymentMethods = computed(() => {
   const methods = props.chargingStation.energyInfrastructureStation?.authenticationAndIdentificationMethods || []
@@ -118,7 +118,7 @@ function onPaymentIconError(event) {
   const img = event.currentTarget;
   img.onerror = null;
   // Fallback to credit card icon if the specific icon fails to load
-  img.src = new URL('../assets/payment-methods/credit_card.svg', import.meta.url).href;
+  img.src = new URL('@/assets/payment-methods/credit_card.svg', import.meta.url).href;
 }
 
 function onAccessibilityIconError(event) {
@@ -227,6 +227,7 @@ function onAccessibilityIconError(event) {
 .destination-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   width: 100%;
   padding: 0.75rem 1rem;

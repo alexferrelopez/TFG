@@ -1,5 +1,4 @@
 import { useNotifications } from '@/composables/useNotifications.js'
-import maplibregl from 'maplibre-gl'
 import { createApp } from 'vue'
 import RoutePopupCard from '@/components/RoutePopupCard.vue'
 
@@ -93,18 +92,19 @@ export function useRouteManagement() {
   function showRoutePopup(map, routeLike) {
     removeRoutePopup()
 
-    const container = document.createElement('div')
-    container.id = 'ev-route-popup'
+    routePopup = document.createElement('div')
+    routePopup.id = 'ev-route-popup'
 
     // Append to document body instead of map container for fixed positioning
-    document.body.appendChild(container)
+    document.body.appendChild(routePopup)
 
     routePopupApp = createApp(RoutePopupCard, {
       summary: routeLike.summary || {},
       legs: routeLike.legs || [],
       stops: routeLike.stops || [],
+      map: map,
     })
-    routePopupApp.mount(container)
+    routePopupApp.mount(routePopup)
   }
 
   function fitMapToRoute(map, routeData) {
