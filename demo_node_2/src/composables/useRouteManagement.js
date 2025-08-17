@@ -1,9 +1,13 @@
 import { useNotifications } from '@/composables/useNotifications.js'
+import maplibregl from 'maplibre-gl'
+import { createApp } from 'vue'
+import RoutePopupCard from '@/components/RoutePopupCard.vue'
 
 export function useRouteManagement() {
   let routeAbortController = null
+  let routePopup = null
+  let routePopupApp = null
 
-  
   const { showError, showWarning } = useNotifications()
 
   function clearExistingRoute(map) {
@@ -21,6 +25,8 @@ export function useRouteManagement() {
         map.removeSource(sourceId)
       }
     })
+
+    removeRoutePopup()
   }
 
   function displayRoute(routeData, addOrUpdateSource, addOrUpdateLineLayer) {
@@ -75,12 +81,53 @@ export function useRouteManagement() {
     }
   }
 
-  function fitMapToRoute(routeData, map) {
+  function getRouteMidCoord(geojson) {
+    if (!geojson?.features?.length) return null
+    const coords = []
+    for (const f of geojson.features) {
+      const g = f.geometry
+      if (!g) continue
+      if (g.type === 'LineString') coords.push(...g.coordinates)
+      else if (g.type === 'MultiLineString') coords.push(...g.coordinates.flat())
+      else if (g.type === 'Point') coords.push(g.coordinates)
+    }
+    if (!coords.length) return null
+    return coords[Math.floor(coords.length / 2)] // simple midpoint by index
+  }
+
+  function removeRoutePopup() {
+    try { routePopupApp?.unmount?.() } catch (e) { }
+    routePopupApp = null
+    if (routePopup) {
+      routePopup.remove()
+      routePopup = null
+    }
+  }
+
+  function showRoutePopup(map, routeLike) {
+    removeRoutePopup()
+
+    const container = document.createElement('div')
+    container.id = 'ev-route-popup'
+
+    // Append to document body instead of map container for fixed positioning
+    document.body.appendChild(container)
+
+    routePopupApp = createApp(RoutePopupCard, {
+      summary: routeLike.summary || {},
+      legs: routeLike.legs || [],
+      stops: routeLike.stops || [],
+    })
+    routePopupApp.mount(container)
+  }
+
+  function fitMapToRoute(map, routeData) {
     if (!routeData?.geojson) return
 
     const coords = []
     for (const feature of routeData.geojson.features || []) {
       const { geometry } = feature
+      console.log('Processing feature geometry:', geometry?.type)
       if (geometry?.type === 'LineString') {
         coords.push(...geometry.coordinates)
       } else if (geometry?.type === 'MultiLineString') {
@@ -132,7 +179,7 @@ export function useRouteManagement() {
 
       if (!response.ok) {
         clearExistingRoute(map)
-        
+
         // Show appropriate error message based on status code
         if (response.status === 422) {
           showWarning('No Route Found', 'No feasible route found with current settings. Try adjusting your EV range or charging requirements.')
@@ -157,14 +204,16 @@ export function useRouteManagement() {
       const stopsData = createStopsData(originCoords, destinationCoords, recommendedRoute?.stops)
       displayStops(stopsData, map, addOrUpdateSource)
 
+      showRoutePopup(map, recommendedRoute)
+
       // Fit map to show the route
-      fitMapToRoute(recommendedRoute, map)
+      fitMapToRoute(map, recommendedRoute)
 
       console.log('Route planned successfully:', data)
     } catch (error) {
       clearExistingRoute(map)
       if (error.name !== 'AbortError') {
-        
+
         // Show user-friendly error message
         if (error.message?.includes('fetch')) {
           showError('Connection Error', 'Unable to connect to routing service. Please check your internet connection and try again.')
