@@ -33,8 +33,6 @@ export function getStationMaxPower(feature, wanted, minPowerKw = 100) {
 export function estimateChargingTimeSeconds(feature, evMaxPowerKw, connectors, minPowerKw) {
   const { maxPower } = getStationMaxPower(feature, connectors, minPowerKw)
 
-  console.log('Station Max Power:', maxPower)
-
   // Effective power is limited by both station and EV capabilities
   const effectiveKw = Math.min(maxPower, evMaxPowerKw)
 
