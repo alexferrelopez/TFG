@@ -110,7 +110,7 @@ function handleChargerClick(e) {
   })
 
   popupApp.mount(container)
-  const popup = new maplibregl.Popup({ closeButton: false })
+  const popup = new maplibregl.Popup({ closeButton: false , anchor: 'bottom' })
     .setLngLat(e.lngLat)
     .setDOMContent(container)
     .addTo(map())
@@ -173,6 +173,13 @@ onMounted(() => {
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0);
+}
+
+.ev-route-popup{
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;         /* above map UI */
 }
 
 /* Remove default MapLibre popup padding */

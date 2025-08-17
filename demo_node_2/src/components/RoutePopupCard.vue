@@ -4,28 +4,15 @@
     <header class="rcard-header">
       <div class="rcard-title">Trip summary</div>
 
-      <button class="rcard-minbtn" @click="isMin = !isMin" :aria-label="isMin ? 'Expand' : 'Minimize'">
-        <img v-if="!isMin" src="@/assets/minimize.svg" alt="Minimize" class="rcard-minbtn-icon" />
-        <img v-else src="@/assets/expand.svg" alt="Expand" class="rcard-minbtn-icon" />
+      <button class="rcard-minbtn" @click="isMin = !isMin">
+        <img :src="isMin ? '/src/assets/expand.svg' : '/src/assets/minimize.svg'" />
       </button>
 
       <div class="rcard-stats">
-        <div class="rcard-stat">
-          <div class="rcard-stat-k">Distance</div>
-          <div class="rcard-stat-v">{{ summary.totalDistanceFormatted }}</div>
-        </div>
-        <div class="rcard-stat">
-          <div class="rcard-stat-k">Drive time</div>
-          <div class="rcard-stat-v">{{ summary.totalDurationFormatted }}</div>
-        </div>
-        <div class="rcard-stat">
-          <div class="rcard-stat-k">Charging</div>
-          <div class="rcard-stat-v">{{ summary.totalChargingTimeFormatted }}</div>
-        </div>
-        <div class="rcard-stat">
-          <div class="rcard-stat-k">Total trip</div>
-          <div class="rcard-stat-v">{{ summary.totalTripTimeFormatted }}</div>
-        </div>
+        <div><small>Distance</small><span>{{ summary.totalDistanceFormatted }}</span></div>
+        <div><small>Drive time</small><span>{{ summary.totalDurationFormatted }}</span></div>
+        <div><small>Charging</small><span>{{ summary.totalChargingTimeFormatted }}</span></div>
+        <div><small>Total trip</small><span>{{ summary.totalTripTimeFormatted }}</span></div>
       </div>
     </header>
 
@@ -103,14 +90,13 @@ const isMin = ref(false)
 </script>
 
 <style scoped>
-/* CARD CONTAINER - positioned at bottom center with animations */
+/* CARD CONTAINER */
 .rcard {
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-  
   width: 380px;
   max-width: 92vw;
   background: #fff;
@@ -120,31 +106,21 @@ const isMin = ref(false)
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: system-ui, -apple-system, sans-serif;
   color: #111827;
-
-  /* Slide up animation on initial appearance */
   animation: slideUp 0.3s ease-out;
 }
 
-/* Slide up animation */
 @keyframes slideUp {
   from {
     transform: translateX(-50%) translateY(100%);
     opacity: 0;
   }
-  to {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
 }
 
 /* HEADER */
 .rcard-header {
-  flex-shrink: 0;
-  background: #fff;
-  z-index: 1;
-  padding: 12px 12px 10px;
+  padding: 12px;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -158,28 +134,25 @@ const isMin = ref(false)
   position: absolute;
   top: 8px;
   right: 8px;
-  inline-size: 28px;
-  block-size: 28px;
-  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   border: 1px solid #e5e7eb;
   background: #f9fafb;
   cursor: pointer;
-  line-height: 1;
-  font-weight: 700;
-  transition: background-color 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.15s ease;
 }
 
 .rcard-minbtn:hover {
   background: #f3f4f6;
 }
 
-.rcard-minbtn-icon {
+.rcard-minbtn img {
   width: 12px;
   height: 12px;
-  display: block;
 }
 
 .rcard-stats {
@@ -188,22 +161,32 @@ const isMin = ref(false)
   gap: 8px;
 }
 
-.rcard-stat {
+.rcard-stats > div {
   background: #f9fafb;
   border: 1px solid #f3f4f6;
   border-radius: 10px;
   padding: 8px;
   text-align: center;
 }
-.rcard-stat-k { font-size: 11px; color: #6b7280; margin-bottom: 2px; }
-.rcard-stat-v { font-size: 13px; font-weight: 700; }
+
+.rcard-stats small { 
+  display: block;
+  font-size: 11px; 
+  color: #6b7280; 
+  margin-bottom: 2px; 
+}
+
+.rcard-stats span { 
+  font-size: 13px; 
+  font-weight: 700; 
+}
 
 /* BODY (scrolls and animates) */
 .rcard-body {
   max-height: 45vh;
-  overflow: auto;
-  padding: 10px 0 10px;
-  transition: max-height 0.25s ease-out, opacity 0.25s ease-out;
+  overflow-y: overlay;
+  padding: 10px 0;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
   opacity: 1;
 }
 
