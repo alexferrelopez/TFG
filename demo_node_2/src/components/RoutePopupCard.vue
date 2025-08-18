@@ -2,12 +2,17 @@
   <div class="rcard" :class="{ min: isMin }">
     <!-- Header / Summary -->
     <header class="head">
-      <button @click="onBackToPlanner?.()">← Back to planning</button>
-      <h3 class="title">Trip summary</h3>
+      <div class="head-main">
+        <button class="back-btn" @click="onBackToPlanner?.()">
+          <img src="@/assets/undo.svg" alt="Go back to planning" class="icon" />
+          <span>Edit plan</span>
+        </button>
+        <h3 class="title">Trip summary</h3>
 
-      <button class="rcard-minbtn" @click="isMin = !isMin">
-        <img :src="isMin ? '/src/assets/expand.svg' : '/src/assets/minimize.svg'" />
-      </button>
+        <button class="rcard-minbtn" @click="isMin = !isMin">
+          <img :src="isMin ? '/src/assets/expand.svg' : '/src/assets/minimize.svg'" />
+        </button>
+      </div>
 
       <div class="stats">
         <div class="stat"><small>Distance</small><b>{{ summary.totalDistanceFormatted }}</b></div>
@@ -138,35 +143,17 @@ const isMin = ref(false)
 }
 
 .head {
-  position: relative;
   padding: 16px;
   border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .title {
   font-size: 17px;
   font-weight: 700;
   margin: 0 0 12px;
-}
-
-.rcard-minbtn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--chip-bg);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color .15s;
-}
-
-.rcard-minbtn:hover {
-  background: #f3f4f6;
 }
 
 .rcard-minbtn img {
@@ -353,7 +340,7 @@ const isMin = ref(false)
   background: var(--ok-bg);
   border: 1px solid var(--ok-br);
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: 50px;
   white-space: nowrap;
 }
 
@@ -370,5 +357,93 @@ const isMin = ref(false)
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 240px;
+}
+
+.head-main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* buttons on sides */
+}
+
+.back-btn {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  height: 28px;
+  padding: 0 12px;
+
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+
+  transition: background-color .15s, box-shadow .15s, border-color .15s;
+}
+.back-btn img {
+  width: 12px;
+  height: 12px;
+  opacity: 0.75;
+}
+.back-btn:hover {
+  background: #f8f9fa;
+  border-color: #d1d5db;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.02),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+}
+.back-btn:active {
+  background: #f0f0f0;
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.1),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Title always centered */
+.title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+}
+
+/* Expand/minimize button */
+.rcard-minbtn {
+  justify-self: end;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color .15s;
+}
+
+.rcard-minbtn:hover {
+  background: #f8f9fa;
+  box-shadow:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.02),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.rcard-minbtn:active {
+  background: #f0f0f0;
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.1),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7);
 }
 </style>

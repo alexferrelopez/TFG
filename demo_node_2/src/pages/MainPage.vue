@@ -8,7 +8,7 @@
       <StationCard v-if="selectedStation" :chargingStation="selectedStation"
         @setAsDestination="handleSetAsDestination" />
       <RouteCard v-else-if="selectedLocation" :selectedLocation="selectedLocation" :autoPlan="autoPlan"
-        @planRoute="handlePlanRoute" @close="closeSideCard" />
+        @planRoute="handlePlanRoute"/>
     </SideCard>
   </transition>
 

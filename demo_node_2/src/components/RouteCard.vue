@@ -72,14 +72,14 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['planRoute', 'close'])
+const emit = defineEmits(['planRoute'])
 
 const { showError } = useNotifications()
 const PREFERENCES_STORAGE_KEY = 'ev-route-preferences'
-const LAST_ROUTE_STORAGE_KEY = 'ev-last-route'
 
 // Use shared connector configuration
 const availableConnectors = ref(connectorConfig)
+const autoPlan = ref(props.autoPlan)
 
 const routeOptions = ref({
   evRangeKm: 300,
@@ -92,23 +92,21 @@ const routeOptions = ref({
 watch(() => props.selectedLocation, (newLocation) => {
   if (newLocation) {
     destinationData.value = newLocation
+    if (!props.autoPlan) autoPlan.value = false
   }
 }, { immediate: true })
 
 // Auto-plan route when both origin and destination are set, or when route options change
 watch([originData, destinationData, routeOptions], ([newOrigin, newDestination, newOptions]) => {
   if (newOrigin && newDestination) {
-    localStorage.setItem(LAST_ROUTE_STORAGE_KEY, JSON.stringify({
-      origin: newOrigin,
-      destination: newDestination,
-    }))
-    if (props.autoPlan) {
+    if (autoPlan.value) {
       emit('planRoute', {
         origin: newOrigin,
         destination: newDestination,
         options: newOptions
       })
     }
+    autoPlan.value = true
   }
   localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(routeOptions.value))
 
@@ -124,15 +122,6 @@ onMounted(() => {
     requestCurrentLocation()
   }
 })
-
-const recoverLastRoute = () => {
-  const lastRoute = localStorage.getItem(LAST_ROUTE_STORAGE_KEY)
-  if (lastRoute) {
-    const { origin, destination } = JSON.parse(lastRoute)
-    originData.value = origin
-    destinationData.value = destination
-  }
-}
 
 const requestCurrentLocation = async () => {
   try {
