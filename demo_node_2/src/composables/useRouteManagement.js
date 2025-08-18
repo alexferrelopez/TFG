@@ -89,7 +89,7 @@ export function useRouteManagement() {
     }
   }
 
-  function showRoutePopup(map, routeLike) {
+  function showRoutePopup(map, routeLike, onBack) {
     removeRoutePopup()
 
     routePopup = document.createElement('div')
@@ -103,6 +103,7 @@ export function useRouteManagement() {
       legs: routeLike.legs || [],
       stops: routeLike.stops || [],
       map: map,
+      onBackToPlanner: onBack
     })
     routePopupApp.mount(routePopup)
   }
@@ -113,7 +114,6 @@ export function useRouteManagement() {
     const coords = []
     for (const feature of routeData.geojson.features || []) {
       const { geometry } = feature
-      console.log('Processing feature geometry:', geometry?.type)
       if (geometry?.type === 'LineString') {
         coords.push(...geometry.coordinates)
       } else if (geometry?.type === 'MultiLineString') {
@@ -134,7 +134,7 @@ export function useRouteManagement() {
     }
   }
 
-  async function planRoute(routeData, map, { addOrUpdateSource, addOrUpdateLineLayer }) {
+  async function planRoute(routeData, map, { addOrUpdateSource, addOrUpdateLineLayer, onPopupBack }) {
     // Cancel previous route request
     routeAbortController?.abort()
     routeAbortController = new AbortController()
@@ -188,9 +188,14 @@ export function useRouteManagement() {
 
       // Create and display stops
       const stopsData = createStopsData(originCoords, destinationCoords, recommendedRoute?.stops)
+      
+      //fix origin and destination name
+      recommendedRoute.legs[0].from = origin.name || 'Origin'
+      recommendedRoute.legs[recommendedRoute.legs.length - 1].to = destination.name || 'Destination'
+
       displayStops(stopsData, map, addOrUpdateSource)
 
-      showRoutePopup(map, recommendedRoute)
+      showRoutePopup(map, recommendedRoute, onPopupBack)
 
       // Fit map to show the route
       fitMapToRoute(map, recommendedRoute)

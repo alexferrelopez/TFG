@@ -57,20 +57,26 @@ import { ref, watch, onMounted } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { connectorConfig } from '@/config/connectors.js'
 import { useNotifications } from '@/composables/useNotifications.js'
+import { useRouteContext } from '@/composables/useRouteContext'
+
+const { originData, destinationData } = useRouteContext()
 
 const props = defineProps({
   selectedLocation: {
     type: Object,
     default: null
+  },
+  autoPlan: {
+    type: Boolean,
+    default: true
   }
 })
 
 const emit = defineEmits(['planRoute', 'close'])
 
 const { showError } = useNotifications()
-
-const originData = ref(null)
-const destinationData = ref(null)
+const PREFERENCES_STORAGE_KEY = 'ev-route-preferences'
+const LAST_ROUTE_STORAGE_KEY = 'ev-last-route'
 
 // Use shared connector configuration
 const availableConnectors = ref(connectorConfig)
@@ -92,21 +98,41 @@ watch(() => props.selectedLocation, (newLocation) => {
 // Auto-plan route when both origin and destination are set, or when route options change
 watch([originData, destinationData, routeOptions], ([newOrigin, newDestination, newOptions]) => {
   if (newOrigin && newDestination) {
-    emit('planRoute', {
+    localStorage.setItem(LAST_ROUTE_STORAGE_KEY, JSON.stringify({
       origin: newOrigin,
       destination: newDestination,
-      options: newOptions
-    })
+    }))
+    if (props.autoPlan) {
+      emit('planRoute', {
+        origin: newOrigin,
+        destination: newDestination,
+        options: newOptions
+      })
+    }
   }
+  localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(routeOptions.value))
+
 }, { deep: true })
 
 // Auto-request location and set origin on component mount
 onMounted(() => {
+  const saved = localStorage.getItem(PREFERENCES_STORAGE_KEY)
+  if (saved) Object.assign(routeOptions.value, JSON.parse(saved))
+
   // Only auto-request location if no origin is set and geolocation is available
   if (!originData.value && navigator.geolocation) {
     requestCurrentLocation()
   }
 })
+
+const recoverLastRoute = () => {
+  const lastRoute = localStorage.getItem(LAST_ROUTE_STORAGE_KEY)
+  if (lastRoute) {
+    const { origin, destination } = JSON.parse(lastRoute)
+    originData.value = origin
+    destinationData.value = destination
+  }
+}
 
 const requestCurrentLocation = async () => {
   try {

@@ -3,9 +3,12 @@
     <SearchBar @select="handleLocationSelect" />
   </div>
   <transition name="slide">
-    <SideCard v-if="selectedStation || selectedLocation" :key="selectedStation?.id || selectedLocation?.display_name" @close="closeSideCard">
-      <StationCard v-if="selectedStation" :chargingStation="selectedStation" @setAsDestination="handleSetAsDestination" />
-      <RouteCard v-else-if="selectedLocation" :selectedLocation="selectedLocation" @planRoute="handlePlanRoute" @close="closeSideCard" />
+    <SideCard v-if="selectedStation || selectedLocation" :key="selectedStation?.id || selectedLocation?.display_name"
+      @close="closeSideCard">
+      <StationCard v-if="selectedStation" :chargingStation="selectedStation"
+        @setAsDestination="handleSetAsDestination" />
+      <RouteCard v-else-if="selectedLocation" :selectedLocation="selectedLocation" :autoPlan="autoPlan"
+        @planRoute="handlePlanRoute" @close="closeSideCard" />
     </SideCard>
   </transition>
 
@@ -38,6 +41,7 @@ import { createStationFromFeature } from '@/utils/chargerUtils.js'
 // Reactive state
 const selectedStation = ref(null)
 const selectedLocation = ref(null)
+const autoPlan = ref(true)
 
 // Composables
 const { map, isNorth, bearing, resetNorth, addOrUpdateSource, addOrUpdateLineLayer, initializeMap } = useMapSetup()
@@ -46,9 +50,8 @@ const { showLow, showMid, showHigh, showVeryHigh, applyPercentileFilter, setupFi
 
 // Event handlers
 function handleLocationSelect(selectedLocationData) {
-  selectedStation.value = null
-  selectedLocation.value = selectedLocationData
-  
+  handleSetAsDestination(selectedLocationData)
+
   if (map() && selectedLocationData.coordinates) {
     const [lng, lat] = selectedLocationData.coordinates
     map().flyTo({
@@ -60,13 +63,20 @@ function handleLocationSelect(selectedLocationData) {
 }
 
 function handlePlanRoute(routeData) {
-  planRoute(routeData, map(), { addOrUpdateSource, addOrUpdateLineLayer })
+  planRoute(routeData, map(), {
+    addOrUpdateSource, addOrUpdateLineLayer, onPopupBack: () => {
+      selectedStation.value = null
+      selectedLocation.value = routeData.destination
+      autoPlan.value = false
+    }
+  })
 }
 
 function handleSetAsDestination(stationLocationData) {
   // Clear selected station and set as location for route planning
   selectedStation.value = null
   selectedLocation.value = stationLocationData
+  autoPlan.value = true
 }
 
 function closeSideCard() {
@@ -74,7 +84,7 @@ function closeSideCard() {
   if (selectedLocation.value && map()) {
     clearExistingRoute(map())
   }
-  
+
   selectedStation.value = null
   selectedLocation.value = null
 }
@@ -110,7 +120,7 @@ function handleChargerClick(e) {
   })
 
   popupApp.mount(container)
-  const popup = new maplibregl.Popup({ closeButton: false , anchor: 'bottom' })
+  const popup = new maplibregl.Popup({ closeButton: false, anchor: 'bottom' })
     .setLngLat(e.lngLat)
     .setDOMContent(container)
     .addTo(map())
@@ -118,13 +128,13 @@ function handleChargerClick(e) {
 
 onMounted(() => {
   const mapInstance = initializeMap()
-  
+
   mapInstance.on('load', () => {
     applyPercentileFilter(mapInstance)
   })
-  
+
   mapInstance.on('click', 'chargers-point', handleChargerClick)
-  
+
   setupFilterWatcher(mapInstance)
 })
 </script>

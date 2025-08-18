@@ -2,6 +2,7 @@
   <div class="rcard" :class="{ min: isMin }">
     <!-- Header / Summary -->
     <header class="head">
+      <button @click="onBackToPlanner?.()">← Back to planning</button>
       <h3 class="title">Trip summary</h3>
 
       <button class="rcard-minbtn" @click="isMin = !isMin">
@@ -43,11 +44,7 @@
         <p v-if="!stops.length" class="empty">No charging stops on this route.</p>
 
         <div v-else class="stops">
-          <article v-for="(s, i) in stops" 
-            :key="s.id || i" 
-            class="stop"
-            @click="zoomToStop(s)"
-          >
+          <article v-for="(s, i) in stops" :key="s.id || i" class="stop" @click="zoomToStop(s)">
             <div class="row top">
               <div class="stoptitle">{{ s.name }}</div>
               <span class="badge">{{ s.estimatedChargingTimeFormatted }}</span>
@@ -79,12 +76,13 @@ const props = defineProps({
   summary: { type: Object, required: true },
   legs: { type: Array, required: true },
   stops: { type: Array, required: true },
-  map: { type: Object, required: true }
+  map: { type: Object, required: true },
+  onBackToPlanner: { type: Function, required: true }
 })
 
 function zoomToStop(stop) {
   if (!props.map || !stop.lon || !stop.lat) return
-    props.map.flyTo({
+  props.map.flyTo({
     center: [stop.lon, stop.lat],
     zoom: 16,
     speed: 1.2,
@@ -124,7 +122,7 @@ const isMin = ref(false)
   color: var(--fg);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, .12);
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
   overflow: hidden;
   animation: slideUp .3s ease-out;
   font-family: system-ui, -apple-system, sans-serif;
@@ -141,7 +139,7 @@ const isMin = ref(false)
 
 .head {
   position: relative;
-  padding: var(--pad);
+  padding: 16px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -153,8 +151,8 @@ const isMin = ref(false)
 
 .rcard-minbtn {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 12px;
+  right: 12px;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -172,8 +170,8 @@ const isMin = ref(false)
 }
 
 .rcard-minbtn img {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 .stats {
@@ -204,7 +202,7 @@ const isMin = ref(false)
 .body {
   max-height: 35vh;
   overflow-y: auto;
-  padding: 10px 0;
+  padding: 16px 0;
   transition: max-height .3s ease, opacity .2s ease;
   scrollbar-gutter: stable both-edges;
   contain: layout paint;
@@ -323,6 +321,7 @@ const isMin = ref(false)
   cursor: pointer;
   transition: box-shadow .2s ease, color .2s ease;
 }
+
 .stop:hover {
   background: #f8f9fa;
   box-shadow:
@@ -330,6 +329,7 @@ const isMin = ref(false)
     inset -1px -1px 2px rgba(255, 255, 255, 0.8);
   border-color: rgba(0, 0, 0, 0.15);
 }
+
 .stop:active {
   background: #f0f0f0;
   transform: none;
@@ -365,7 +365,7 @@ const isMin = ref(false)
 }
 
 .ellipsis {
-  align-items: center; 
+  align-items: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
