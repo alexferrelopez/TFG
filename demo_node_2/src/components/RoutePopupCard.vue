@@ -10,14 +10,17 @@
         <h3 class="title">Trip summary</h3>
 
         <button class="rcard-minbtn" @click="isMin = !isMin">
-          <img :src="isMin ? '/src/assets/expand.svg' : '/src/assets/minimize.svg'" />
+          <img :src="isMin ? expandIcon : minimizeIcon" />
         </button>
       </div>
 
       <div class="stats">
         <div class="stat"><small>Distance</small><b>{{ summary.totalDistanceFormatted }}</b></div>
         <div class="stat"><small>Drive time</small><b>{{ summary.totalDurationFormatted }}</b></div>
-        <div class="stat"><small>Charging</small><b>{{ summary.totalChargingTimeFormatted }}</b></div>
+        <div v-if="summary.totalChargingTime > 0" class="stat">
+          <small>Charging</small>
+          <b>{{ summary.totalChargingTimeFormatted }}</b>
+        </div>
         <div class="stat"><small>Total trip</small><b>{{ summary.totalTripTimeFormatted }}</b></div>
       </div>
     </header>
@@ -45,30 +48,31 @@
 
       <!-- Stops -->
       <section>
-        <h4 class="sec">{{ stops.length }} Charging stops</h4>
-        <p v-if="!stops.length" class="empty">No charging stops on this route.</p>
+        <template v-if="stops.length">
+          <h4 class="sec">{{ stops.length }} Charging {{ stops.length === 1 ? 'stop' : 'stops' }}</h4>
+          <div class="stops">
+            <article v-for="(s, i) in stops" :key="s.id || i" class="stop" @click="zoomToStop(s)">
+              <div class="row top">
+                <div class="stoptitle">{{ s.name }}</div>
+                <span class="badge">{{ s.estimatedChargingTimeFormatted }}</span>
+              </div>
 
-        <div v-else class="stops">
-          <article v-for="(s, i) in stops" :key="s.id || i" class="stop" @click="zoomToStop(s)">
-            <div class="row top">
-              <div class="stoptitle">{{ s.name }}</div>
-              <span class="badge">{{ s.estimatedChargingTimeFormatted }}</span>
-            </div>
+              <div class="row sub">
+                <span>{{ s.town }}</span>
+                <b>{{ s.validConnectors }} x {{ s.maxPowerFormatted }}</b>
+              </div>
 
-            <div class="row sub">
-              <span>{{ s.town }}</span>
-              <b>{{ s.validConnectors }} x {{ s.maxPowerFormatted }}</b>
-            </div>
-
-            <div class="row meta">
-              <span class="ellipsis">{{ s.operator }}</span>
-              <span class="ellipsis">
-                <img src="@/assets/location.svg" alt="" class="icon" />
-                {{ s.address }}
-              </span>
-            </div>
-          </article>
-        </div>
+              <div class="row meta">
+                <span class="ellipsis">{{ s.operator }}</span>
+                <span class="ellipsis">
+                  <img src="@/assets/location.svg" alt="" class="icon" />
+                  {{ s.address }}
+                </span>
+              </div>
+            </article>
+          </div>
+        </template>
+        <p v-else class="empty">No charging stops on this route.</p>
       </section>
     </div>
   </div>
@@ -76,6 +80,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import expandIcon from '@/assets/expand.svg'
+import minimizeIcon from '@/assets/minimize.svg'
 
 const props = defineProps({
   summary: { type: Object, required: true },
@@ -163,7 +169,7 @@ const isMin = ref(false)
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 8px;
 }
 
@@ -189,16 +195,17 @@ const isMin = ref(false)
 .body {
   max-height: 35vh;
   overflow-y: auto;
-  padding: 16px 0;
+  padding: 16px;
+  /* default: both sides for Android/WebView */
   transition: max-height .3s ease, opacity .2s ease;
-  scrollbar-gutter: stable both-edges;
   contain: layout paint;
   will-change: max-height, opacity;
 }
 
-@supports not (scrollbar-gutter: stable) {
+@media (hover: none) and (pointer: coarse) {
   .body {
-    overflow-y: scroll;
+    padding: 16px !important;
+    /* fallback for Android/mobile */
   }
 }
 
@@ -213,7 +220,6 @@ const isMin = ref(false)
   font-size: 14px;
   font-weight: 700;
   color: #374151;
-
   margin: 8px 0;
 }
 
@@ -363,7 +369,8 @@ const isMin = ref(false)
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* buttons on sides */
+  justify-content: space-between;
+  /* buttons on sides */
 }
 
 .back-btn {
@@ -387,11 +394,13 @@ const isMin = ref(false)
 
   transition: background-color .15s, box-shadow .15s, border-color .15s;
 }
+
 .back-btn img {
   width: 12px;
   height: 12px;
   opacity: 0.75;
 }
+
 .back-btn:hover {
   background: #f8f9fa;
   border-color: #d1d5db;
@@ -399,6 +408,7 @@ const isMin = ref(false)
     inset 2px 2px 4px rgba(0, 0, 0, 0.02),
     inset -1px -1px 2px rgba(255, 255, 255, 0.8);
 }
+
 .back-btn:active {
   background: #f0f0f0;
   box-shadow:

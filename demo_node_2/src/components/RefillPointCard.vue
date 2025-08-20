@@ -4,7 +4,7 @@
     <div class="connector-groups">
       <div v-for="(grp, i) in groupedConnectors" :key="i" class="connector-group">
         <img class="icon" :src="getConnectorIconUrl(grp.type)" :alt="grp.type" :title="grp.type" @error="onIconError" />
-        <span v-if="grp.count > 1" class="count">x{{ grp.count }}</span>
+        <span class="count">x{{ grp.count }}</span>
         <span class="power">{{ formatPower(grp.power) }}</span>
       </div>
     </div>

@@ -57,7 +57,8 @@ import { ref, watch, onMounted } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import { connectorConfig } from '@/config/connectors.js'
 import { useNotifications } from '@/composables/useNotifications.js'
-import { useRouteContext } from '@/composables/useRouteContext'
+import { useRouteContext } from '@/composables/useRouteContext.js'
+import { Capacitor } from '@capacitor/core'
 
 const { originData, destinationData } = useRouteContext()
 
@@ -118,7 +119,7 @@ onMounted(() => {
   if (saved) Object.assign(routeOptions.value, JSON.parse(saved))
 
   // Only auto-request location if no origin is set and geolocation is available
-  if (!originData.value && navigator.geolocation) {
+  if (!originData.value) {
     requestCurrentLocation()
   }
 })
@@ -157,18 +158,41 @@ const requestCurrentLocation = async () => {
   }
 }
 
-const getCurrentPosition = () => {
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      resolve,
-      reject,
-      {
+async function getCurrentPosition() {
+  const isCapacitor = Capacitor.isNativePlatform();
+
+  if (isCapacitor) {
+    try {
+      const { Geolocation } = await import('@capacitor/geolocation');
+      await Geolocation.requestPermissions()
+
+      return Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 300000 // 5 minutes
+        maximumAge: 300000
+      });
+    } catch (err) {
+      console.error('Capacitor geolocation failed:', err);
+      throw err;
+    }
+  } else {
+    // Fallback to browser API
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        return reject(new Error('Geolocation not supported'));
       }
-    )
-  })
+
+      navigator.geolocation.getCurrentPosition(
+        resolve,
+        reject,
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000
+        }
+      );
+    });
+  }
 }
 
 const reverseGeocode = async (lat, lon) => {
