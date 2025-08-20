@@ -1,70 +1,44 @@
-// Payment methods configuration shared across components
+// Import all icons so Vite bundles them
+import mobile from '@/assets/payment-methods/mobile.svg'
+import contactless from '@/assets/payment-methods/contactless.svg'
+import creditCard from '@/assets/payment-methods/credit_card.svg'
+
+// Payment methods configuration
 export const paymentMethodConfig = [
-  { 
-    id: 'apps', 
-    label: 'Mobile App', 
-    icon: '/src/assets/payment-methods/mobile.svg' 
-  },
-  { 
-    id: 'rfid', 
-    label: 'RFID', 
-    icon: '/src/assets/payment-methods/contactless.svg' 
-  },
-  { 
-    id: 'creditCard', 
-    label: 'Credit Card', 
-    icon: '/src/assets/payment-methods/credit_card.svg' 
-  },
-  { 
-    id: 'nfc', 
-    label: 'NFC', 
-    icon: '/src/assets/payment-methods/contactless.svg' 
-  },
-  { 
-    id: 'debitCard', 
-    label: 'Debit Card', 
-    icon: '/src/assets/payment-methods/credit_card.svg' 
-  },
-  { 
-    id: 'pinpad', 
-    label: 'PIN Pad', 
-    icon: '/src/assets/payment-methods/credit_card.svg' 
-  }
+  { id: 'apps',       label: 'Mobile App',   icon: mobile },
+  { id: 'rfid',       label: 'RFID',         icon: contactless },
+  { id: 'creditCard', label: 'Credit Card',  icon: creditCard },
+  { id: 'nfc',        label: 'NFC',          icon: contactless },
+  { id: 'debitCard',  label: 'Debit Card',   icon: creditCard },
+  { id: 'pinpad',     label: 'PIN Pad',      icon: creditCard }
 ]
 
-// Create a map for quick lookup by payment method ID
+// Create a map for quick lookup
 export const paymentMethodMap = paymentMethodConfig.reduce((map, method) => {
   map[method.id] = method
   return map
 }, {})
 
-// Helper function to get payment method icon URL
+// Helper: get icon URL
 export function getPaymentMethodIconUrl(methodId) {
-  const method = paymentMethodMap[methodId]
-  if (method) {
-    return new URL(method.icon.replace('/src/', '@/'), import.meta.url).href
-  }
-  // Fallback to credit card icon
-  return new URL('@/assets/payment-methods/credit_card.svg', import.meta.url).href
+  return paymentMethodMap[methodId]?.icon || creditCard
 }
 
-// Helper function to get payment method display label
+// Helper: get label
 export function getPaymentMethodLabel(methodId) {
   return paymentMethodMap[methodId]?.label || methodId
 }
 
-// Helper function to process payment methods array with fallback handling
+// Helper: normalize array with fallbacks
 export function processPaymentMethods(methods) {
   if (!methods) return []
-  
-  // Normalize to array if it's a single string
-  const normalizedMethods = Array.isArray(methods) ? methods : [methods]
-  
-  return normalizedMethods
-    .filter(method => method && typeof method === 'string') // Filter out null/undefined/empty values
-    .map(method => ({
-      type: method,
-      label: getPaymentMethodLabel(method),
-      icon: paymentMethodMap[method]?.icon || '/src/assets/payment-methods/credit_card.svg'
+  const normalized = Array.isArray(methods) ? methods : [methods]
+
+  return normalized
+    .filter(m => typeof m === 'string' && m.trim() !== '')
+    .map(m => ({
+      type: m,
+      label: getPaymentMethodLabel(m),
+      icon: getPaymentMethodIconUrl(m)
     }))
 }
