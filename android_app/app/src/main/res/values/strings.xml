@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Android_app</string>
+    <string name="payment_methods">Payment Methods</string>
+    <string name="station_name">Station name</string>
+    <string name="address_town">Address, Town</string>
+    <string name="in_building">In Building</string>
+    <string name="operator">Operator</string>
+    <string name="set_as_destination">Set as Destination</string>
+    <string name="hours_24_7">Hours: 24/7</string>
+    <string name="accessibility">Accessibility:</string>
+    <string name="_0_refill_points">0 Refill Points</string>
+    <string name="connector_multiplier">x2</string>
+    <string name="connector_power">50 kW</string>
+    <string name="connector_icon">Connector Icon</string>
+    <string name="close">Close</string>
 </resources>
