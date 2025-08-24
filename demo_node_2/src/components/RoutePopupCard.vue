@@ -192,17 +192,9 @@ const isMin = ref(false)
   max-height: 35vh;
   overflow-y: auto;
   padding: 16px;
-  /* default: both sides for Android/WebView */
   transition: max-height .3s ease, opacity .2s ease;
   contain: layout paint;
   will-change: max-height, opacity;
-}
-
-@media (hover: none) and (pointer: coarse) {
-  .body {
-    padding: 16px !important;
-    /* fallback for Android/mobile */
-  }
 }
 
 .body.collapsed {
@@ -312,12 +304,14 @@ const isMin = ref(false)
   -webkit-tap-highlight-color: transparent;
 }
 
-.stop:hover {
-  background: #f8f9fa;
-  box-shadow:
-    inset 2px 2px 4px rgba(0, 0, 0, 0.1),
-    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
-  border-color: rgba(0, 0, 0, 0.15);
+@media (hover: hover) and (pointer: fine) {
+  .stop:hover {
+    background: #f8f9fa;
+    box-shadow:
+      inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+      inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+  }
 }
 
 .stop:active {
@@ -399,12 +393,14 @@ const isMin = ref(false)
   opacity: 0.75;
 }
 
-.back-btn:hover {
-  background: #f8f9fa;
-  border-color: #d1d5db;
-  box-shadow:
-    inset 2px 2px 4px rgba(0, 0, 0, 0.02),
-    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+@media (hover: hover) and (pointer: fine) {
+  .back-btn:hover {
+    background: #f8f9fa;
+    border-color: #d1d5db;
+    box-shadow:
+      inset 2px 2px 4px rgba(0, 0, 0, 0.02),
+      inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+  }
 }
 
 .back-btn:active {
@@ -442,17 +438,20 @@ const isMin = ref(false)
   -webkit-tap-highlight-color: transparent;
 }
 
-.rcard-minbtn:hover {
-  background: #f8f9fa;
-  box-shadow:
-    inset 2px 2px 4px rgba(0, 0, 0, 0.02),
-    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+
+@media (hover: hover) and (pointer: fine) {
+  .rcard-minbtn:hover {
+    background: #f8f9fa;
+    box-shadow:
+      inset 2px 2px 4px rgba(0, 0, 0, 0.02),
+      inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+  }
 }
 
 .rcard-minbtn:active {
   background: #f0f0f0;
   box-shadow:
-    inset 3px 3px 6px rgba(0, 0, 0, 0.1), 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.1),
     inset -2px -2px 4px rgba(255, 255, 255, 0.7);
 }
 
