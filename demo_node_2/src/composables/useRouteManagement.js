@@ -130,7 +130,7 @@ export function useRouteManagement() {
         [Math.min(...lons), Math.min(...lats)],
         [Math.max(...lons), Math.max(...lats)]
       ]
-      map.fitBounds(bounds, { padding: 400, duration: 800 })
+      map.fitBounds(bounds, { padding: 200, padding: { top: 25, bottom: 25, left: 100, right: 100 }, duration: 800 })
     }
   }
 
