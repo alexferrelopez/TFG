@@ -102,10 +102,12 @@ function closePopup() {
   font-size: 1.5rem;
 }
 
-.popup-close-btn:hover {
-  box-shadow:
-    inset 2px 2px 4px rgba(0, 0, 0, 0.02),
-    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+@media (hover: hover) and (pointer: fine) {
+  .popup-close-btn:hover {
+    box-shadow:
+      inset 2px 2px 4px rgba(0, 0, 0, 0.02),
+      inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+  }
 }
 
 .popup-close-btn:active {

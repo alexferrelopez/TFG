@@ -38,6 +38,7 @@ const props = defineProps({
   cursor: pointer;
   border-radius: 50%;
   transition: opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .north-button:disabled {

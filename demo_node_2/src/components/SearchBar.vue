@@ -42,12 +42,11 @@ const selectedIndex = ref(-1)
 const searchInput = ref(null)
 let abortController = null
 
-// Watch for external value changes and update the search query
-watch(() => props.value, (newValue, oldValue) => {
-  // Only update search query if the new value has a name (selection made)
-  // Don't update if value is being cleared (null/undefined)
+watch(() => props.value, (newValue) => {
   if (newValue?.name) {
     searchQuery.value = newValue.name
+  } else {
+    searchQuery.value = ''
   }
 }, { immediate: true })
 

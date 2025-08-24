@@ -1,55 +1,50 @@
 <template>
-  <div class="station-card">
-    <h2>{{ props.chargingStation.name }}</h2>
-    <p>{{ props.chargingStation.address || 'n/a' }}, {{ props.chargingStation.town || 'n/a' }}</p>
-    <p><strong>Type of Site: </strong>
-      <span class="type-badge" :class="badgeClass">
-        {{ props.chargingStation.typeOfSite }}
-      </span>
-    </p>
-    <p><strong>{{ props.chargingStation.operator || 'n/a' }}</strong></p>
-    
-    <!-- Set as Destination Button -->
-    <button @click="setAsDestination" class="destination-btn">
-      <img src="@/assets/location.svg" alt="Location" width="16" height="16" class="location-icon" />
-      Set as Destination
-    </button>
-    
-    <!-- Operating Hours -->
-    <p v-if="props.chargingStation.operatingHours" class="operating-hours">
-      <strong>Hours:</strong> {{ props.chargingStation.operatingHours }}
-    </p>
-    
-    <!-- Accessibility (only show if meaningful) -->
-    <p v-if="showAccessibility" class="accessibility">
-      <strong>Accessibility:</strong> 
-      <img v-if="isDisabilityAccessible" 
-           class="accessibility-icon" 
-           :src="accessibilityIconUrl" 
-           alt="Disability accessible" 
-           title="Disability accessible"
-           @error="onAccessibilityIconError" />
-    </p>
-    
-    <!-- Payment Methods Section -->
-    <div class="payment-section" v-if="paymentMethods.length > 0">
-      <h4>Payment Methods</h4>
-      <div class="payment-methods">
-        <div v-for="method in paymentMethods" :key="method.type" class="payment-method">
-          <img class="payment-icon" :src="getPaymentMethodIconUrl(method.type)" :alt="method.type" :title="method.label" @error="onPaymentIconError" />
-          <span class="payment-label">{{ method.label }}</span>
-        </div>
-      </div>
-      <p v-if="paymentMethods.length === 0" class="empty">No payment methods available.</p>
-    </div>
-    <div class="refill-section">
-      <h4>{{ props.chargingStation.energyInfrastructureStation?.refillPoint?.length }} Refill Points</h4>
+  <h2 style="max-width: 90%;">{{ props.chargingStation.name }}</h2>
+  <p>{{ props.chargingStation.address || 'n/a' }}, {{ props.chargingStation.town || 'n/a' }}</p>
+  <p><strong>Type of site: </strong>
+    <span class="type-badge" :class="badgeClass">
+      {{ props.chargingStation.typeOfSite }}
+    </span>
+  </p>
+  <p><strong>{{ props.chargingStation.operator || 'n/a' }}</strong></p>
 
-      <RefillPointCard v-for="p in props.chargingStation.energyInfrastructureStation?.refillPoint || []" :key="p.name"
-        :point="p" />
-      <p v-if="!(props.chargingStation.energyInfrastructureStation?.refillPoint?.length)" class="empty">No refill points
-        added.</p>
+  <!-- Set as Destination Button -->
+  <button @click="setAsDestination" class="destination-btn">
+    <img src="@/assets/location.svg" alt="Location" width="16" height="16" class="location-icon" />
+    Set as Destination
+  </button>
+
+  <!-- Operating Hours -->
+  <p v-if="props.chargingStation.operatingHours" class="operating-hours">
+    <strong>Hours:</strong> {{ props.chargingStation.operatingHours }}
+  </p>
+
+  <!-- Accessibility (only show if meaningful) -->
+  <p v-if="showAccessibility" class="accessibility">
+    <strong>Accessibility:</strong>
+    <img v-if="isDisabilityAccessible" class="accessibility-icon" :src="accessibilityIconUrl"
+      alt="Disability accessible" title="Disability accessible" @error="onAccessibilityIconError" />
+  </p>
+
+  <!-- Payment Methods Section -->
+  <div class="payment-section" v-if="paymentMethods.length > 0">
+    <h4>Payment methods</h4>
+    <div class="payment-methods">
+      <div v-for="method in paymentMethods" :key="method.type" class="payment-method">
+        <img class="payment-icon" :src="getPaymentMethodIconUrl(method.type)" :alt="method.type" :title="method.label"
+          @error="onPaymentIconError" />
+        <span class="payment-label">{{ method.label }}</span>
+      </div>
     </div>
+    <p v-if="paymentMethods.length === 0" class="empty">No payment methods available.</p>
+  </div>
+  <div class="refill-section">
+    <h4>{{ props.chargingStation.energyInfrastructureStation?.refillPoint?.length }} Refill points</h4>
+
+    <RefillPointCard v-for="p in props.chargingStation.energyInfrastructureStation?.refillPoint || []" :key="p.name"
+      :point="p" />
+    <p v-if="!(props.chargingStation.energyInfrastructureStation?.refillPoint?.length)" class="empty">No refill points
+      added.</p>
   </div>
 </template>
 
@@ -78,10 +73,10 @@ const badgeClass = computed(() => classMap[props.chargingStation.typeOfSite] || 
 
 const showAccessibility = computed(() => {
   const accessibility = props.chargingStation.accessibility
-  return accessibility && 
-         accessibility.toLowerCase() !== 'unknown' && 
-         accessibility.toLowerCase() !== 'none' &&
-         accessibility.trim() !== ''
+  return accessibility &&
+    accessibility.toLowerCase() !== 'unknown' &&
+    accessibility.toLowerCase() !== 'none' &&
+    accessibility.trim() !== ''
 })
 
 const isDisabilityAccessible = computed(() => {
@@ -101,7 +96,7 @@ function setAsDestination() {
     console.error('No coordinates available for this charging station')
     return
   }
-  
+
   emit('setAsDestination', {
     name: props.chargingStation.name,
     coordinates: props.chargingStation.coordinates,
@@ -241,6 +236,7 @@ function onAccessibilityIconError(event) {
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .destination-btn:hover {
@@ -258,6 +254,7 @@ function onAccessibilityIconError(event) {
 
 .destination-btn .location-icon {
   flex-shrink: 0;
-  filter: brightness(0) invert(1); /* Makes the icon white to match button text */
+  filter: brightness(0) invert(1);
+  /* Makes the icon white to match button text */
 }
 </style>

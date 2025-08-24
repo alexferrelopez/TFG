@@ -26,21 +26,21 @@ defineEmits(['close'])
   cursor: pointer;
   transition: box-shadow .2s ease, color .2s ease;
   border: 1px solid rgba(0, 0, 0, 0.1);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn:hover,
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    color: #f00;
+    background: #f8f9fa;
+    box-shadow:
+      inset 5px 5px 10px #f5f5f5,
+      inset -5px -5px 10px #fff;
+  }
+}
+
 .btn:active {
   color: #f00;
-}
-
-.btn:hover {
-  background: #f8f9fa;
-  box-shadow:
-    inset 5px 5px 10px #f5f5f5,
-    inset -5px -5px 10px #fff;
-}
-
-.btn:active {
   background: #f0f0f0;
   box-shadow:
     inset 5px 5px 10px #d9d9d9,

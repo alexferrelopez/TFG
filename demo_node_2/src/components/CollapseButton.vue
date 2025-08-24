@@ -35,6 +35,7 @@ export default {
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
   cursor: pointer;
   transition: transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .arrow-btn img {

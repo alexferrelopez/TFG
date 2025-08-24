@@ -5,7 +5,7 @@
       <div class="head-main">
         <button class="back-btn" @click="onBackToPlanner?.()">
           <img src="@/assets/undo.svg" alt="Go back to planning" class="icon" />
-          <span>Edit plan</span>
+          <span>Open route</span>
         </button>
         <h3 class="title">Trip summary</h3>
 
@@ -29,7 +29,8 @@
     <div class="body" :class="{ collapsed: isMin }">
       <!-- Legs -->
       <section v-if="legs.length">
-        <h4 class="sec">{{ legs.length }} Legs</h4>
+        <h4 class="sec" v-if="legs.length > 1">{{ legs.length }} Legs</h4>
+        <h4 class="sec" v-else>{{ legs.length }} Leg</h4>
         <ul class="legs">
           <li v-for="leg in legs" :key="leg.legIndex" class="leg">
             <div class="legcol">
@@ -160,11 +161,6 @@ const isMin = ref(false)
   font-size: 17px;
   font-weight: 700;
   margin: 0 0 12px;
-}
-
-.rcard-minbtn img {
-  width: 10px;
-  height: 10px;
 }
 
 .stats {
@@ -313,6 +309,7 @@ const isMin = ref(false)
   transition: background-color .2s;
   cursor: pointer;
   transition: box-shadow .2s ease, color .2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .stop:hover {
@@ -393,6 +390,7 @@ const isMin = ref(false)
   color: #374151;
 
   transition: background-color .15s, box-shadow .15s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .back-btn img {
@@ -441,6 +439,7 @@ const isMin = ref(false)
   align-items: center;
   justify-content: center;
   transition: background-color .15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .rcard-minbtn:hover {
@@ -453,7 +452,12 @@ const isMin = ref(false)
 .rcard-minbtn:active {
   background: #f0f0f0;
   box-shadow:
-    inset 3px 3px 6px rgba(0, 0, 0, 0.1),
+    inset 3px 3px 6px rgba(0, 0, 0, 0.1), 
     inset -2px -2px 4px rgba(255, 255, 255, 0.7);
+}
+
+.rcard-minbtn img {
+  width: 10px;
+  height: 10px;
 }
 </style>

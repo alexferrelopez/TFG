@@ -1,6 +1,6 @@
 <template>
   <div class="route-card">
-    <h2>Plan Route</h2>
+    <h2>Plan route</h2>
     <div class="route-points">
       <div class="search-container">
         <div class="search-fields">
@@ -15,30 +15,30 @@
           </div>
         </div>
 
-        <button @click="swapOriginDestination" class="swap-btn" :disabled="!originData && !destinationData"
+        <button @click="swapOriginDestination(); rotated = !rotated" class="swap-btn" :disabled="!originData && !destinationData"
           title="Swap origin and destination">
-          <img src="@/assets/swap_vert.svg" alt="Swap" class="swap-icon" />
+          <img src="@/assets/swap_vert.svg" alt="Swap" class="swap-icon" :class="{ rotated }"/>
         </button>
       </div>
     </div>
 
     <div class="route-options">
-      <h4>Route Preferences</h4>
+      <h4>Route preferences</h4>
       <div class="option-row">
-        <label>Vehicle Range (km)</label>
+        <label>Vehicle range (km)</label>
         <input v-model.number="routeOptions.evRangeKm" type="number" min="0" class="number-input" />
       </div>
       <div class="option-row">
-        <label>Max Charging Power (kW)</label>
+        <label>Max charging power (kW)</label>
         <input v-model.number="routeOptions.evMaxPowerKw" type="number" min="0" class="number-input" />
       </div>
       <div class="option-row">
-        <label>Min Charging Power (kW)</label>
+        <label>Min charging power (kW)</label>
         <input v-model.number="routeOptions.minPowerKw" type="number" min="0" class="number-input" />
       </div>
 
       <div class="connector-section">
-        <h4>Connector Types</h4>
+        <h4>Connector types</h4>
         <div class="connector-grid">
           <button v-for="connector in availableConnectors" :key="connector.id" @click="toggleConnector(connector.id)"
             :class="['connector-btn', { active: routeOptions.connectors.includes(connector.id) }]"
@@ -61,6 +61,7 @@ import { useRouteContext } from '@/composables/useRouteContext.js'
 import { Capacitor } from '@capacitor/core'
 
 const { originData, destinationData } = useRouteContext()
+const rotated = ref(false)
 
 const props = defineProps({
   selectedLocation: {
@@ -208,7 +209,13 @@ const reverseGeocode = async (lat, lon) => {
 }
 
 const swapOriginDestination = () => {
-  [originData.value, destinationData.value] = [destinationData.value, originData.value]
+  const newOrigin = destinationData.value ? { ...destinationData.value } : null
+  const newDestination = originData.value ? { ...originData.value } : null
+
+  originData.value = newOrigin
+  destinationData.value = newDestination
+
+  console.log('Swapped origin and destination')
 }
 
 const toggleConnector = (connectorId) => {
@@ -313,10 +320,16 @@ input:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .swap-icon {
   filter: none;
+  transition: transform 0.2s ease;
+
+}
+.swap-icon.rotated {
+  transform: rotate(180deg);
 }
 
 .swap-btn:hover:not(:disabled) {
@@ -362,10 +375,13 @@ input:focus {
   cursor: pointer;
   transition: all 0.1s ease;
   min-height: 80px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.connector-btn:hover {
-  border-color: #3b82f6;
+@media (hover: hover) and (pointer: fine) {
+  .connector-btn:hover {
+    border-color: #3b82f6;
+  }
 }
 
 .connector-btn.active {

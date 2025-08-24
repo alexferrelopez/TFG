@@ -57,7 +57,7 @@ const collapsed = ref(false);
   justify-self: end;
   align-self: start;
   z-index: 4;
-  margin: 20px;
+  margin: 40px;
 }
 
 @media (max-width: 768px),

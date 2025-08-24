@@ -145,7 +145,7 @@ onMounted(() => {
   top: 40px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 2;
+  z-index: 3;
 }
 
 .map-container {
