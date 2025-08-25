@@ -16,7 +16,6 @@
 </template>
 
 <script setup>
-import { defineEmits } from 'vue'
 import ChargingStopCard from './ChargingStopCard.vue'
 
 const props = defineProps({

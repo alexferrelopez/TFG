@@ -23,7 +23,6 @@
 </template>
 
 <script setup>
-import { defineEmits } from 'vue'
 import expandIcon from '@/assets/expand.svg'
 import minimizeIcon from '@/assets/minimize.svg'
 import RouteSummaryStats from './RouteSummaryStats.vue'
