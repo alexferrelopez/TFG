@@ -1,19 +1,19 @@
 <template>
   <header class="head">
-    <div class="head-main">
-      <button class="back-btn" @click="onBackToPlanner?.()">
-        <img src="@/assets/undo.svg" alt="Go back to planning" class="icon" />
-        <span>Open route</span>
+    <div class="head-main" @click="$emit('toggle-minimize')">
+      <button class="rcard-iconbtn" @click.stop="onBackToPlanner?.()">
+        <img src="@/assets/undo.svg" alt="Go back to planning" />
       </button>
 
-      <h3 class="title">Trip summary</h3>
+      <!-- Clickable title with arrow -->
+      <div class="title-toggle">
+        <h3 class="title">Trip summary</h3>
+        <img src="@/assets/arrow_left.svg" alt="Toggle" class="title-arrow" :class="{ expanded: !isMin }" />
+      </div>
 
       <div class="actions">
-        <button class="rcard-iconbtn open-route-btn" @click="openRoute" title="Open in Google Maps">
+        <button class="rcard-iconbtn" @click.stop="openRoute" title="Open in Google Maps">
           <img src="@/assets/open_in_new.svg" alt="Open in Google Maps" />
-        </button>
-        <button class="rcard-iconbtn rcard-minbtn" @click="$emit('toggle-minimize')">
-          <img :src="isMin ? expandIcon : minimizeIcon" alt="" />
         </button>
       </div>
     </div>
@@ -23,8 +23,6 @@
 </template>
 
 <script setup>
-import expandIcon from '@/assets/expand.svg'
-import minimizeIcon from '@/assets/minimize.svg'
 import RouteSummaryStats from './RouteSummaryStats.vue'
 
 const props = defineProps({
@@ -70,10 +68,13 @@ function openRoute() {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  cursor: pointer;
+  /* entire header clickable */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .back-btn {
-  justify-self: start;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -115,14 +116,33 @@ function openRoute() {
   border-color: rgba(0, 0, 0, 0.2);
 }
 
-.title {
+.title-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.title {
   font-size: 17px;
   font-weight: 700;
   margin: 0;
   text-align: center;
+}
+
+.title-arrow {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.3s ease;
+  transform: rotate(-90deg);
+  /* default = pointing down */
+}
+
+.title-arrow.expanded {
+  transform: rotate(90deg);
+  /* expanded = pointing up/left */
 }
 
 .actions {
@@ -148,7 +168,6 @@ function openRoute() {
 .rcard-iconbtn img {
   width: 14px;
   height: 14px;
-  opacity: 0.75;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -156,23 +175,16 @@ function openRoute() {
     background: #f8f9fa;
     border-color: #d1d5db;
     box-shadow:
-      inset 2px 2px 4px rgba(0,0,0,0.02),
-      inset -1px -1px 2px rgba(255,255,255,0.8);
+      inset 2px 2px 4px rgba(0, 0, 0, 0.02),
+      inset -1px -1px 2px rgba(255, 255, 255, 0.8);
   }
 }
 
 .rcard-iconbtn:active {
   background: #f0f0f0;
-  border-color: rgba(0,0,0,0.2);
+  border-color: rgba(0, 0, 0, 0.2);
   box-shadow:
-    inset 3px 3px 6px rgba(0,0,0,0.1),
-    inset -2px -2px 4px rgba(255,255,255,0.7);
-}
-
-.icon {
-  width: 14px;
-  height: 14px;
-  vertical-align: middle;
-  filter: brightness(0) saturate(100%) invert(15%);
+    inset 3px 3px 6px rgba(0, 0, 0, 0.1),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.7);
 }
 </style>
