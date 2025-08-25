@@ -78,7 +78,7 @@ function openRoute() {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 28px;
+  height: 32px;
   padding: 0 12px;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -132,8 +132,8 @@ function openRoute() {
 }
 
 .rcard-iconbtn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 1px solid var(--line);
   background: #fff;

@@ -202,7 +202,7 @@ export function useRouteManagement() {
       // Fit map to show the route
       fitMapToRoute(map, recommendedRoute)
 
-      console.log('Route planned successfully:', data)
+      // console.log('Route planned successfully:', data)
     } catch (error) {
       clearExistingRoute(map)
       if (error.name !== 'AbortError') {
