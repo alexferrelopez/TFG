@@ -40,8 +40,8 @@ export default {
 
 .arrow-btn img {
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 12px;
+  height: 12px;
   transition: transform 0.3s ease;
 }
 
