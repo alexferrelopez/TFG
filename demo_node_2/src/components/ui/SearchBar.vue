@@ -21,6 +21,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useNotifications } from '@/composables/useNotifications.js'
 
 const props = defineProps({
   placeholder: {
@@ -34,6 +35,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['select', 'clear'])
+
+const { showError } = useNotifications()
 
 const searchQuery = ref('')
 const searchResults = ref([])
@@ -89,7 +92,7 @@ const performSearch = async (query) => {
 
   } catch (error) {
     if (error.name !== 'AbortError') {
-      console.error('Geocoding search failed:', error)
+      showError('Search Failed', 'Unable to search for locations. Please try again.')
       searchResults.value = []
     }
   }

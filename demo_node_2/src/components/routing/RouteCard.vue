@@ -61,6 +61,7 @@ import { useRouteContext } from '@/composables/useRouteContext.js'
 import { Capacitor } from '@capacitor/core'
 
 const { originData, destinationData } = useRouteContext()
+const { showError } = useNotifications()
 const rotated = ref(false)
 
 const props = defineProps({
@@ -173,7 +174,7 @@ async function getCurrentPosition() {
         maximumAge: 300000
       });
     } catch (err) {
-      console.error('Capacitor geolocation failed:', err);
+      showError('Location Error', 'Failed to get current location')
       throw err;
     }
   } else {
@@ -214,8 +215,6 @@ const swapOriginDestination = () => {
 
   originData.value = newOrigin
   destinationData.value = newDestination
-
-  console.log('Swapped origin and destination')
 }
 
 const toggleConnector = (connectorId) => {

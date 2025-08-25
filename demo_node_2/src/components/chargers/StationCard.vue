@@ -52,6 +52,7 @@
 import { computed } from 'vue'
 import RefillPointCard from '@/components/chargers/RefillPointCard.vue'
 import { getPaymentMethodIconUrl, processPaymentMethods } from '@/config/paymentMethods.js'
+import { useNotifications } from '@/composables/useNotifications.js'
 
 const props = defineProps({
   chargingStation: {
@@ -61,6 +62,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['setAsDestination'])
+
+const { showError } = useNotifications()
 
 const classMap = {
   'Open Space': 'badge-open-space',
@@ -93,7 +96,7 @@ const paymentMethods = computed(() => {
 
 function setAsDestination() {
   if (!props.chargingStation.coordinates) {
-    console.error('No coordinates available for this charging station')
+    showError('No Location Available', 'No coordinates available for this charging station')
     return
   }
 
