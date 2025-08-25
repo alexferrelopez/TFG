@@ -92,11 +92,14 @@ export function useRouteManagement() {
   function showRoutePopup(map, originCoords, destinationCoords, routeLike, onBack) {
     removeRoutePopup()
 
+    const container = document.getElementById('route-popup-container')
+    if (!container) return
+
     routePopup = document.createElement('div')
     routePopup.id = 'ev-route-popup'
 
-    // Append to document body instead of map container for fixed positioning
-    document.body.appendChild(routePopup)
+    // Append to the route popup container instead of document body
+    container.appendChild(routePopup)
 
     routePopupApp = createApp(RoutePopupCard, {
       originCoords: originCoords,

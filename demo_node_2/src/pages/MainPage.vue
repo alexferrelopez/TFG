@@ -18,6 +18,7 @@
       <CompassButton :bearing="bearing" :isNorth="isNorth" @reset="resetNorth" />
       <ChargerFilters v-model:showHigh="showHigh" v-model:showMid="showMid" v-model:showLow="showLow"
         v-model:showVeryHigh="showVeryHigh" />
+      <div id="route-popup-container"></div>
     </div>
   </div>
 </template>
@@ -165,11 +166,23 @@ onMounted(() => {
   position: absolute;
   bottom: 40px;
   right: 1rem;
-  display: flex;
+
+  display: inline-flex;   /* shrink to fit */
   flex-direction: column;
   align-items: flex-end;
   gap: 0.5rem;
+
   z-index: 2;
+  pointer-events: none;   /* let clicks go through empty space */
+}
+
+.bottom-right-controls > * {
+  pointer-events: auto;   /* re-enable on the actual buttons/popup */
+}
+#route-popup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .map-placeholder {

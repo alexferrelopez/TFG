@@ -65,13 +65,10 @@ const isMin = ref(false)
   --accent: #3b82f6;
   --accent-ring: #93c5fd;
 
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   z-index: 2;
   width: 380px;
-  max-width: 92vw;
+  max-width: calc(100vw - 2rem);
   background: var(--bg);
   color: var(--fg);
   border: 1px solid var(--line);
@@ -82,11 +79,12 @@ const isMin = ref(false)
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 14px;
   line-height: 1.4;
+  margin-bottom: 0.5rem;
 }
 
 @keyframes slideUp {
   from {
-    transform: translateX(-50%) translateY(100%);
+    transform: translateY(100%);
     opacity: 0;
   }
 }
