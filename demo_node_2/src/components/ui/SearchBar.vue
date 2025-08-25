@@ -8,8 +8,8 @@
 
     <div v-if="showResults && searchResults.length > 0" class="autocomplete-dropdown">
       <div v-for="(result, index) in searchResults" :key="index" class="autocomplete-item"
-        :class="{ active: selectedIndex === index }"
-        @mousedown="selectResult(result)" @mouseenter="selectedIndex = index">
+        :class="{ active: selectedIndex === index }" @mousedown="selectResult(result)"
+        @mouseenter="selectedIndex = index">
         <div class="result-name">{{ result.properties.name }}</div>
         <div class="result-details">
           {{ formatResultDetails(result.properties) }}
@@ -56,12 +56,12 @@ watch(() => props.value, (newValue) => {
 const handleInput = (event) => {
   const query = event.target.value
   searchQuery.value = query
-  
+
   // If user is typing and there's a selected value, clear it
   if (props.value && query !== props.value.name) {
     emit('clear')
   }
-  
+
   if (query.trim()) {
     performSearch(query)
   } else {
@@ -99,7 +99,7 @@ const performSearch = async (query) => {
 }
 const handleSubmit = (event) => {
   event.preventDefault()
-  
+
   // If there are search results, select the first one
   if (searchResults.value.length > 0) {
     const indexToSelect = selectedIndex.value >= 0 ? selectedIndex.value : 0
@@ -120,14 +120,14 @@ const handleKeydown = (event) => {
   switch (event.key) {
     case 'ArrowDown':
       event.preventDefault()
-      selectedIndex.value = selectedIndex.value < searchResults.value.length - 1 
-        ? selectedIndex.value + 1 
+      selectedIndex.value = selectedIndex.value < searchResults.value.length - 1
+        ? selectedIndex.value + 1
         : 0
       break
     case 'ArrowUp':
       event.preventDefault()
-      selectedIndex.value = selectedIndex.value > 0 
-        ? selectedIndex.value - 1 
+      selectedIndex.value = selectedIndex.value > 0
+        ? selectedIndex.value - 1
         : searchResults.value.length - 1
       break
     case 'Enter':

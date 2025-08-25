@@ -76,8 +76,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['planRoute'])
-
-const { showError } = useNotifications()
 const PREFERENCES_STORAGE_KEY = 'ev-route-preferences'
 
 // Use shared connector configuration
