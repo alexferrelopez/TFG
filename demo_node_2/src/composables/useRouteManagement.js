@@ -1,6 +1,6 @@
 import { useNotifications } from '@/composables/useNotifications.js'
 import { createApp } from 'vue'
-import RoutePopupCard from '@/components/RoutePopupCard.vue'
+import RoutePopupCard from '@/components/routing/RoutePopupCard.vue'
 
 export function useRouteManagement() {
   let routeAbortController = null

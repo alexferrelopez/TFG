@@ -10,8 +10,8 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import CollapseButton from '@/components/CollapseButton.vue';
-import Button from '@/components/Button.vue';
+import CollapseButton from '@/components/ui/CollapseButton.vue';
+import Button from '@/components/ui/Button.vue';
 
 const props = defineProps({
   forceExpand: {

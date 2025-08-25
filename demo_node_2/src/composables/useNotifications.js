@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import NotificationToast from '@/components/NotificationToast.vue'
+import NotificationToast from '@/components/layout/NotificationToast.vue'
 
 let currentNotification = null
 

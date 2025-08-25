@@ -54,7 +54,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
+import SearchBar from '@/components/ui/SearchBar.vue'
 import { connectorConfig } from '@/config/connectors.js'
 import { useNotifications } from '@/composables/useNotifications.js'
 import { useRouteContext } from '@/composables/useRouteContext.js'

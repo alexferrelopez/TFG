@@ -50,7 +50,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import RefillPointCard from '@/components/RefillPointCard.vue'
+import RefillPointCard from '@/components/chargers/RefillPointCard.vue'
 import { getPaymentMethodIconUrl, processPaymentMethods } from '@/config/paymentMethods.js'
 
 const props = defineProps({
