@@ -4,7 +4,7 @@
   </div>
   <transition name="slide">
     <SideCard v-if="selectedStation || selectedLocation" :key="selectedStation?.id || selectedLocation?.display_name"
-      @close="closeSideCard">
+      :forceExpand="forceExpand" @close="closeSideCard">
       <StationCard v-if="selectedStation" :chargingStation="selectedStation"
         @setAsDestination="handleSetAsDestination" />
       <RouteCard v-else-if="selectedLocation" :selectedLocation="selectedLocation" :autoPlan="autoPlan"
@@ -42,6 +42,7 @@ import { createStationFromFeature } from '@/utils/chargerUtils.js'
 const selectedStation = ref(null)
 const selectedLocation = ref(null)
 const autoPlan = ref(true)
+const forceExpand = ref(false)
 
 // Composables
 const { map, isNorth, bearing, resetNorth, addOrUpdateSource, addOrUpdateLineLayer, initializeMap } = useMapSetup()
@@ -68,6 +69,11 @@ function handlePlanRoute(routeData) {
       selectedStation.value = null
       selectedLocation.value = routeData.destination
       autoPlan.value = false
+      forceExpand.value = true
+      // Reset forceExpand after a short delay to allow for future triggers
+      setTimeout(() => {
+        forceExpand.value = false
+      }, 100)
     }
   })
 }
@@ -87,6 +93,7 @@ function closeSideCard() {
 
   selectedStation.value = null
   selectedLocation.value = null
+  forceExpand.value = false
 }
 
 function handleChargerClick(e) {

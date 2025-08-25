@@ -9,11 +9,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import CollapseButton from '@/components/CollapseButton.vue';
 import Button from '@/components/Button.vue';
 
+const props = defineProps({
+  forceExpand: {
+    type: Boolean,
+    default: false
+  }
+});
+
 const collapsed = ref(false);
+
+// Watch for forceExpand prop changes
+watch(() => props.forceExpand, (newValue) => {
+  if (newValue) {
+    collapsed.value = false;
+  }
+});
 </script>
 
 <style scoped>
