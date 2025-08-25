@@ -89,7 +89,7 @@ export function useRouteManagement() {
     }
   }
 
-  function showRoutePopup(map, routeLike, onBack) {
+  function showRoutePopup(map, originCoords, destinationCoords, routeLike, onBack) {
     removeRoutePopup()
 
     routePopup = document.createElement('div')
@@ -99,6 +99,8 @@ export function useRouteManagement() {
     document.body.appendChild(routePopup)
 
     routePopupApp = createApp(RoutePopupCard, {
+      originCoords: originCoords,
+      destinationCoords: destinationCoords,
       summary: routeLike.summary || {},
       legs: routeLike.legs || [],
       stops: routeLike.stops || [],
@@ -195,7 +197,7 @@ export function useRouteManagement() {
 
       displayStops(stopsData, map, addOrUpdateSource)
 
-      showRoutePopup(map, recommendedRoute, onPopupBack)
+      showRoutePopup(map, originCoords, destinationCoords, recommendedRoute, onPopupBack)
 
       // Fit map to show the route
       fitMapToRoute(map, recommendedRoute)
