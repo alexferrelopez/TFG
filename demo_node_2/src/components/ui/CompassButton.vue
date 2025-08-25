@@ -28,8 +28,8 @@ const props = defineProps({
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 4rem;
-  height: 4rem;
+  width: 3.5rem;
+  height: 3.5rem;
   margin: 5px;
   z-index: 2;
   background: white;

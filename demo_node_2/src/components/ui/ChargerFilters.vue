@@ -58,9 +58,9 @@ const toggleExpanded = () => {
 
 <style scoped>
 .filter-controls {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 0.9rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
