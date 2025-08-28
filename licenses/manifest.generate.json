@@ -162,6 +162,13 @@
       "license_spdx": "CC-BY-SA-4.0",
       "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
       "modified": true
+    },
+    {
+      "name": "google_material_icons",
+      "source_page": "https://fonts.google.com/icons",
+      "license_spdx": "Apache-2.0",
+      "license_file": "LICENSE-2.0.txt",
+      "notes": "Used as font icons; if fonts are bundled, this entry documents provenance"
     }
   ]
 }

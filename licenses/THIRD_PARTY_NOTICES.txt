@@ -21,3 +21,4 @@ commons_Combo-ccs-eu.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 a
 commons_IEC_62196_Type_3A.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 5e29033e6dbf0602c323c9549efb80bf3e396ea9e805ffd8cd322698d1175b81)
 commons_Type3c.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 3a7ce3816deade130814e60f313f9fe2979f57cf99bf2a0bfa9fdec5e1c38648)
 commons_Tesla-hpwc-model-s.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 a3a4c066011a304addea66611e703e90965e4fa40363411b3995ac36bc982c71)
+google_fonts_material_icons -> LICENSE (saved as LICENSE-2.0.txt, sha256 null)
