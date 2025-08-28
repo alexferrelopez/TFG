@@ -1,0 +1,8 @@
+# Third-party notices
+
+komoot/photon -> LICENSE (saved as komoot_photon-LICENSE, sha256 c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4)
+GIScience/openrouteservice -> LICENSE (saved as GIScience_openrouteservice-LICENSE, sha256 6ba8958ca511cabbea23bcb57e17376ab588d101627e18fe811d2bc901116569)
+maplibre/martin -> LICENSE-APACHE (saved as maplibre_martin-LICENSE-APACHE, sha256 8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90)
+mapbox/tippecanoe -> LICENSE.md (saved as mapbox_tippecanoe-LICENSE.md, sha256 ef022be0bdbe6acf96080e0b0c25ad7f34ad4996ea6a4f5a6c7d8a442541d774)
+maplibre/maplibre-gl-js -> LICENSE.txt (saved as maplibre_maplibre-gl-js-LICENSE.txt, sha256 ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2)
+graphhopper/graphhopper -> LICENSE.txt (saved as graphhopper_graphhopper-LICENSE.txt, sha256 600cc67cc4cb2f5ea317dcfc687ad1c74dc4bec8782bbe9db0afd83513b935b7)

@@ -1,0 +1,47 @@
+{
+  "generated_at": "2025-08-28T20:12:22Z",
+  "components": [
+    {
+      "name": "komoot/photon",
+      "repo": "https://github.com/komoot/photon",
+      "license_file": "komoot_photon-LICENSE",
+      "license_filename": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "name": "GIScience/openrouteservice",
+      "repo": "https://github.com/GIScience/openrouteservice",
+      "license_file": "GIScience_openrouteservice-LICENSE",
+      "license_filename": "LICENSE",
+      "sha256": "6ba8958ca511cabbea23bcb57e17376ab588d101627e18fe811d2bc901116569"
+    },
+    {
+      "name": "maplibre/martin",
+      "repo": "https://github.com/maplibre/martin",
+      "license_file": "maplibre_martin-LICENSE-APACHE",
+      "license_filename": "LICENSE-APACHE",
+      "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+    },
+    {
+      "name": "mapbox/tippecanoe",
+      "repo": "https://github.com/mapbox/tippecanoe",
+      "license_file": "mapbox_tippecanoe-LICENSE.md",
+      "license_filename": "LICENSE.md",
+      "sha256": "ef022be0bdbe6acf96080e0b0c25ad7f34ad4996ea6a4f5a6c7d8a442541d774"
+    },
+    {
+      "name": "maplibre/maplibre-gl-js",
+      "repo": "https://github.com/maplibre/maplibre-gl-js",
+      "license_file": "maplibre_maplibre-gl-js-LICENSE.txt",
+      "license_filename": "LICENSE.txt",
+      "sha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2"
+    },
+    {
+      "name": "graphhopper/graphhopper",
+      "repo": "https://github.com/graphhopper/graphhopper",
+      "license_file": "graphhopper_graphhopper-LICENSE.txt",
+      "license_filename": "LICENSE.txt",
+      "sha256": "600cc67cc4cb2f5ea317dcfc687ad1c74dc4bec8782bbe9db0afd83513b935b7"
+    }
+  ]
+}
