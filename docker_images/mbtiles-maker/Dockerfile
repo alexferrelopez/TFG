@@ -22,4 +22,4 @@ RUN apt-get update -qq \
 WORKDIR /files
 
 # keep the container running
-CMD ["tail", "-f", "/dev/null"]
+CMD ["./make_charger_tiles.bash"]
