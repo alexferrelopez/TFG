@@ -130,7 +130,7 @@ Entrat més en detall, el script en Bash descarrega el fitxer directament des de
 
 En aquest punt, gràcies al servidor Martin i a l'estil anteriorment mencionat, ja es poden veure els carregadors sobre el mapa.
 
-## Refinament del preprocessat ()
+## Refinament del preprocessat
 
 Amb el servidor resolt, el coll d’ampolla passen a ser les dades. La font oficial té adreces irregulars, municipis amb formats diferents i una varietat de noms de valors que fa impossible filtrar amb garanties. L’script inicial llegia l’XML i retornava un GeoJSON prou correcte, però era massa complex per iterar-hi. A més un cop vaig publicar les tessel·les, va quedar clar que el primer intent amb Tippecanoe era massa optimista: a zooms baixos el mapa quedava recarregat i era massa lent. No era un problema de back-end, sinó del pressupost computacional del client en els diferents zooms. Per solucionar això he rebaixat el nivell d’informació als zooms inicials des de Tippecanoe, a més de refactoritzar el fitxer geojson. Implementant una rutina per netejar adreces i municipis (treure comes sobreres, normalitzar variants), una altra per simplificar l'estructura de cada "refill point" (reduint el nombre de camps i estandarditzant els objectes i llistes) i finalment una rutina per simplificar l'estructura de l'estació (reduint també el nombre de camps), el preprocessament del fitxer XML a geojson redueix la mida del fitxer de 60,3 MB a 14,6 MB, una millora de x4.1.
 
