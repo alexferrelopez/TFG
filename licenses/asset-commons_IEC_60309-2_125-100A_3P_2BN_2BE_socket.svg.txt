@@ -1,0 +1,10 @@
+Asset: iec60309x2three32.svg
+Source page: https://commons.wikimedia.org/wiki/File:IEC_60309-2_125-100A_3P%2BN%2BE_socket.svg
+Source id: commons_IEC_60309-2_125-100A_3P_2BN_2BE_socket.svg
+Local sha256: 8358b4bfec0b97ef944504d39abdffde209ba635d35a8833c19ef0f68414ac9f
+Original URL: https://upload.wikimedia.org/wikipedia/commons/e/e1/IEC_60309-2_125-100A_3P%2BN%2BE_socket.svg
+Original sha256: cb5a91456927a443ef4d41617ccfda62a555a56e2a9affef7e3b3833a17a732f
+License (declared): CC-BY-SA-4.0
+Per-asset (reused) license file: LICENSE-CC-BY-SA-4.0.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).

@@ -1,0 +1,10 @@
+Asset: iec62196T3C.svg
+Source page: https://commons.wikimedia.org/wiki/File:Type3c.svg
+Source id: commons_Type3c.svg
+Local sha256: 3a7ce3816deade130814e60f313f9fe2979f57cf99bf2a0bfa9fdec5e1c38648
+Original URL: https://upload.wikimedia.org/wikipedia/commons/f/f8/Type3c.svg
+Original sha256: 54b8129aa21d9361956dee834bdf7a3fc2258a6da4bf6e784f0fc6e8dd9b5f49
+License (declared): CC-BY-SA-4.0
+Per-asset (reused) license file: LICENSE-CC-BY-SA-4.0.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).

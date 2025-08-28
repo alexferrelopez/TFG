@@ -1,0 +1,10 @@
+Asset: lightning.svg
+Source page: https://www.svgrepo.com/download/510043/lightning.svg
+Source id: svgrepo.com_lightning
+Local sha256: 246e0bcaa2c48d292c1b4c5114a8ea44563d3d6cf41a1bf78f4c33f794775e8a
+Original URL: https://www.svgrepo.com/download/510043/lightning.svg
+Original sha256: d04c4724c1113becb010c912c399d848fcaff9441643869f29cc19f6a5d7afd1
+License (declared): MIT
+Per-asset license file: lightning_LICENSE-MIT.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).

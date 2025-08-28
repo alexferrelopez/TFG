@@ -1,8 +1,23 @@
 # Third-party notices
 
+Software:
 komoot/photon -> LICENSE (saved as komoot_photon-LICENSE, sha256 c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4)
 GIScience/openrouteservice -> LICENSE (saved as GIScience_openrouteservice-LICENSE, sha256 6ba8958ca511cabbea23bcb57e17376ab588d101627e18fe811d2bc901116569)
 maplibre/martin -> LICENSE-APACHE (saved as maplibre_martin-LICENSE-APACHE, sha256 8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90)
 mapbox/tippecanoe -> LICENSE.md (saved as mapbox_tippecanoe-LICENSE.md, sha256 ef022be0bdbe6acf96080e0b0c25ad7f34ad4996ea6a4f5a6c7d8a442541d774)
 maplibre/maplibre-gl-js -> LICENSE.txt (saved as maplibre_maplibre-gl-js-LICENSE.txt, sha256 ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2)
 graphhopper/graphhopper -> LICENSE.txt (saved as graphhopper_graphhopper-LICENSE.txt, sha256 600cc67cc4cb2f5ea317dcfc687ad1c74dc4bec8782bbe9db0afd83513b935b7)
+
+Assets:
+svgrepo.com_unknown-status -> LICENSE (saved as LICENSE-MIT.txt, sha256 2c2aaa165b373e2203f262e881219e78e35fd8f8de889ba248449ed72e2f5af2)
+svgrepo.com_compass -> LICENSE (saved as LICENSE-CC0-1.0.txt, sha256 677fa24f5d15ebca1bf1647caa86cb93513ce99b977c25ee20ae8950571a5960)
+svgrepo.com_lightning -> LICENSE (saved as LICENSE-MIT.txt, sha256 246e0bcaa2c48d292c1b4c5114a8ea44563d3d6cf41a1bf78f4c33f794775e8a)
+commons_Chademo_type4.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 36fff29fdeb98a313116ce960d41eb20fa03a929896ccbdbaa364fd019832f24)
+commons_IEC_60309-2_125-100A_3P_2BN_2BE_socket.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 8358b4bfec0b97ef944504d39abdffde209ba635d35a8833c19ef0f68414ac9f)
+commons_Type1_J1772.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 ae1ec7d81acd8d8765f79f61844211dbc01ff34c168eb26e1a1aee4e53d875d7)
+commons_Type1-ccs.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 e526dc9c2e7426022b3ffbcd75e9023386ea447dd288e68e8529981863f3f6f8)
+commons_Type_2_mennekes.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 fcc281cf2020f6296af21c8615246c50e1437c2ae7c4f00640bc568fb2fd08da)
+commons_Combo-ccs-eu.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 af07146f483960b406b99382634f5c3edeb92b7688e1d7070869621f3966556a)
+commons_IEC_62196_Type_3A.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 5e29033e6dbf0602c323c9549efb80bf3e396ea9e805ffd8cd322698d1175b81)
+commons_Type3c.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 3a7ce3816deade130814e60f313f9fe2979f57cf99bf2a0bfa9fdec5e1c38648)
+commons_Tesla-hpwc-model-s.svg -> LICENSE (saved as LICENSE-CC-BY-SA-4.0.txt, sha256 a3a4c066011a304addea66611e703e90965e4fa40363411b3995ac36bc982c71)

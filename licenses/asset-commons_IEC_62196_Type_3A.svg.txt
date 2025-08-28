@@ -1,0 +1,10 @@
+Asset: iec62196T3A.svg
+Source page: https://commons.wikimedia.org/wiki/File:IEC_62196_Type_3A.svg
+Source id: commons_IEC_62196_Type_3A.svg
+Local sha256: 5e29033e6dbf0602c323c9549efb80bf3e396ea9e805ffd8cd322698d1175b81
+Original URL: https://upload.wikimedia.org/wikipedia/commons/b/be/IEC_62196_Type_3A.svg
+Original sha256: 48ead444f2f09761365f6e8a20d8ddd29a13b154bf040a02227b8e45908a899b
+License (declared): CC-BY-SA-4.0
+Per-asset (reused) license file: LICENSE-CC-BY-SA-4.0.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).

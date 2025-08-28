@@ -42,6 +42,126 @@
       "license_file": "graphhopper_graphhopper-LICENSE.txt",
       "license_filename": "LICENSE.txt",
       "sha256": "600cc67cc4cb2f5ea317dcfc687ad1c74dc4bec8782bbe9db0afd83513b935b7"
+    },
+    {
+      "name": "unknown_charger.svg",
+      "source_id": "svgrepo.com_unknown-status",
+      "source_page": "https://www.svgrepo.com/download/372737/unknown-status.svg",
+      "local_sha256": "2c2aaa165b373e2203f262e881219e78e35fd8f8de889ba248449ed72e2f5af2",
+      "original_sha256": "1d76cb7b9b9ccc476b4fe29aa3ad078ea6dd071271d5765e6a364bc1bd3f7eb5",
+      "license_spdx": "MIT",
+      "per_asset_license": "LICENSE-MIT.txt",
+      "modified": true
+    },
+    {
+      "name": "compass.svg",
+      "source_id": "svgrepo.com_compass",
+      "source_page": "https://www.svgrepo.com/download/883/compass.svg",
+      "local_sha256": "677fa24f5d15ebca1bf1647caa86cb93513ce99b977c25ee20ae8950571a5960",
+      "original_sha256": "03142b87f1f4f7d7440d03989355f3f6b2fab17fb95c7f4455c73d12fe3539dc",
+      "license_spdx": "CC0-1.0",
+      "per_asset_license": "LICENSE-CC0-1.0.txt",
+      "modified": true
+    },
+    {
+      "name": "lightning.svg",
+      "source_id": "svgrepo.com_lightning",
+      "source_page": "https://www.svgrepo.com/download/510043/lightning.svg",
+      "local_sha256": "246e0bcaa2c48d292c1b4c5114a8ea44563d3d6cf41a1bf78f4c33f794775e8a",
+      "original_sha256": "d04c4724c1113becb010c912c399d848fcaff9441643869f29cc19f6a5d7afd1",
+      "license_spdx": "MIT",
+      "per_asset_license": "LICENSE-MIT.txt",
+      "modified": true
+    },
+    {
+      "name": "chademo.svg",
+      "source_id": "commons_Chademo_type4.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Chademo_type4.svg",
+      "local_sha256": "36fff29fdeb98a313116ce960d41eb20fa03a929896ccbdbaa364fd019832f24",
+      "original_sha256": "b208458582ef32d0c5519e9797da2b6e94af218124e3b4e6cc8e4d096a7c4275",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
+    },
+    {
+      "name": "iec60309x2three32.svg",
+      "source_id": "commons_IEC_60309-2_125-100A_3P_2BN_2BE_socket.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:IEC_60309-2_125-100A_3P%2BN%2BE_socket.svg",
+      "local_sha256": "8358b4bfec0b97ef944504d39abdffde209ba635d35a8833c19ef0f68414ac9f",
+      "original_sha256": "cb5a91456927a443ef4d41617ccfda62a555a56e2a9affef7e3b3833a17a732f",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
+    },
+    {
+      "name": "iec62196T1.svg",
+      "source_id": "commons_Type1_J1772.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Type1_J1772.svg",
+      "local_sha256": "ae1ec7d81acd8d8765f79f61844211dbc01ff34c168eb26e1a1aee4e53d875d7",
+      "original_sha256": "6cb4c15d7b08e3fb07f63890312c805d775b2a22b9061849f39b4012df5e5fc7",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
+    },
+    {
+      "name": "iec62196T1COMBO.svg",
+      "source_id": "commons_Type1-ccs.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Type1-ccs.svg",
+      "local_sha256": "e526dc9c2e7426022b3ffbcd75e9023386ea447dd288e68e8529981863f3f6f8",
+      "original_sha256": "db4d9bba4dc1b3bbeac5a91b339f1fc7a1f4c6d2e5b37e15add0a169538d0e88",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
+    },
+    {
+      "name": "iec62196T2.svg",
+      "source_id": "commons_Type_2_mennekes.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Type_2_mennekes.svg",
+      "local_sha256": "fcc281cf2020f6296af21c8615246c50e1437c2ae7c4f00640bc568fb2fd08da",
+      "original_sha256": "664f419cde75db3279340748b1c4df1c2a26de47f0d3ed854555a0cf697cf666",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
+    },
+    {
+      "name": "iec62196T2COMBO.svg",
+      "source_id": "commons_Combo-ccs-eu.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Combo-ccs-eu.svg",
+      "local_sha256": "af07146f483960b406b99382634f5c3edeb92b7688e1d7070869621f3966556a",
+      "original_sha256": "3aee4047217be747f1d1865385372d9c889f8f2bf5de9bc02437d958dde1e944",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
+    },
+    {
+      "name": "iec62196T3A.svg",
+      "source_id": "commons_IEC_62196_Type_3A.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:IEC_62196_Type_3A.svg",
+      "local_sha256": "5e29033e6dbf0602c323c9549efb80bf3e396ea9e805ffd8cd322698d1175b81",
+      "original_sha256": "48ead444f2f09761365f6e8a20d8ddd29a13b154bf040a02227b8e45908a899b",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
+    },
+    {
+      "name": "iec62196T3C.svg",
+      "source_id": "commons_Type3c.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Type3c.svg",
+      "local_sha256": "3a7ce3816deade130814e60f313f9fe2979f57cf99bf2a0bfa9fdec5e1c38648",
+      "original_sha256": "54b8129aa21d9361956dee834bdf7a3fc2258a6da4bf6e784f0fc6e8dd9b5f49",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
+    },
+    {
+      "name": "nacs.svg",
+      "source_id": "commons_Tesla-hpwc-model-s.svg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Tesla-hpwc-model-s.svg",
+      "local_sha256": "a3a4c066011a304addea66611e703e90965e4fa40363411b3995ac36bc982c71",
+      "original_sha256": "c31661698d84b7ffb04aa1ef5f7bbc61ee257b99f8d68fb3696ff753a4890a1a",
+      "license_spdx": "CC-BY-SA-4.0",
+      "per_asset_license": "LICENSE-CC-BY-SA-4.0.txt",
+      "modified": true
     }
   ]
 }

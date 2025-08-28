@@ -1,0 +1,10 @@
+Asset: unknown_charger.svg
+Source page: https://www.svgrepo.com/download/372737/unknown-status.svg
+Source id: svgrepo.com_unknown-status
+Local sha256: 2c2aaa165b373e2203f262e881219e78e35fd8f8de889ba248449ed72e2f5af2
+Original URL: https://www.svgrepo.com/download/372737/unknown-status.svg
+Original sha256: 1d76cb7b9b9ccc476b4fe29aa3ad078ea6dd071271d5765e6a364bc1bd3f7eb5
+License (declared): MIT
+Per-asset license file: unknown_charger_LICENSE-MIT.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).

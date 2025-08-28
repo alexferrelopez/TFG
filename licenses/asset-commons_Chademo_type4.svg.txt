@@ -1,0 +1,10 @@
+Asset: chademo.svg
+Source page: https://commons.wikimedia.org/wiki/File:Chademo_type4.svg
+Source id: commons_Chademo_type4.svg
+Local sha256: 36fff29fdeb98a313116ce960d41eb20fa03a929896ccbdbaa364fd019832f24
+Original URL: https://upload.wikimedia.org/wikipedia/commons/e/ec/Chademo_type4.svg
+Original sha256: b208458582ef32d0c5519e9797da2b6e94af218124e3b4e6cc8e4d096a7c4275
+License (declared): CC-BY-SA-4.0
+Per-asset (reused) license file: LICENSE-CC-BY-SA-4.0.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).

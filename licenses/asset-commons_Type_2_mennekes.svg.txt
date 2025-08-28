@@ -1,0 +1,10 @@
+Asset: iec62196T2.svg
+Source page: https://commons.wikimedia.org/wiki/File:Type_2_mennekes.svg
+Source id: commons_Type_2_mennekes.svg
+Local sha256: fcc281cf2020f6296af21c8615246c50e1437c2ae7c4f00640bc568fb2fd08da
+Original URL: https://upload.wikimedia.org/wikipedia/commons/4/4c/Type_2_mennekes.svg
+Original sha256: 664f419cde75db3279340748b1c4df1c2a26de47f0d3ed854555a0cf697cf666
+License (declared): CC-BY-SA-4.0
+Per-asset (reused) license file: LICENSE-CC-BY-SA-4.0.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).

@@ -1,0 +1,10 @@
+Asset: compass.svg
+Source page: https://www.svgrepo.com/download/883/compass.svg
+Source id: svgrepo.com_compass
+Local sha256: 677fa24f5d15ebca1bf1647caa86cb93513ce99b977c25ee20ae8950571a5960
+Original URL: https://www.svgrepo.com/download/883/compass.svg
+Original sha256: 03142b87f1f4f7d7440d03989355f3f6b2fab17fb95c7f4455c73d12fe3539dc
+License (declared): CC0-1.0
+Per-asset (reused) license file: LICENSE-CC0-1.0.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).

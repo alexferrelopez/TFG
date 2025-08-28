@@ -1,0 +1,10 @@
+Asset: iec62196T2COMBO.svg
+Source page: https://commons.wikimedia.org/wiki/File:Combo-ccs-eu.svg
+Source id: commons_Combo-ccs-eu.svg
+Local sha256: af07146f483960b406b99382634f5c3edeb92b7688e1d7070869621f3966556a
+Original URL: https://upload.wikimedia.org/wikipedia/commons/4/4a/Combo-ccs-eu.svg
+Original sha256: 3aee4047217be747f1d1865385372d9c889f8f2bf5de9bc02437d958dde1e944
+License (declared): CC-BY-SA-4.0
+Per-asset (reused) license file: LICENSE-CC-BY-SA-4.0.txt
+
+NOTE: local asset appears modified relative to original. Ensure compliance with the license (e.g. CC-BY-SA share-alike).
