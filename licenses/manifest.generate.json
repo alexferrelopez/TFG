@@ -11,8 +11,8 @@
     {
       "name": "GIScience/openrouteservice",
       "repo": "https://github.com/GIScience/openrouteservice",
-      "license_file": "GIScience_openrouteservice-LICENSE",
-      "license_filename": "LICENSE",
+      "license_file": "LICENSE-2.0.txt",
+      "license": "Apache-2.0",
       "sha256": "6ba8958ca511cabbea23bcb57e17376ab588d101627e18fe811d2bc901116569"
     },
     {
@@ -35,13 +35,6 @@
       "license_file": "maplibre_maplibre-gl-js-LICENSE.txt",
       "license_filename": "LICENSE.txt",
       "sha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2"
-    },
-    {
-      "name": "graphhopper/graphhopper",
-      "repo": "https://github.com/graphhopper/graphhopper",
-      "license_file": "graphhopper_graphhopper-LICENSE.txt",
-      "license_filename": "LICENSE.txt",
-      "sha256": "600cc67cc4cb2f5ea317dcfc687ad1c74dc4bec8782bbe9db0afd83513b935b7"
     },
     {
       "name": "unknown_charger.svg",
