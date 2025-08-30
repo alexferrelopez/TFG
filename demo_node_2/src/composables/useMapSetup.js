@@ -41,8 +41,18 @@ export function useMapSetup() {
             maxZoom: 19,
             minZoom: 4,
             hash: true,
-            antialias: true
+            antialias: true,
+            attributionControl: false
         })
+
+
+        map.addControl(new maplibregl.AttributionControl({
+            compact: true,
+            customAttribution: [
+                `<a href="https://openmaptiles.org/">Style: © OpenMapTiles</a> 
+            <a href="https://creativecommons.org/licenses/by/4.0/">(CC-BY 4.0)</a> — adapted`
+            ]
+        }), 'bottom-right');
 
         map.on('load', () => {
             updateDirection()
