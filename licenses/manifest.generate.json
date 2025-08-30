@@ -67,6 +67,16 @@
       "modified": true
     },
     {
+      "name": "domesticF.svg",
+      "source_id": "commons_CEE7_Type4",
+      "source_page": "https://commons.wikimedia.org/wiki/File:CEE7_Type4.svg",
+      "local_sha256": "55b1e09c3d0c90800b8171b64e1adb75babaa5f7aa54f64eb64b34849d3f7ce9",
+      "original_sha256": "f29267a433f76ed57dc467833b75aa906204a811251aa93d00d6cb29fb3ec2e3",
+      "license_spdx": "CC0-1.0",
+      "per_asset_license": "LICENSE-CC0-1.0.txt",
+      "modified": true
+    },
+    {
       "name": "chademo.svg",
       "source_id": "commons_Chademo_type4.svg",
       "source_page": "https://commons.wikimedia.org/wiki/File:Chademo_type4.svg",
@@ -162,6 +172,11 @@
       "license_spdx": "Apache-2.0",
       "license_file": "LICENSE-2.0.txt",
       "notes": "Used as font icons; if fonts are bundled, this entry documents provenance"
+    },
+    {
+      "name": "maptiler-basic-gl-style",
+      "source_page": "https://github.com/openmaptiles/maptiler-basic-gl-style",
+      "license_file": "maptiler-basic-gl-style_LICENSE.md"
     }
   ]
 }
