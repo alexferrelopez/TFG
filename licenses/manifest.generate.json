@@ -30,13 +30,6 @@
       "sha256": "ef022be0bdbe6acf96080e0b0c25ad7f34ad4996ea6a4f5a6c7d8a442541d774"
     },
     {
-      "name": "maplibre/maplibre-gl-js",
-      "repo": "https://github.com/maplibre/maplibre-gl-js",
-      "license_file": "maplibre_maplibre-gl-js-LICENSE.txt",
-      "license_filename": "LICENSE.txt",
-      "sha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2"
-    },
-    {
       "name": "unknown_charger.svg",
       "source_id": "svgrepo.com_unknown-status",
       "source_page": "https://www.svgrepo.com/download/372737/unknown-status.svg",

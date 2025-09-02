@@ -3,9 +3,8 @@
 Software:
 komoot/photon -> (license saved as komoot_photon-LICENSE)
 GIScience/openrouteservice -> (license saved as LICENSE-2.0.txt)
-maplibre/martin -> (license saved as maplibre_martin-LICENSE-APACHE)
+maplibre/martin -> (license saved as maplibre_martin-LICENSE-APACHE.txt)
 mapbox/tippecanoe -> (license saved as mapbox_tippecanoe-LICENSE.md)
-maplibre/maplibre-gl-js -> (license saved as maplibre_maplibre-gl-js-LICENSE.txt)
 graphhopper/graphhopper -> (license saved as graphhopper_graphhopper-LICENSE.txt)
 
 Assets:
