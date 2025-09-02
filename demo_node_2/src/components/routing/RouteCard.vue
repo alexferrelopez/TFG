@@ -321,6 +321,8 @@ input:focus {
 }
 
 .swap-icon {
+  width: 24px;
+  height: 24px;
   filter: none;
   transition: transform 0.2s ease;
 
