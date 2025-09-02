@@ -99,6 +99,7 @@ function closePopup() {
   position: relative;
   min-width: 28px;
   height: 28px;
+  aspect-ratio: 1;
   font-size: 1.5rem;
 }
 

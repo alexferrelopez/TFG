@@ -1,6 +1,8 @@
 <template>
   <button class="btn" @click="$emit('close')">
-    <slot>×</slot>
+    <slot>
+      <img src="@/assets/close.svg" alt="Close" class="close-icon" />
+    </slot>
   </button>
 </template>
 
@@ -27,6 +29,14 @@ defineEmits(['close'])
   transition: box-shadow .2s ease, color .2s ease;
   border: 1px solid rgba(0, 0, 0, 0.1);
   -webkit-tap-highlight-color: transparent;
+}
+
+.close-icon {
+  width: 45%;
+  height: 45%;
+  object-fit: contain;
+  display: block;
+  margin: auto;
 }
 
 @media (hover: hover) and (pointer: fine) {

@@ -66,6 +66,9 @@ watch(() => props.forceExpand, (newValue) => {
 }
 
 .close-btn {
+  min-width: 48px;
+  max-height: 48px;
+  aspect-ratio: 1;
   position: absolute;
   display: flex;
   justify-self: end;
