@@ -14,13 +14,13 @@
 
   <div class="map-container">
     <div id="map" class="map-placeholder"></div>
-    <div class="bottom-right-controls">
+  </div>
+  <div class="bottom-right-controls">
       <CompassButton :bearing="bearing" :isNorth="isNorth" @reset="resetNorth" />
       <ChargerFilters v-model:showHigh="showHigh" v-model:showMid="showMid" v-model:showLow="showLow"
         v-model:showVeryHigh="showVeryHigh" />
       <div id="route-popup-container"></div>
     </div>
-  </div>
 </template>
 
 <script setup>
