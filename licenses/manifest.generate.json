@@ -18,7 +18,7 @@
     {
       "name": "maplibre/martin",
       "repo": "https://github.com/maplibre/martin",
-      "license_file": "maplibre_martin-LICENSE-APACHE",
+      "license_file": "maplibre_martin-LICENSE-APACHE.txt",
       "license_filename": "LICENSE-APACHE",
       "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
     },
