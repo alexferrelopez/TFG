@@ -70,9 +70,8 @@ watch(() => props.forceExpand, (newValue) => {
   max-height: 48px;
   aspect-ratio: 1;
   position: absolute;
-  display: flex;
-  justify-self: end;
-  align-self: start;
+  top:0;
+  right: 0;
   z-index: 4;
   margin: 40px;
 }
