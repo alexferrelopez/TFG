@@ -63,6 +63,7 @@ router.post('/ev-route', async (req, res) => {
       evMaxPowerKw,
       connectors = ['iec62196T2COMBO'],
       minPowerKw,
+      includeChargerDetails = true, // Optional flag to include detailed charger analysis
     } = req.body
 
     // Use server-controlled performance parameters
@@ -75,6 +76,7 @@ router.post('/ev-route', async (req, res) => {
       evMaxPowerKw,
       connectors,
       minPowerKw,
+      includeChargerDetails,
       bufferKm,
       segmentKm,
       maxOrsCandidates
@@ -97,9 +99,11 @@ router.post('/ev-route', async (req, res) => {
       bufferKm,
       segmentKm,
       maxOrsCandidates,
-      evMaxPowerKw
+      evMaxPowerKw,
+      returnDetails: includeChargerDetails // Use the flag from request
     })
     const candidates = pruneResult.features || pruneResult
+    const pruningSteps = pruneResult.steps || null
     timings.step2_prune_candidates = performance.now() - step2Start
 
     // 3) Build EV-feasible graph from O + candidates + D
@@ -152,6 +156,43 @@ router.post('/ev-route', async (req, res) => {
       recommended_route: recommendedPath
     }
 
+    // Include detailed charger analysis if requested
+    if (includeChargerDetails) {
+      result.charger_layers = {
+        initial_chargers: {
+          count: pruningSteps?.step1_initial?.count || 0,
+          coordinates: pruningSteps?.step1_initial?.coordinates || []
+        },
+        filtered_chargers: {
+          count: pruningSteps?.step2_filtered?.count || 0,
+          coordinates: pruningSteps?.step2_filtered?.coordinates || []
+        },
+        corridor_chargers: {
+          count: pruningSteps?.step3_corridor?.count || 0,
+          coordinates: pruningSteps?.step3_corridor?.coordinates || []
+        },
+        segmented_chargers: {
+          count: pruningSteps?.step4_segmented?.count || 0,
+          coordinates: pruningSteps?.step4_segmented?.coordinates || []
+        },
+        final_candidates: {
+          count: pruningSteps?.step5_deduplicated?.count || 0,
+          coordinates: pruningSteps?.step5_deduplicated?.coordinates || []
+        }
+      }
+    } else {
+      // Include basic statistics even when detailed info is not requested
+      result.charger_summary = {
+        candidates_found: candidates.length,
+        graph_nodes: nodes.length,
+        ...(pruningSteps && {
+          initial_chargers: pruningSteps.step1_initial?.count,
+          final_chargers: pruningSteps.step5_deduplicated?.count,
+          reduction_percentage: pruneResult.summary?.reductionPercentage
+        })
+      }
+    }
+
     // Log performance summary to console
     console.log('=== EV Route Performance ===')
     console.log(`Total: ${timings.total_time.toFixed(2)}ms`)
@@ -160,7 +201,20 @@ router.post('/ev-route', async (req, res) => {
     console.log(`  3. Build graph: ${timings.step3_build_graph.toFixed(2)}ms`)
     console.log(`  4. Dijkstra: ${timings.step4_dijkstra.toFixed(2)}ms`)
     console.log(`  5. Stitch path: ${timings.step5_stitch_path.toFixed(2)}ms`)
-    console.log(`Candidates found: ${candidates.length}`)
+
+    // Log charger analysis summary
+    if (pruningSteps) {
+      console.log('=== Charger Analysis ===')
+      console.log(`Initial chargers: ${pruningSteps.step1_initial?.count || 0}`)
+      console.log(`After filtering: ${pruningSteps.step2_filtered?.count || 0}`)
+      console.log(`Within corridor: ${pruningSteps.step3_corridor?.count || 0}`)
+      console.log(`After segmentation: ${pruningSteps.step4_segmented?.count || 0}`)
+      console.log(`Final candidates: ${pruningSteps.step5_deduplicated?.count || 0}`)
+      if (pruneResult.summary) {
+        console.log(`Reduction: ${pruneResult.summary.reductionPercentage}%`)
+      }
+    }
+    console.log(`Graph nodes: ${nodes.length}`)
 
     // Log trip summary
     if (recommendedPath?.summary) {
