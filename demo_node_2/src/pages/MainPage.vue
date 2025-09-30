@@ -17,6 +17,7 @@
   </div>
   <div class="bottom-right-controls">
       <CompassButton :bearing="bearing" :isNorth="isNorth" @reset="resetNorth" />
+      <ChargerLayersControl />
       <ChargerFilters v-model:showHigh="showHigh" v-model:showMid="showMid" v-model:showLow="showLow"
         v-model:showVeryHigh="showVeryHigh" />
       <div id="route-popup-container"></div>
@@ -31,6 +32,7 @@ import CompassButton from '@/components/ui/CompassButton.vue'
 import StationCard from '@/components/chargers/StationCard.vue'
 import RouteCard from '@/components/routing/RouteCard.vue'
 import ChargerFilters from '@/components/ui/ChargerFilters.vue'
+import ChargerLayersControl from '@/components/ui/ChargerLayersControl.vue'
 import SideCard from '@/components/layout/SideCard.vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
 import ChargerPopup from '@/components/chargers/ChargerPopup.vue'
@@ -136,6 +138,9 @@ function handleChargerClick(e) {
 
 onMounted(() => {
   const mapInstance = initializeMap()
+
+  // Make map globally available for charger layers
+  window.mapInstance = mapInstance
 
   mapInstance.on('load', () => {
     applyPercentileFilter(mapInstance)

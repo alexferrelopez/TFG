@@ -1,4 +1,5 @@
 import { useNotifications } from '@/composables/useNotifications.js'
+import { useChargerLayers } from '@/composables/useChargerLayers.js'
 import { createApp } from 'vue'
 import RoutePopupCard from '@/components/routing/RoutePopupCard.vue'
 
@@ -8,6 +9,7 @@ export function useRouteManagement() {
   let routePopupApp = null
 
   const { showError, showWarning } = useNotifications()
+  const { updateChargerLayers, clearChargerLayers } = useChargerLayers()
 
   function clearExistingRoute(map) {
     const layersToRemove = ['ev-recommended-line', 'ev-stops-circle']
@@ -24,6 +26,9 @@ export function useRouteManagement() {
         map.removeSource(sourceId)
       }
     })
+
+    // Clear charger layers
+    clearChargerLayers(map)
 
     removeRoutePopup()
   }
@@ -163,7 +168,8 @@ export function useRouteManagement() {
           evRangeKm: options.evRangeKm,
           evMaxPowerKw: options.evMaxPowerKw,
           connectors: options.connectors,
-          minPowerKw: options.minPowerKw
+          minPowerKw: options.minPowerKw,
+          includeChargerDetails: true // Request charger layer information
         }),
         signal: routeAbortController.signal
       })
@@ -186,10 +192,16 @@ export function useRouteManagement() {
 
       const data = await response.json()
       const recommendedRoute = data.recommended_route
+      const chargerLayersData = data.charger_layers
 
       // Clear existing route and display new one
       clearExistingRoute(map)
       displayRoute(recommendedRoute, addOrUpdateSource, addOrUpdateLineLayer)
+
+      // Update charger layers if we have the data
+      if (chargerLayersData) {
+        updateChargerLayers(map, chargerLayersData, addOrUpdateSource)
+      }
 
       // Create and display stops
       const stopsData = createStopsData(originCoords, destinationCoords, recommendedRoute?.stops)
