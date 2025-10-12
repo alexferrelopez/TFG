@@ -162,3 +162,60 @@ export function pruneAlongCorridor(opts) {
   // 4) Remove duplicates by station ID
   return deduplicatedChargers
 }
+
+/**
+ * Nearby pruning around a single location:
+ *  1) filter by connector + min power (same as corridor)
+ *  2) keep only inside a radius buffer around the location
+ *  3) sort by charger score desc, then distance asc, limit results
+ *
+ * @param {Object} opts
+ * @param {Array<Feature<Point>>} opts.features Raw charger features
+ * @param {Array<number>} opts.location [lon, lat]
+ * @param {Array<string>} [opts.connectors=['iec62196T2COMBO']]
+ * @param {number} [opts.minPowerKw=100]
+ * @param {number} [opts.radiusKm=25]
+ * @param {number} [opts.limit=120]
+ * @returns {Array<Feature<Point>>} Sorted, limited nearby chargers
+ */
+export function findNearbyChargers(opts) {
+  const {
+    features,
+    location,
+    connectors = ['iec62196T2COMBO'],
+    minPowerKw = 100,
+    radiusKm = 25,
+    limit = 120
+  } = opts
+
+  if (!features || !Array.isArray(features) || features.length === 0) return []
+  if (!location || !Array.isArray(location) || location.length !== 2) return []
+
+  const validChargers = features.filter(f =>
+    f?.geometry?.coordinates && hasConnectorWithMinPower(f, connectors, minPowerKw)
+  )
+  if (validChargers.length === 0) return []
+
+  const center = turf.point(location)
+  const circle = turf.buffer(center, radiusKm, { units: 'kilometers' })
+  const pointsInArea = turf.pointsWithinPolygon(
+    createPointsFromFeatures(validChargers),
+    circle
+  ).features
+  if (pointsInArea.length === 0) return []
+
+  const scored = pointsInArea.map(pt => ({
+    point: pt,
+    score: calculateChargerScore(pt, connectors, minPowerKw),
+    distance: turf.distance(center, turf.point(pt.geometry.coordinates), { units: 'kilometers' })
+  }))
+
+  const sorted = scored
+    .sort((a, b) => {
+      const diff = b.score - a.score
+      return diff !== 0 ? diff : (a.distance - b.distance)
+    })
+    .map(s => s.point)
+
+  return sorted.slice(0, Math.max(0, Math.floor(limit)))
+}

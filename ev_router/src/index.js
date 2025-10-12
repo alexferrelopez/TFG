@@ -24,6 +24,9 @@ export const PERFORMANCE_CONFIG = {
   bufferKm: Number(process.env.BUFFER_KM || 25),
   segmentKm: Number(process.env.SEGMENT_KM || 75),
   maxOrsCandidates: Number(process.env.MAX_ORS_CANDIDATES || 120),
+  // Nearby search defaults (kept server-side to avoid client control)
+  nearbyRadiusKm: Number(process.env.NEARBY_RADIUS_KM || process.env.BUFFER_KM || 25),
+  nearbyLimit: Number(process.env.NEARBY_LIMIT || process.env.MAX_ORS_CANDIDATES || 120),
   requestTimeoutMs: 30000 // 30 second timeout
 }
 

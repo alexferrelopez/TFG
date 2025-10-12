@@ -3,8 +3,8 @@ import dijkstra from 'dijkstrajs'
 import { buildChargerGraph } from '../solver.js'
 import { stitchPath } from '../stitch.js'
 import { orsRoute } from '../ors.js'
-import { pruneAlongCorridor } from '../prune.js'
-import { validateEvRouteRequest } from '../validation.js'
+import { pruneAlongCorridor, findNearbyChargers } from '../prune.js'
+import { validateEvRouteRequest, validateNearbyChargersRequest } from '../validation.js'
 import { chargers, PERFORMANCE_CONFIG } from '../index.js'
 
 const router = express.Router()
@@ -203,6 +203,70 @@ router.post('/ev-route', async (req, res) => {
 
     // Only send safe, sanitized error response to client
     cleanupAndRespond(500, createErrorResponse(errorType, safeMessage))
+  }
+})
+
+// Nearby chargers search (single location, pruning-like logic)
+router.post('/nearby-chargers', async (req, res) => {
+  const startTime = performance.now()
+
+  const cleanupAndRespond = (statusCode, data) => {
+    clearTimeout(timeout)
+    if (!res.headersSent) {
+      res.status(statusCode).json(data)
+    }
+  }
+
+  const createErrorResponse = (type, message, details = null) => ({
+    error: { type, message, details, timestamp: new Date().toISOString() }
+  })
+
+  const timeout = setTimeout(() => {
+    cleanupAndRespond(504, createErrorResponse('timeout', 'Request timeout - nearby search taking too long'))
+  }, PERFORMANCE_CONFIG.requestTimeoutMs)
+
+  try {
+    const errors = validateNearbyChargersRequest(req.body || {})
+    if (errors.length > 0) {
+      return cleanupAndRespond(400, createErrorResponse('validation', 'Invalid request parameters', errors))
+    }
+
+    const {
+      location,
+      connectors = ['iec62196T2COMBO'],
+      minPowerKw,
+    } = req.body
+
+    // Use server-controlled performance parameters; ignore client-provided radius/limit
+    const radiusKm = PERFORMANCE_CONFIG.nearbyRadiusKm
+    const limit = PERFORMANCE_CONFIG.nearbyLimit
+
+    const results = findNearbyChargers({
+      features: chargers,
+      location,
+      connectors,
+      minPowerKw,
+      radiusKm,
+      limit
+    })
+
+    const durationMs = performance.now() - startTime
+
+    cleanupAndRespond(200, {
+      meta: { count: results.length, radiusKm, limit, durationMs },
+      chargers: {
+        type: 'FeatureCollection',
+        features: results
+      }
+    })
+  } catch (err) {
+    console.error('Nearby Chargers Error:', {
+      message: err.message,
+      stack: err.stack,
+      request: { location: req.body?.location, minPowerKw: req.body?.minPowerKw },
+      timestamp: new Date().toISOString()
+    })
+    cleanupAndRespond(500, createErrorResponse('server', 'Internal server error'))
   }
 })
 

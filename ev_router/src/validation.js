@@ -82,3 +82,29 @@ export function validateOptionalNumber(value, name, options = {}) {
   
   return errors
 }
+
+/**
+ * Validates a nearby chargers request
+ * @param {Object} body - Request body
+ * @returns {Array<string>} Array of validation error messages (empty if valid)
+ */
+export function validateNearbyChargersRequest(body) {
+  const errors = []
+
+  // Required location
+  errors.push(...validateCoordinate(body.location, 'location'))
+
+  // Optional numeric params
+  errors.push(...validateOptionalNumber(body.minPowerKw, 'minPowerKw'))
+
+  // Optional connectors array
+  if (body.connectors !== undefined) {
+    if (!Array.isArray(body.connectors) || body.connectors.length === 0) {
+      errors.push('connectors must be a non-empty array')
+    } else if (!body.connectors.every(c => typeof c === 'string' && c.length > 0)) {
+      errors.push('all connectors must be non-empty strings')
+    }
+  }
+
+  return errors
+}
