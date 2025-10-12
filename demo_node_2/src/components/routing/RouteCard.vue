@@ -6,19 +6,29 @@
         <div class="search-fields">
           <div class="search-section">
             <SearchBar @select="(location) => originData = location" @clear="originData = null" :key="'origin'"
-              placeholder="Search origin" :value="originData" />
+              placeholder="Search origin" :value="originData" :openOnFocus="true">
+              <template #dropdown-prepend="{ select }">
+                <GeoSuggestionItem :onSelect="select" />
+              </template>
+            </SearchBar>
           </div>
 
           <div class="search-section">
             <SearchBar @select="(location) => destinationData = location" @clear="destinationData = null"
-              :key="'destination'" placeholder="Search destination" :value="destinationData" />
+              :key="'destination'" placeholder="Search destination" :value="destinationData" :openOnFocus="true">
+              <template #dropdown-prepend="{ select }">
+                <GeoSuggestionItem :onSelect="select" />
+              </template>
+            </SearchBar>
           </div>
         </div>
 
-        <button @click="swapOriginDestination(); rotated = !rotated" class="swap-btn" :disabled="!originData && !destinationData"
-          title="Swap origin and destination">
-          <img src="@/assets/swap_vert.svg" alt="Swap" class="swap-icon" :class="{ rotated }"/>
-        </button>
+        <div class="actions">
+          <button @click="swapOriginDestination(); rotated = !rotated" class="icon-btn" :disabled="!originData && !destinationData"
+            title="Swap origin and destination" aria-label="Swap origin and destination">
+            <img src="@/assets/swap_vert.svg" alt="Swap" class="icon" :class="{ rotated }"/>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -55,6 +65,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
+import GeoSuggestionItem from '@/components/ui/GeoSuggestionItem.vue'
 import { connectorConfig } from '@/config/connectors.js'
 import { useNotifications } from '@/composables/useNotifications.js'
 import { useRouteContext } from '@/composables/useRouteContext.js'
@@ -117,14 +128,9 @@ watch([originData, destinationData, routeOptions], ([newOrigin, newDestination, 
 onMounted(() => {
   const saved = localStorage.getItem(PREFERENCES_STORAGE_KEY)
   if (saved) Object.assign(routeOptions.value, JSON.parse(saved))
-
-  // Only auto-request location if no origin is set and geolocation is available
-  if (!originData.value) {
-    requestCurrentLocation()
-  }
 })
 
-const requestCurrentLocation = async () => {
+const requestCurrentLocation = async (target = 'origin') => {
   try {
     const position = await getCurrentPosition()
     const { latitude, longitude } = position.coords
@@ -134,14 +140,15 @@ const requestCurrentLocation = async () => {
 
     if (locationData) {
       // Transform the Photon response to match SearchBar format
-      originData.value = {
+      const selected = {
         name: locationData.properties.name || 'Current Location',
         coordinates: locationData.geometry.coordinates,
         properties: locationData.properties
       }
+      if (target === 'destination') destinationData.value = selected; else originData.value = selected;
     } else {
       // Fallback: create a basic location object with coordinates
-      originData.value = {
+      const selected = {
         name: 'Current Location',
         coordinates: [longitude, latitude],
         properties: {
@@ -152,6 +159,7 @@ const requestCurrentLocation = async () => {
           country: ''
         }
       }
+      if (target === 'destination') destinationData.value = selected; else originData.value = selected;
     }
   } catch (error) {
     showError('Location Access Failed', 'Unable to access your current location. Please enter your origin manually.')
@@ -239,6 +247,11 @@ const toggleConnector = (connectorId) => {
   align-items: center;
 }
 
+.actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
 .search-fields {
   flex: 1;
   display: flex;
@@ -259,6 +272,8 @@ const toggleConnector = (connectorId) => {
   box-shadow: none;
   border: 1px solid #e2e8f0;
 }
+
+/* (unused) reserved for future in-bar icons */
 
 .search-container :deep(.search-bar):hover {
   border-color: #a0a9b3;
@@ -306,7 +321,7 @@ input:focus {
 }
 
 /* Swap button styling */
-.swap-btn {
+.icon-btn {
   width: 30px;
   height: 30px;
   background: none;
@@ -320,27 +335,27 @@ input:focus {
   -webkit-tap-highlight-color: transparent;
 }
 
-.swap-icon {
+.icon {
   width: 24px;
   height: 24px;
   filter: none;
   transition: transform 0.2s ease;
 
 }
-.swap-icon.rotated {
+.icon.rotated {
   transform: rotate(180deg);
 }
 
-.swap-btn:hover:not(:disabled) {
+.icon-btn:hover:not(:disabled) {
   opacity: 0.7;
 }
 
-.swap-btn:disabled {
+.icon-btn:disabled {
   opacity: 0.2;
   cursor: not-allowed;
 }
 
-.swap-btn:disabled .swap-icon {
+.icon-btn:disabled .icon {
   filter: grayscale(1);
 }
 

@@ -2,11 +2,15 @@
   <div class="searchbar-container">
     <form class="search-bar" @submit="handleSubmit">
       <input ref="searchInput" v-model="searchQuery" type="text" :placeholder="placeholder" class="search-input"
-        spellcheck="false" @input="handleInput" @focus="showResults = true" @blur="handleBlur"
+        spellcheck="false" @input="handleInput" @focus="handleFocus" @blur="handleBlur"
         @keydown="handleKeydown" />
+      <div class="input-actions">
+        <slot name="append" />
+      </div>
     </form>
 
-    <div v-if="showResults && searchResults.length > 0" class="autocomplete-dropdown">
+    <div v-if="showResults && (searchResults.length > 0 || hasPrepend)" class="autocomplete-dropdown">
+      <slot name="dropdown-prepend" :select="handleExternalSelect" />
       <div v-for="(result, index) in searchResults" :key="index" class="autocomplete-item"
         :class="{ active: selectedIndex === index }" @mousedown="selectResult(result)"
         @mouseenter="selectedIndex = index">
@@ -20,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, useSlots } from 'vue'
 import { useNotifications } from '@/composables/useNotifications.js'
 
 const props = defineProps({
@@ -31,6 +35,10 @@ const props = defineProps({
   value: {
     type: Object,
     default: null
+  },
+  openOnFocus: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -44,6 +52,10 @@ const showResults = ref(false)
 const selectedIndex = ref(-1)
 const searchInput = ref(null)
 let abortController = null
+
+const slots = useSlots()
+const hasPrepend = computed(() => !!slots['dropdown-prepend'])
+
 
 watch(() => props.value, (newValue) => {
   if (newValue?.name) {
@@ -66,7 +78,7 @@ const handleInput = (event) => {
     performSearch(query)
   } else {
     searchResults.value = []
-    showResults.value = false
+    showResults.value = !!props.openOnFocus && hasPrepend.value
   }
 }
 
@@ -112,6 +124,10 @@ const handleBlur = () => {
   setTimeout(() => {
     showResults.value = false
   }, 150)
+}
+const handleFocus = () => {
+  const hasText = searchQuery.value.trim().length > 0
+  showResults.value = hasText || (props.openOnFocus && hasPrepend.value)
 }
 
 const handleKeydown = (event) => {
@@ -165,6 +181,14 @@ const formatResultDetails = (properties) => {
   if (properties.country) parts.push(properties.country)
   return parts.join(', ')
 }
+
+function handleExternalSelect(item) {
+  emit('select', item)
+  showResults.value = false
+  selectedIndex.value = -1
+  searchInput.value?.blur()
+}
+
 </script>
 
 <style scoped>
@@ -183,6 +207,13 @@ const formatResultDetails = (properties) => {
   overflow: hidden;
   width: 100%;
   min-width: 120px;
+}
+
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 6px;
 }
 
 .search-input {
@@ -213,48 +244,48 @@ const formatResultDetails = (properties) => {
   margin-top: 4px;
 }
 
-.autocomplete-item {
+.autocomplete-dropdown :deep(.autocomplete-item) {
   padding: 12px 16px;
   cursor: pointer;
   border-bottom: 1px solid #f0f0f0;
   transition: background-color 0.2s ease;
 }
 
-.autocomplete-item:first-child {
+.autocomplete-dropdown :deep(.autocomplete-item:first-child) {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
 
-.autocomplete-item:last-child {
+.autocomplete-dropdown :deep(.autocomplete-item:last-child) {
   border-bottom: none;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
 
-.autocomplete-item:hover,
-.autocomplete-item.active {
+.autocomplete-dropdown :deep(.autocomplete-item:hover),
+.autocomplete-dropdown :deep(.autocomplete-item.active) {
   background-color: #f8f9fa;
 }
 
 /* Ensure first item respects container border radius when active */
-.autocomplete-item:first-child.active {
+.autocomplete-dropdown :deep(.autocomplete-item:first-child.active) {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
 
 /* Ensure last item respects container border radius when active */
-.autocomplete-item:last-child.active {
+.autocomplete-dropdown :deep(.autocomplete-item:last-child.active) {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
 
-.result-name {
+.autocomplete-dropdown :deep(.result-name) {
   font-weight: 500;
   color: #333;
   margin-bottom: 2px;
 }
 
-.result-details {
+.autocomplete-dropdown :deep(.result-details) {
   font-size: 14px;
   color: #666;
 }
