@@ -4,7 +4,7 @@
       <div class="popup-header">
         {{ features.length }} stations here
       </div>
-      <Button class="popup-close-btn" @click="closePopup"></Button>
+      <CloseButton class="popup-close-btn" @click="closePopup"></CloseButton>
     </div>
     <ul class="charger-list">
       <li v-for="(feature, index) in features" :key="index" class="charger-item">
@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import Button from '@/components/ui/Button.vue'
+import CloseButton from '@/components/ui/CloseButton.vue'
 
 const props = defineProps({
   features: {

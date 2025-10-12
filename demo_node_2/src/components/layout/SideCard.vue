@@ -1,6 +1,6 @@
 <template>
   <aside class="card-container" :class="{ collapsed }">
-    <Button class="close-btn" @click="$emit('close')"></Button>
+    <CloseButton class="close-btn" @click="$emit('close')"></CloseButton>
     <div class="content-area">
       <slot />
     </div>
@@ -11,7 +11,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import CollapseButton from '@/components/ui/CollapseButton.vue';
-import Button from '@/components/ui/Button.vue';
+import CloseButton from '@/components/ui/CloseButton.vue';
 
 const props = defineProps({
   forceExpand: {

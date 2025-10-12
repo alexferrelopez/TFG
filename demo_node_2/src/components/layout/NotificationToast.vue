@@ -5,14 +5,14 @@
         <div class="title">{{ title }}</div>
         <div v-if="message" class="text">{{ message }}</div>
       </div>
-      <Button @close="close" class="close-toast-btn" />
+      <CloseButton @close="close" class="close-toast-btn" />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import Button from '@/components/ui/Button.vue'
+import CloseButton from '@/components/ui/CloseButton.vue'
 
 defineProps({
   title: String,
