@@ -3,20 +3,20 @@
  "sprite": [
     {
       "id": "sprites",
-      "url": "http://192.168.1.153:3000/sprite/sprites"
+      "url": "http://localhost:3000/sprite/sprites"
     },
     {
       "id": "sdf_sprites",
-      "url": "http://192.168.1.153:3000/sdf_sprite/sdf_sprites"
+      "url": "http://localhost:3000/sdf_sprite/sdf_sprites"
     }
   ],
-  "glyphs": "http://192.168.1.153:3000/font/{fontstack}/{range}",
+  "glyphs": "http://localhost:3000/font/{fontstack}/{range}",
   "sources": {
     "openmaptiles": { 
       "type": "vector",
-      "url": "http://192.168.1.153:3000/tiles",
+      "url": "http://localhost:3000/tiles",
       "tiles": [
-        "http://192.168.1.153:3000/tiles/{z}/{x}/{y}"
+        "http://localhost:3000/tiles/{z}/{x}/{y}"
       ],
       "bounds": [-180, -85.05112877980659, 180, 85.05112877980659],
       "minzoom": 0,
@@ -24,9 +24,9 @@
     },
     "chargers": {
       "type": "vector",
-      "url": "http://192.168.1.153:3000/chargers",
+      "url": "http://localhost:3000/chargers",
       "tiles": [
-        "http://192.168.1.153:3000/chargers/{z}/{x}/{y}"
+        "http://localhost:3000/chargers/{z}/{x}/{y}"
       ],
       "minzoom": 0,
       "maxzoom": 14

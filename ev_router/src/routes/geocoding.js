@@ -38,7 +38,7 @@ router.get('/geocode', async (req, res) => {
       urlParams.set('lang', lang)
     }
 
-    const photonUrl = `http://192.168.1.153:2322/api?${urlParams.toString()}`
+    const photonUrl = `http://localhost:2322/api?${urlParams.toString()}`
     
     const response = await fetch(photonUrl)
     const data = await response.json()
@@ -88,7 +88,7 @@ router.get('/reverse', async (req, res) => {
       urlParams.set('lang', lang)
     }
 
-    const photonUrl = `http://192.168.1.153:2322/reverse?${urlParams.toString()}`
+    const photonUrl = `http://localhost:2322/reverse?${urlParams.toString()}`
     
     const response = await fetch(photonUrl)
     const data = await response.json()

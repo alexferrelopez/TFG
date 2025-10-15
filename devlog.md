@@ -74,15 +74,15 @@ Essencialment, tot el que es veu al mapa ha d'estar definit en aquest estil, esp
   "sprite": [
     {
       "id": "sdf_sprites",
-      "url": "http://192.168.1.153:3000/sdf_sprite/sdf_sprites"
+      "url": "http://localhost:3000/sdf_sprite/sdf_sprites"
     }
   ],
   "sources": {
     "chargers": {
       "type": "vector",
-      "url": "http://192.168.1.153:3000/chargers",
+      "url": "http://localhost:3000/chargers",
       "tiles": [
-        "http://192.168.1.153:3000/chargers/{z}/{x}/{y}"
+        "http://localhost:3000/chargers/{z}/{x}/{y}"
       ],
       "minzoom": 0,
       "maxzoom": 14

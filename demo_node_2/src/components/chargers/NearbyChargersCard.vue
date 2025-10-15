@@ -119,7 +119,7 @@ const searchNearby = async () => {
 
   isLoading.value = true
   try {
-    const response = await fetch('http://192.168.1.153:3001/nearby-chargers', {
+    const response = await fetch('http://localhost:3001/nearby-chargers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

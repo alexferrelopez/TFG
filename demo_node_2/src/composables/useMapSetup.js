@@ -35,7 +35,7 @@ export function useMapSetup() {
     function initializeMap() {
         map = new maplibregl.Map({
             container: 'map',
-            style: 'http://192.168.1.153:3000/style/style',
+            style: 'http://localhost:3000/style/style',
             center: [3.7492, 40.4637],
             zoom: 2,
             maxZoom: 19,

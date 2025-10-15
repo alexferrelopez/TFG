@@ -56,7 +56,7 @@ export function useGeoSuggestion() {
   }
 
   async function reverseGeocode(lat, lon) {
-    const res = await fetch(`http://192.168.1.153:3001/reverse?lat=${lat}&lon=${lon}&limit=1&lang=en`)
+    const res = await fetch(`http://localhost:3001/reverse?lat=${lat}&lon=${lon}&limit=1&lang=en`)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
     return data.features?.[0] ?? null

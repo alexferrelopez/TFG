@@ -154,7 +154,7 @@ export function useRouteManagement() {
     }
 
     try {
-      const response = await fetch('http://192.168.1.153:3001/ev-route', {
+      const response = await fetch('http://localhost:3001/ev-route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

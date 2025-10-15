@@ -90,7 +90,7 @@ const performSearch = async (query) => {
   selectedIndex.value = -1
 
   try {
-    const response = await fetch(`http://192.168.1.153:3001/geocode?q=${encodeURIComponent(query)}&limit=4`, {
+    const response = await fetch(`http://localhost:3001/geocode?q=${encodeURIComponent(query)}&limit=4`, {
       signal: abortController.signal
     })
 
