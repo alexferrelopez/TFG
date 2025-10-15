@@ -13,4 +13,4 @@ COPY entrypoint.sh ./entrypoint.sh
 
 EXPOSE 2322
 
-ENTRYPOINT /photon/entrypoint.sh
+ENTRYPOINT ["/photon/entrypoint.sh"]

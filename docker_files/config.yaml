@@ -4,7 +4,7 @@ cors: true
 
 mbtiles:
   sources:
-    tiles: /files/mbtiles/osm-2020-02-10-v3.11_europe.mbtiles
+    tiles: /files/mbtiles/osm-2020-02-10-v3.11_europe_spain.mbtiles
     chargers: /files/mbtiles/chargers.mbtiles
 
 sprites:
