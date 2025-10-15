@@ -1,14 +1,19 @@
 <template>
   <div class="search-container">
     <SearchBar @select="handleLocationSelect" />
+    <!--
+    <NearbyChargersButton @nearbyRequest="handleNearbyRequest" />
+    -->
   </div>
   <transition name="slide">
-    <SideCard v-if="selectedStation || selectedLocation" :key="selectedStation?.id || selectedLocation?.display_name"
+    <SideCard v-if="selectedStation || selectedLocation || nearbyLocation" :key="selectedStation?.id || selectedLocation?.display_name || nearbyLocation?.name"
       :forceExpand="forceExpand" @close="closeSideCard">
       <StationCard v-if="selectedStation" :chargingStation="selectedStation"
         @setAsDestination="handleSetAsDestination" />
       <RouteCard v-else-if="selectedLocation" :selectedLocation="selectedLocation" :autoPlan="autoPlan"
         @planRoute="handlePlanRoute"/>
+      <NearbyChargersCard v-else-if="nearbyLocation" :selectedLocation="nearbyLocation" 
+        @selectCharger="handleChargerSelect"/>
     </SideCard>
   </transition>
 
@@ -30,9 +35,11 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import CompassButton from '@/components/ui/CompassButton.vue'
 import StationCard from '@/components/chargers/StationCard.vue'
 import RouteCard from '@/components/routing/RouteCard.vue'
+import NearbyChargersCard from '@/components/chargers/NearbyChargersCard.vue'
 import ChargerFilters from '@/components/ui/ChargerFilters.vue'
 import SideCard from '@/components/layout/SideCard.vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
+import NearbyChargersButton from '@/components/ui/NearbyChargersButton.vue'
 import ChargerPopup from '@/components/chargers/ChargerPopup.vue'
 import { useMapSetup } from '@/composables/useMapSetup.js'
 import { useRouteManagement } from '@/composables/useRouteManagement.js'
@@ -42,6 +49,7 @@ import { createStationFromFeature } from '@/utils/chargerUtils.js'
 // Reactive state
 const selectedStation = ref(null)
 const selectedLocation = ref(null)
+const nearbyLocation = ref(null)
 const autoPlan = ref(true)
 const forceExpand = ref(false)
 
@@ -80,10 +88,33 @@ function handlePlanRoute(routeData) {
 }
 
 function handleSetAsDestination(stationLocationData) {
-  // Clear selected station and set as location for route planning
+  // Clear selected station and nearby location, set as location for route planning
   selectedStation.value = null
+  nearbyLocation.value = null
   selectedLocation.value = stationLocationData
   autoPlan.value = true
+}
+
+function handleNearbyRequest(locationData) {
+  // Clear other selections and show nearby chargers
+  selectedStation.value = null
+  selectedLocation.value = null
+  nearbyLocation.value = locationData
+  
+  if (map() && locationData.coordinates) {
+    const [lng, lat] = locationData.coordinates
+    map().flyTo({
+      center: [lng, lat],
+      zoom: 12,
+      duration: 2000
+    })
+  }
+}
+
+function handleChargerSelect(station) {
+  // When a charger is selected from nearby results, show it as selected station
+  nearbyLocation.value = null
+  selectedStation.value = station
 }
 
 function closeSideCard() {
@@ -94,6 +125,7 @@ function closeSideCard() {
 
   selectedStation.value = null
   selectedLocation.value = null
+  nearbyLocation.value = null
   forceExpand.value = false
 }
 
@@ -103,6 +135,7 @@ function handleChargerClick(e) {
 
   if (features.length === 1) {
     selectedLocation.value = null
+    nearbyLocation.value = null
     selectedStation.value = createStationFromFeature(features[0])
     return
   }
@@ -117,6 +150,7 @@ function handleChargerClick(e) {
     }),
     onSelectCharger: (feature) => {
       selectedLocation.value = null
+      nearbyLocation.value = null
       selectedStation.value = createStationFromFeature(feature)
       popup.remove()
       popupApp.unmount()
@@ -154,6 +188,9 @@ onMounted(() => {
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .map-container {

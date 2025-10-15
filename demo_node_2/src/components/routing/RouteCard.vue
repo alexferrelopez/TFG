@@ -34,30 +34,13 @@
 
     <div class="route-options">
       <h4>Route preferences</h4>
-      <div class="option-row">
-        <label>Vehicle range (km)</label>
-        <input v-model.number="routeOptions.evRangeKm" type="number" min="0" class="number-input" />
-      </div>
-      <div class="option-row">
-        <label>Max charging power (kW)</label>
-        <input v-model.number="routeOptions.evMaxPowerKw" type="number" min="0" class="number-input" />
-      </div>
-      <div class="option-row">
-        <label>Min charging power (kW)</label>
-        <input v-model.number="routeOptions.minPowerKw" type="number" min="0" class="number-input" />
-      </div>
+      <PowerPreferences 
+        v-model:preferences="routeOptions" 
+        :showVehicleRange="true" 
+        :showMaxPower="true" 
+      />
 
-      <div class="connector-section">
-        <h4>Connector types</h4>
-        <div class="connector-grid">
-          <button v-for="connector in availableConnectors" :key="connector.id" @click="toggleConnector(connector.id)"
-            :class="['connector-btn', { active: routeOptions.connectors.includes(connector.id) }]"
-            :title="connector.name">
-            <img :src="connector.icon" :alt="connector.name" class="connector-icon" />
-            <span class="connector-name">{{ connector.name }}</span>
-          </button>
-        </div>
-      </div>
+      <ConnectorSelector v-model:selectedConnectors="routeOptions.connectors" />
     </div>
   </div>
 </template>
@@ -66,7 +49,8 @@
 import { ref, watch, onMounted } from 'vue'
 import SearchBar from '@/components/ui/SearchBar.vue'
 import GeoSuggestionItem from '@/components/ui/GeoSuggestionItem.vue'
-import { connectorConfig } from '@/config/connectors.js'
+import PowerPreferences from '@/components/ui/PowerPreferences.vue'
+import ConnectorSelector from '@/components/ui/ConnectorSelector.vue'
 import { useNotifications } from '@/composables/useNotifications.js'
 import { useRouteContext } from '@/composables/useRouteContext.js'
 import { Capacitor } from '@capacitor/core'
@@ -89,8 +73,6 @@ const props = defineProps({
 const emit = defineEmits(['planRoute'])
 const PREFERENCES_STORAGE_KEY = 'ev-route-preferences'
 
-// Use shared connector configuration
-const availableConnectors = ref(connectorConfig)
 const autoPlan = ref(props.autoPlan)
 
 const routeOptions = ref({
@@ -130,108 +112,12 @@ onMounted(() => {
   if (saved) Object.assign(routeOptions.value, JSON.parse(saved))
 })
 
-const requestCurrentLocation = async (target = 'origin') => {
-  try {
-    const position = await getCurrentPosition()
-    const { latitude, longitude } = position.coords
-
-    // Use reverse geocoding to get address for current location
-    const locationData = await reverseGeocode(latitude, longitude)
-
-    if (locationData) {
-      // Transform the Photon response to match SearchBar format
-      const selected = {
-        name: locationData.properties.name || 'Current Location',
-        coordinates: locationData.geometry.coordinates,
-        properties: locationData.properties
-      }
-      if (target === 'destination') destinationData.value = selected; else originData.value = selected;
-    } else {
-      // Fallback: create a basic location object with coordinates
-      const selected = {
-        name: 'Current Location',
-        coordinates: [longitude, latitude],
-        properties: {
-          name: 'Current Location',
-          housenumber: '',
-          street: '',
-          city: '',
-          country: ''
-        }
-      }
-      if (target === 'destination') destinationData.value = selected; else originData.value = selected;
-    }
-  } catch (error) {
-    showError('Location Access Failed', 'Unable to access your current location. Please enter your origin manually.')
-  }
-}
-
-async function getCurrentPosition() {
-  const isCapacitor = Capacitor.isNativePlatform();
-
-  if (isCapacitor) {
-    try {
-      const { Geolocation } = await import('@capacitor/geolocation');
-      await Geolocation.requestPermissions()
-
-      return Geolocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000
-      });
-    } catch (err) {
-      showError('Location Error', 'Failed to get current location')
-      throw err;
-    }
-  } else {
-    // Fallback to browser API
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        return reject(new Error('Geolocation not supported'));
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        resolve,
-        reject,
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000
-        }
-      );
-    });
-  }
-}
-
-const reverseGeocode = async (lat, lon) => {
-  try {
-    const res = await fetch(`http://192.168.1.153:3001/reverse?lat=${lat}&lon=${lon}&limit=1&lang=en`)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const data = await res.json()
-    return data.features?.[0] ?? null
-  } catch (e) {
-    showError('Location Service Error', 'Unable to determine your address. Using coordinates only.')
-    return null
-  }
-}
-
 const swapOriginDestination = () => {
   const newOrigin = destinationData.value ? { ...destinationData.value } : null
   const newDestination = originData.value ? { ...originData.value } : null
 
   originData.value = newOrigin
   destinationData.value = newDestination
-}
-
-const toggleConnector = (connectorId) => {
-  const connectors = routeOptions.value.connectors
-  const index = connectors.indexOf(connectorId)
-
-  if (index > -1) {
-    connectors.splice(index, 1)
-  } else {
-    connectors.push(connectorId)
-  }
 }
 </script>
 
@@ -340,8 +226,8 @@ input:focus {
   height: 24px;
   filter: none;
   transition: transform 0.2s ease;
-
 }
+
 .icon.rotated {
   transform: rotate(180deg);
 }
@@ -357,67 +243,5 @@ input:focus {
 
 .icon-btn:disabled .icon {
   filter: grayscale(1);
-}
-
-/* Layout styling */
-.option-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.connector-section {
-  margin-top: 1.5rem;
-}
-
-.connector-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-.connector-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0.75rem 0.5rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.5rem;
-  background: white;
-  cursor: pointer;
-  transition: all 0.1s ease;
-  min-height: 80px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .connector-btn:hover {
-    border-color: #3b82f6;
-  }
-}
-
-.connector-btn.active {
-  border-color: #3b82f6;
-  background-color: #dbeafe;
-}
-
-.connector-icon {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 0.25rem;
-}
-
-.connector-name {
-  font-size: 0.75rem;
-  color: #374151;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.connector-btn.active .connector-name {
-  color: #1d4ed8;
-  font-weight: 500;
 }
 </style>
