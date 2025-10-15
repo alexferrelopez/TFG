@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # Download elasticsearch index
 if [ ! -d "/photon/photon_data/elasticsearch" ]; then
     echo "Downloading search index"
